@@ -605,6 +605,7 @@ int main(int argc, char* argv[])
 		infoOut << "14: Signal ROI start" << std::endl;
 		infoOut << "15: Signal ROI stop" << std::endl;
 		infoOut << "16: Unzipped file size" << std::endl;
+		infoOut << "17: SPE histogram" << std::endl;
 
 		// Actual output
 		infoOut << "0\t" << waveformCtr << std::endl;
@@ -624,6 +625,11 @@ int main(int argc, char* argv[])
 		infoOut << "14\t" << S_ROI[0] << std::endl;
 		infoOut << "15\t" << S_ROI[1] << std::endl;
 		infoOut << "16\t" << fileSize << std::endl;
+		infoOut << "17\t";
+		for (int idx = 0; idx < 400; idx++)
+		{
+			infoOut << spe_charge_dist[idx] << " ";
+		}
 		infoOut.close();
 	}
     return 0;
