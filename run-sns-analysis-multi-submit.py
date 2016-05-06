@@ -102,10 +102,11 @@ def main():
 
         # Get all times within the day folder chosen and prepare condor submit files
         tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
-        createCondorFile(dataRunDir,outDir,run,day,len(tList))
+        #createCondorFile(dataRunDir,outDir,run,day,len(tList))
+        createCondorFile(dataRunDir,outDir,run,day,2)
         cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
         os.system(cmd)
-        tm.sleep(5)
+        tm.sleep(1)
  
 if __name__ == '__main__':
     main()
