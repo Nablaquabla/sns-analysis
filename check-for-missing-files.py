@@ -8,7 +8,7 @@ def createCondorFile(dataDir,outDir,run,day,time):
     with open('/home/bjs66/CondorFiles/%s-%s-%s.condor'%(run,day,time),'w') as f:
         
         # Fixed program location'
-        f.write('Executable = /home/bjs66/sns-analysis-multi-submit/sns-analysis-multi-submit\n')
+        f.write('Executable = /home/bjs66/GitHub/sns-analysis/sns-analysis-multi-submit\n')
         
         # Arguments passed to the exe:
         # Set main run directory, e.g. Run-15-10-02-27-32-23/151002
