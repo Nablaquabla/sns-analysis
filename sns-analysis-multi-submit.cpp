@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
 						else
 						{
 							spe_integration_ctr = 0;
-							spe_integration_charge += (csi[i] > 0) ? _tmpC : 0;
+							spe_integration_charge += (csi[i] > 0) ? csi[i] : 0;
 							if (spe_integration_charge < 1000) { spe_charge_dist[spe_integration_charge] += 1; }
 							spe_integration_charge = 0;
 						}
