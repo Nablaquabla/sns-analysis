@@ -85,6 +85,9 @@ int main(int argc, char* argv[])
     unsigned int med_mv_sum = 0;
     unsigned int med_csi_arr [256] = {} ;
     unsigned int med_mv_arr [256] = {};   
+	unsigned int spe_charge_dist[400] = {};
+	unsigned int spe_integration_ctr = 0;
+	unsigned int _tmp_spe_charge = 0;
     bool med_csi_found = false;
     bool med_mv_found = false;
     bool overflow = false;
@@ -289,7 +292,8 @@ int main(int argc, char* argv[])
 				m_peak_width = 0;
 				pe_found = false;
 				peaks.clear();
-				muon_peaks.clear();       
+				muon_peaks.clear();
+				spe_integration_ctr = 0;
                         
 				// Read time stamp of current waveform
 				for(int i=0; i<7; i++)
@@ -301,6 +305,7 @@ int main(int argc, char* argv[])
                         
 				// Read waveform data into buffer and fill median histogram
 				// Map data onto smaller set to eliminate zero bins
+				
 				for(int i=0; i<35000; i++)
 				{
 					// CsI
@@ -308,10 +313,32 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c - (int) floor(((float) c + 5.0)/11.0);
 					med_csi_arr[ _tmpC + 128] += 1;
 					csi[i] = _tmpC;
+
+					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
 					_previous_c = _tmpC;
-                            
+
+					// Integrate 100 ns long sub-windows in the pretrace and fill histogram
+					// The end of a sub-section has been reached
+					if (spe_integration_ctr >= 50)
+					{
+						// Prevent overflow and fill histogram
+						if (_tmpC < 400) { spe_charge_dist[_tmp_spe_charge] += 1; }
+
+						// Reset counter and reset charge
+						spe_integration_ctr = 0;
+						_tmp_spe_charge = (_tmpC >= 1) ? _tmpC : 0;
+					}
+
+					// Still inside window -> Integrate charge but only if it is positive 
+					// (should probably relax this in the future? But then the integration within the ROI would have to be changed)
+					else
+					{
+						if (_tmpC >= 1) { _tmp_spe_charge += _tmpC; }
+						spe_integration_ctr += 1;
+					}
+
 					// Muon veto
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((float) c))/11.0));
@@ -578,6 +605,7 @@ int main(int argc, char* argv[])
 		infoOut << "14: Signal ROI start" << std::endl;
 		infoOut << "15: Signal ROI stop" << std::endl;
 		infoOut << "16: Unzipped file size" << std::endl;
+		infoOut << "17: SPE histogram" << std::endl;
 
 		// Actual output
 		infoOut << "0\t" << waveformCtr << std::endl;
@@ -597,6 +625,11 @@ int main(int argc, char* argv[])
 		infoOut << "14\t" << S_ROI[0] << std::endl;
 		infoOut << "15\t" << S_ROI[1] << std::endl;
 		infoOut << "16\t" << fileSize << std::endl;
+		infoOut << "17\t";
+		for (int idx = 0; idx < 400; idx++)
+		{
+			infoOut << spe_charge_dist[idx] << " ";
+		}
 		infoOut.close();
 	}
     return 0;
