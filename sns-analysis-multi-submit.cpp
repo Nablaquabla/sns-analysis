@@ -384,13 +384,13 @@ int main(int argc, char* argv[])
 						if (spe_integration_ctr < 50)
 						{
 							spe_integration_ctr += 1;
-							spe_integration_charge += (csi[i] > 0) ? csi[i] : 0;
+							spe_integration_charge += (csi[i] > 0) ? csi[i] : csi[i];
 						}
 						else
 						{
 							spe_integration_ctr = 0;
-							spe_integration_charge += (csi[i] > 0) ? csi[i] : 0;
-							if (spe_integration_charge < 1000) { spe_charge_dist[spe_integration_charge] += 1; }
+							spe_integration_charge += (csi[i] > 0) ? csi[i] : csi[i];
+							if (spe_integration_charge >= -100 && spe_integration_charge < 900) { spe_charge_dist[spe_integration_charge+100] += 1; }
 							spe_integration_charge = 0;
 						}
 					}
