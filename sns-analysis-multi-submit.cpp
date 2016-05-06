@@ -319,6 +319,7 @@ int main(int argc, char* argv[])
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
 					_previous_c = _tmpC;
 
+					/*
 					// Integrate 100 ns long sub-windows in the pretrace and fill histogram
 					// The end of a sub-section has been reached
 					if (spe_integration_ctr >= 50)
@@ -337,7 +338,7 @@ int main(int argc, char* argv[])
 					{
 						if (_tmpC >= 1) { _tmp_spe_charge += _tmpC; }
 						spe_integration_ctr += 1;
-					}
+					}*/
 
 					// Muon veto
 					c = contents[zidx++];
