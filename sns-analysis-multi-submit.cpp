@@ -85,13 +85,15 @@ int main(int argc, char* argv[])
     unsigned int med_mv_sum = 0;
     unsigned int med_csi_arr [256] = {} ;
     unsigned int med_mv_arr [256] = {};   
-	unsigned int spe_charge_dist[400] = {};
-	unsigned int spe_integration_ctr = 0;
-	unsigned int _tmp_spe_charge = 0;
     bool med_csi_found = false;
     bool med_mv_found = false;
     bool overflow = false;
       
+	// Buffers for SPE integration
+	int spe_charge_dist[400] = {};
+	int spe_integration_ctr = 0;
+	int spe_integration_charge = 0;
+
     // Rising and falling threshold crossings used for linear gate detection
     int _previous_c = 0;
     int gate_down = 0;
@@ -294,7 +296,8 @@ int main(int argc, char* argv[])
 				peaks.clear();
 				muon_peaks.clear();
 				spe_integration_ctr = 0;
-                        
+				spe_integration_charge = 0;
+
 				// Read time stamp of current waveform
 				for(int i=0; i<7; i++)
 				{
@@ -319,26 +322,21 @@ int main(int argc, char* argv[])
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
 					_previous_c = _tmpC;
 
-					/*
-					// Integrate 100 ns long sub-windows in the pretrace and fill histogram
-					// The end of a sub-section has been reached
-					if (spe_integration_ctr >= 50)
+					if (i <= 20000)
 					{
-						// Prevent overflow and fill histogram
-						if (_tmpC < 400) { spe_charge_dist[_tmp_spe_charge] += 1; }
-
-						// Reset counter and reset charge
-						spe_integration_ctr = 0;
-						_tmp_spe_charge = (_tmpC >= 1) ? _tmpC : 0;
+						if (spe_integration_ctr < 50)
+						{
+							spe_integration_ctr += 1;
+							spe_integration_charge += (_tmpC > 0) ? _tmpC : 0;
+						}
+						else
+						{
+							spe_integration_ctr = 0
+							spe_integration_charge += (_tmpC > 0) ? _tmpC : 0;
+							if (spe_integration_charge < 400) { spe_charge_dist[spe_integration_charge] += 1; }
+							spe_integration_charge = 0;
+						}
 					}
-
-					// Still inside window -> Integrate charge but only if it is positive 
-					// (should probably relax this in the future? But then the integration within the ROI would have to be changed)
-					else
-					{
-						if (_tmpC >= 1) { _tmp_spe_charge += _tmpC; }
-						spe_integration_ctr += 1;
-					}*/
 
 					// Muon veto
 					c = contents[zidx++];
