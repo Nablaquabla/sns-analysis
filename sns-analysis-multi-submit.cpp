@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
     bool overflow = false;
       
 	// Buffers for SPE integration
-	int spe_charge_dist[400] = {};
+	int spe_charge_dist[1000] = {};
 	int spe_integration_ctr = 0;
 	int spe_integration_charge = 0;
 
@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
 						{
 							spe_integration_ctr = 0;
 							spe_integration_charge += (_tmpC > 0) ? _tmpC : 0;
-							if (spe_integration_charge < 400) { spe_charge_dist[spe_integration_charge] += 1; }
+							if (spe_integration_charge < 1000) { spe_charge_dist[spe_integration_charge] += 1; }
 							spe_integration_charge = 0;
 						}
 					}
