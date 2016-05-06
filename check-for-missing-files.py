@@ -24,9 +24,9 @@ def createCondorFile(dataDir,outDir,run,day,time):
         f.write('request_memory = 300\n')
      
         # Output, error and log name convention: run-day-time.log/out/err
-        f.write('log = ../Logs/%s-%s-%s.log\n'%(run,day,time))
-        f.write('Output = ../Outs/%s-%s-%s.out\n'%(run,day,time))
-        f.write('Error = ../Errs/%s-%s-%s.err\n'%(run,day,time))
+        f.write('log = ../../Logs/%s-%s-%s.log\n'%(run,day,time))
+        f.write('Output = ../../Outs/%s-%s-%s.out\n'%(run,day,time))
+        f.write('Error = ../../Errs/%s-%s-%s.err\n'%(run,day,time))
         
         # Do not write any emails
         f.write('notification = never\n')
