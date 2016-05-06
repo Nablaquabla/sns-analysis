@@ -322,22 +322,6 @@ int main(int argc, char* argv[])
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
 					_previous_c = _tmpC;
 
-					if (i <= 20000)
-					{
-						if (spe_integration_ctr < 50)
-						{
-							spe_integration_ctr += 1;
-							spe_integration_charge += (_tmpC > 0) ? _tmpC : 0;
-						}
-						else
-						{
-							spe_integration_ctr = 0;
-							spe_integration_charge += (_tmpC > 0) ? _tmpC : 0;
-							if (spe_integration_charge < 1000) { spe_charge_dist[spe_integration_charge] += 1; }
-							spe_integration_charge = 0;
-						}
-					}
-
 					// Muon veto
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((float) c))/11.0));
@@ -392,6 +376,23 @@ int main(int argc, char* argv[])
 					{
 						if (c_peak_width >= 3) { peaks.push_back(i-c_peak_width); }
 						c_peak_width = 0;
+					}
+
+					// Integrate sub windows
+					if (i <= 20000)
+					{
+						if (spe_integration_ctr < 50)
+						{
+							spe_integration_ctr += 1;
+							spe_integration_charge += (csi[i] > 0) ? csi[i] : 0;
+						}
+						else
+						{
+							spe_integration_ctr = 0;
+							spe_integration_charge += (csi[i] > 0) ? _tmpC : 0;
+							if (spe_integration_charge < 1000) { spe_charge_dist[spe_integration_charge] += 1; }
+							spe_integration_charge = 0;
+						}
 					}
 
 					mv[i] = med_mv - mv[i];
