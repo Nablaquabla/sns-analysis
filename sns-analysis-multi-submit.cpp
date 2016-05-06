@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
 						}
 						else
 						{
-							spe_integration_ctr = 0
+							spe_integration_ctr = 0;
 							spe_integration_charge += (_tmpC > 0) ? _tmpC : 0;
 							if (spe_integration_charge < 400) { spe_charge_dist[spe_integration_charge] += 1; }
 							spe_integration_charge = 0;
