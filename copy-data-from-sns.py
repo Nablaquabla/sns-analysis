@@ -4,7 +4,7 @@ import time as tm
 # Handles the creation of condor files for a given set of directories
 # -----------------------------------------------------------------------------
 def createCondorFile(RUNTIME):
-    with open('/home/bjs66/CondorFiles/copy-%s.condor\n'%(RUNTIME),'w') as f:
+    with open('/home/bjs66/CondorFiles/copy-%s.condor'%(RUNTIME),'w') as f:
         f.write('Executable = /home/bjs66/GitHub/sns-analysis/copy-data-from-sns.sh\n')
         f.write('Arguments = %s\n'%RUNTIME)
         f.write('Universe = vanilla\n')
