@@ -20,8 +20,8 @@ def createCondorFile(RUNTIME):
 # Main function handling all internals
 # -----------------------------------------------------------------------------
 def main():     
-    runArray = ['Run-16-02-15-13-46-34']
-    #runArray = ['Run-16-02-15-13-46-34','Run-16-02-29-11-54-20','Run-16-03-09-13-00-14','Run-16-03-22-18-09-33' ]
+    #runArray = ['Run-16-02-15-13-46-34']
+    runArray = ['Run-16-02-29-11-54-20','Run-16-03-09-13-00-14','Run-16-03-22-18-09-33' ]
     
     for run in runArray:
         print run              
