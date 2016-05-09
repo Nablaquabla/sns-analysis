@@ -27,8 +27,7 @@ def main():
         print run              
         createCondorFile(run)
         cmd = 'condor_submit /home/bjs66/CondorFiles/copy-%s.condor'%(run)
-        print cmd
-        #os.system(cmd)
+        os.system(cmd)
  
 if __name__ == '__main__':
     main()
