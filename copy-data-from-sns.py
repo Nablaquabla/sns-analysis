@@ -19,19 +19,16 @@ def createCondorFile(RUNTIME):
         
 # Main function handling all internals
 # -----------------------------------------------------------------------------
-def main():       
-    # Choose run to copy
-#    run = 'Run-16-02-02-16-26-26'
-    run = 'Run-16-02-15-13-46-34'
-#    run = 'Run-16-02-29-11-54-20'
-#    run = 'Run-16-03-09-13-00-14'
-#    run = 'Run-16-03-22-18-09-33' 
-              
-    print run              
-    createCondorFile(run)
-    cmd = 'condor_submit /home/bjs66/CondorFiles/copy-%s.condor'%(run)
-    print cmd
-    #os.system(cmd)
+def main():     
+    runArray = ['Run-16-02-15-13-46-34']
+    #runArray = ['Run-16-02-15-13-46-34','Run-16-02-29-11-54-20','Run-16-03-09-13-00-14','Run-16-03-22-18-09-33' ]
+    
+    for run in runArray:
+        print run              
+        createCondorFile(run)
+        cmd = 'condor_submit /home/bjs66/CondorFiles/copy-%s.condor'%(run)
+        print cmd
+        #os.system(cmd)
  
 if __name__ == '__main__':
     main()
