@@ -1,5 +1,5 @@
 Executable = /home/bjs66/GitHub/sns-analysis/copy-data-from-sns.sh
-Arguments = Run-16-02-02-16-26-26
+Arguments = RUNTIME
 Universe = vanilla
 Getenv = true
 Log = ../../Logs/copy.log
