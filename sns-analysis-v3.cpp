@@ -424,7 +424,7 @@ int main(int argc, char* argv[])
 						else
 						{
 							// Ignore single dips below threshold, but 'close' the PE window if there are two consecutive samples below threshold.
-							if (below_pe_threshold >= 2)
+							if (below_pe_threshold >= 1)
 							{
 								above_pe_threshold = 0;
 								pe_beginnings.push_back(i - current_pe_width - 2);
