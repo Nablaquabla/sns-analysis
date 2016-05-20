@@ -145,6 +145,7 @@ int main(int argc, char* argv[])
 
     // Buffers used during window analysis
     int idx_0 = 0;
+	int idx_w_offset = 0;
     int i_peak = 0;
 	int i_pe = 0;
     int q_int = 0;   
@@ -471,7 +472,7 @@ int main(int argc, char* argv[])
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
-							for (int i = pe_beginnings[idx]; i <= pe_endings[idx], i++)	{ current_spe_q += csi[i]; }
+							for (int i = pe_beginnings[idx]; i <= pe_endings[idx]; i++)	{ current_spe_q += csi[i]; }
 							if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[current_spe_q+50] += 1; }
 						}
 						else { break; }
@@ -590,7 +591,7 @@ int main(int argc, char* argv[])
 							//    Write analysis results to file
 							// -------------------------------------------------------------
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
-							bg_out_file << spe_charge << " " << bg_pt_ct << " " << bg_roi_ct << " ";
+							bg_out_file << " " << bg_pt_ct << " " << bg_roi_ct << " ";
 							bg_out_file << bg_iw_ct << " " << idx_0 << " " << q_int << " ";
 							bg_out_file << bg_rt[0] << " " << bg_rt[1] << " " << bg_rt[2] << " ";
 							bg_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
@@ -747,7 +748,7 @@ int main(int argc, char* argv[])
 		infoOut << "4\t" << bgAnalysisCtr << std::endl;
 		infoOut << "5\t" << sAnalysisCtr << std::endl;
 		infoOut << "6\t" << PE_max_PT << std::endl;
-		infoOut << "7\t" << integration_Threshold << std::endl;
+		infoOut << "7\t" << "Not In Use" << std::endl;
 		infoOut << "8\t" << BG_PT[0] << std::endl;
 		infoOut << "9\t" << BG_PT[1] << std::endl;
 		infoOut << "10\t" << BG_ROI[0] << std::endl;
