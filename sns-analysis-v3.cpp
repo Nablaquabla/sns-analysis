@@ -119,17 +119,20 @@ int main(int argc, char* argv[])
 	unsigned int S_ROI [2] = {27500,33500};
 	
     // Buffers to store current peak width in CsI and muon veto waveform
-    int c_peak_width = 0;
+	int above_pe_threshold = 0;
+	int below_pe_threshold = 0;
+	int current_peak_width = 0;
+	int current_pe_width = 0;
     int m_peak_width = 0;
 
     // PE location in CsI, Muon locations in muon veto
     std::vector<int> peaks;
+	std::vector<int> pe_beginnings;
+	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
 
-    bool pe_found = false;
-    
-    // Charge of first PE in waveform
-    int spe_charge = 0;
+    // Charge of PE in PT
+    int current_spe_q = 0;
     
     // Integration window buffers
     int s_q_arr [1500] = {};
@@ -143,6 +146,7 @@ int main(int argc, char* argv[])
     // Buffers used during window analysis
     int idx_0 = 0;
     int i_peak = 0;
+	int i_pe = 0;
     int q_int = 0;   
     float _t1 = 0.0;
     float _t2 = 0.0;
@@ -293,11 +297,16 @@ int main(int argc, char* argv[])
 				med_csi_found = false;
 				med_mv_found = false;
 				med_csi_sum = 0;
-				med_mv_sum = 0;                
-				c_peak_width = 0;
+				med_mv_sum = 0;     
+				above_pe_threshold = 0;
+				below_pe_threshold = 0;
+				current_peak_width = 0;
+				current_pe_width = 0;
+				current_spe_q = 0;
 				m_peak_width = 0;
-				pe_found = false;
 				peaks.clear();
+				pe_beginnings.clear();
+				pe_endings.clear();
 				muon_peaks.clear();
 				spe_integration_ctr = 0;
 				spe_integration_charge = 0;
@@ -463,7 +472,7 @@ int main(int argc, char* argv[])
 						{
 							current_spe_q = 0;
 							for (int i = pe_beginnings[idx]; i <= pe_endings[idx], i++)	{ current_spe_q += csi[i]; }
-							if (current_spe_q >= 0 && current_spe_q < 250) { spe_spectrum[current_spe_q] += 1; }
+							if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[current_spe_q+50] += 1; }
 						}
 						else { break; }
 					}
