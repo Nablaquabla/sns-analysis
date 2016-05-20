@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Determine integration windows for possible photoelectrons
-					if (csi[i] >= 2)
+					if (csi[i] >= 3)
 					{
 						above_pe_threshold += 1;
 						below_pe_threshold = 0;
@@ -420,7 +420,7 @@ int main(int argc, char* argv[])
 						below_pe_threshold += 1;
 
 						// Less than three consecutive samples have been found to be above threshold before the 'drop'-> No PE & continue streaming
-						if (above_pe_threshold < 4) { above_pe_threshold = 0; }
+						if (above_pe_threshold < 3) { above_pe_threshold = 0; }
 						else
 						{
 							// Ignore single dips below threshold, but 'close' the PE window if there are two consecutive samples below threshold.
