@@ -591,8 +591,8 @@ int main(int argc, char* argv[])
 							//    Write analysis results to file
 							// -------------------------------------------------------------
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
-							bg_out_file << " " << bg_pt_ct << " " << bg_roi_ct << " ";
-							bg_out_file << bg_iw_ct << " " << idx_0 << " " << q_int << " ";
+							bg_out_file << bg_pt_ct << " " << bg_roi_ct << " ";
+							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " ";
 							bg_out_file << bg_rt[0] << " " << bg_rt[1] << " " << bg_rt[2] << " ";
 							bg_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
 
@@ -698,8 +698,8 @@ int main(int argc, char* argv[])
 							//    Write analysis results to file
 							// -------------------------------------------------------------
 							s_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
-							s_out_file << spe_charge << " " << bg_pt_ct << " " << bg_roi_ct << " ";
-							s_out_file << s_iw_ct << " " << idx_0 << " " << q_int << " ";
+							s_out_file << s_pt_ct << " " << s_roi_ct << " ";
+							s_out_file << s_iw_ct << " " << idx_0 << " " << s_q_arr[1499] << " ";
 							s_out_file << s_rt[0] << " " << s_rt[1] << " " << s_rt[2] << " ";
 							s_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
 
