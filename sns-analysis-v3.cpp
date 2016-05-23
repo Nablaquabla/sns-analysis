@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Determine integration windows for possible photoelectrons
-					if (csi[i] >= 3)
+					if (csi[i] >= 2)
 					{
 						above_pe_threshold += 1;
 						below_pe_threshold = 0;
