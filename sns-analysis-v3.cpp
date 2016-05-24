@@ -480,7 +480,13 @@ int main(int argc, char* argv[])
 				std::cout << "Found number of PE: " << pe_beginnings.size() << std::endl;
 				for (int idx = 0; idx <= pe_beginnings.size(); idx++)
 				{
-					std::cout << pe_beginnings[idx] << pe_endings[idx] << std::endl;
+					current_spe_q = 0;
+					for (int i = pe_beginnings[idx] - 2; i <= pe_endings[idx] + 2; i++)
+					{
+						if (i >= 0){ current_spe_q += csi[i]; }
+					}
+
+					std::cout << pe_beginnings[idx] << " " << pe_endings[idx] << " " << current_spe_q << std::endl;
 				}
 				return 0;
 				// Raise muon veto flag if more than three muons have been found
