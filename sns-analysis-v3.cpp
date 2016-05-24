@@ -395,6 +395,30 @@ int main(int argc, char* argv[])
 				// ---------------------------------------
 				//  Calculate the median of both channels
 				// ---------------------------------------
+				
+				for(int i=0; i<256; i++)
+				{
+					if (!med_csi_found)
+					{
+						med_csi_sum += med_csi_arr[i];
+						if (med_csi_sum >= 17500)
+						{
+							med_csi = i-128;
+							med_csi_found=true;
+						}
+					}
+
+					if (!med_mv_found)
+					{
+						med_mv_sum += med_mv_arr[i];
+						if (med_mv_sum >= 17500)
+						{
+							med_mv = i-128;
+							med_mv_found=true;	
+						}
+					}
+				} 
+				/*
 				for(int i=255; i>=0; i--)
 				{
 					if (!med_csi_found)
@@ -416,8 +440,9 @@ int main(int argc, char* argv[])
 							med_mv_found=true;
 						}
 					}            
-				} 
+				} */
 
+				for (int)
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
