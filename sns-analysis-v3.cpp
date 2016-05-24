@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     unsigned int bg_roi_ct = 0;
     unsigned int s_iw_ct = 0;
     unsigned int bg_iw_ct = 0;
-	unsigned int PE_max_PT = 10;
+	unsigned int PE_max_PT = 100000;
 
     // Buffers to store current peak width in CsI and muon veto waveform
 	int above_pe_threshold = 0;
