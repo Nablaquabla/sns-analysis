@@ -345,7 +345,7 @@ int main(int argc, char* argv[])
 					c = contents[zidx++];
 					timestamp += zeroPad((int) c, 2);  
 				}
-                        
+				std::cout << "Waveform timestamp: " << timestamp << std::endl;
 				// ---------------------------------------------------------------
 				// Read the full CsI and muon veto waveforms from the zip-stream
 				// + Apply bit transformation
@@ -358,6 +358,7 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c - (int) floor(((float) c + 5.0)/11.0);
 					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
+					std::cout << c << " " << csi[i] << std::endl;
 
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
@@ -415,21 +416,21 @@ int main(int argc, char* argv[])
 						}
 					}
 				} 
-
+				std::cout << "Found Median: " << med_csi << std::endl;
+				std::cout << "Offset Waveform: " << std::endl;
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
-				std::cout << "First WF" << std::endl;
 				for(int i=0;i<35000; i++)
 				{
 					// -------------------------------------------
 					//          Analyze CsI[Na] waveform
 					// -------------------------------------------
+					// Additional offset of 1 necessary?!
 					csi[i] = med_csi - csi[i];
 					std::cout << csi[i] << std::endl;
-
 					// Peak finder
-					if (csi[i] >= 4) { current_peak_width++; }
+					if (csi[i] >= 3) { current_peak_width++; }
 					else
 					{
 						if (current_peak_width >= 3) { peaks.push_back(i - current_peak_width); }
