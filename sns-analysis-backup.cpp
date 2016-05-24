@@ -415,18 +415,39 @@ int main(int argc, char* argv[])
 						}
 					}
 				} 
+				/*
+				for(int i=255; i>=0; i--)
+				{
+					if (!med_csi_found)
+					{
+						med_csi_sum += med_csi_arr[i];
+						if (med_csi_sum >= 17500)
+						{
+						med_csi = i-128;
+						med_csi_found=true;
+						}
+					}
+
+					if (!med_mv_found)
+					{
+						med_mv_sum += med_mv_arr[i];
+						if (med_mv_sum >= 17500)
+						{
+							med_mv = i-128;
+							med_mv_found=true;
+						}
+					}            
+				} */
 
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
-				std::cout << "First WF" << std::endl;
 				for(int i=0;i<35000; i++)
 				{
 					// -------------------------------------------
 					//          Analyze CsI[Na] waveform
 					// -------------------------------------------
 					csi[i] = med_csi - csi[i];
-					std::cout << csi[i];
 
 					// Peak finder
 					if (csi[i] >= 4) { current_peak_width++; }
@@ -461,7 +482,7 @@ int main(int argc, char* argv[])
 						}
 					}
 					current_pe_width += (above_pe_threshold >= 3) ? 1 : 0;
-					
+
 					// -------------------------------------------
 					//        Analyze muon veto waveform
 					// -------------------------------------------
@@ -475,7 +496,7 @@ int main(int argc, char* argv[])
 						m_peak_width = 0;
 					}
 				}
-				return 0;
+                        
 				// Raise muon veto flag if more than three muons have been found
 				// If less than 3 have been found fill the vector with -1 for postprocessing
 				if (muon_peaks.size() > 3)
@@ -497,6 +518,7 @@ int main(int argc, char* argv[])
 					// -------------------------------------------------------------
 					for (int idx = 0; idx <= pe_beginnings.size(); idx++)
 					{
+						std::cout << pe_beginnings[idx] << " " << pe_endings[idx] << std::endl;
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
