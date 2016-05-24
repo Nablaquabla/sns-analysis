@@ -112,12 +112,7 @@ int main(int argc, char* argv[])
     unsigned int s_iw_ct = 0;
     unsigned int bg_iw_ct = 0;
 	unsigned int PE_max_PT = 10;
-	
-	unsigned int BG_PT [2] = {0,20000};
-	unsigned int BG_ROI [2] = {20000,26000};
-	unsigned int S_PT [2] = {7500,27500};
-	unsigned int S_ROI [2] = {27500,33500};
-	
+
     // Buffers to store current peak width in CsI and muon veto waveform
 	int above_pe_threshold = 0;
 	int below_pe_threshold = 0;
@@ -162,12 +157,14 @@ int main(int argc, char* argv[])
     // Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
+	int data_set = 1;
     if (argc == 5) 
     {
-        main_dir = std::string(argv[1]); 
-		current_time = atoi(argv[2]);
-        out_dir = std::string(argv[3]);
-		single_time = atoi(argv[4]);
+		data_set = atoi(argv[1]);
+        main_dir = std::string(argv[2]); 
+		current_time = atoi(argv[3]);
+        out_dir = std::string(argv[4]);
+		single_time = atoi(argv[5]);
     }
     else
     {
@@ -175,6 +172,25 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+	if (data_set == 1)
+	{
+		unsigned int BG_PT[2] = { 0, 20000 };
+		unsigned int BG_ROI[2] = { 20000, 26000 };
+		unsigned int S_PT[2] = { 7500, 27500 };
+		unsigned int S_ROI[2] = { 27500, 33500 };
+	}
+	else if (data_set == 2)
+	{
+		unsigned int BG_PT[2] = { 0, 20000 };
+		unsigned int BG_ROI[2] = { 20000, 26000 };
+		unsigned int S_PT[2] = { 7450, 27450 };
+		unsigned int S_ROI[2] = { 27450, 33500 };
+	}
+	else
+	{
+		std::cout << "Arguments not matching! Aborting now!" << std::endl;
+		return 1;
+	}
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
 	if (single_time == 0)
 	{

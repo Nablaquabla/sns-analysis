@@ -14,7 +14,7 @@ def createCondorFile(dataDir,outDir,run,day,time):
         # Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	    # Set current time to be analzyed (w/o .zip extension!), e.g. 184502
 	    # Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
-        f.write('Arguments = \"%s %s %s 1\"\n'%(dataDir,time,outDir)) 
+        f.write('Arguments = \"1 %s %s %s 1\"\n'%(dataDir,time,outDir)) 
         
         # Standard cluster universe
         f.write('universe   = vanilla\n')
