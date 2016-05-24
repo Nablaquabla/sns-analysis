@@ -51,7 +51,7 @@ def main():
     subdirs = {}
     subdirs[run] = 'am_calibration_1350v'
     days_in = {}
-    days_in[run] = '150617'
+    days_in[run] = ['150617']
     # Iterate through all days in a given run folder, create a condor file and run it.                
     for day in days_in[run]:
 
