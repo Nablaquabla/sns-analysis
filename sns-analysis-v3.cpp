@@ -472,7 +472,8 @@ int main(int argc, char* argv[])
 						m_peak_width = 0;
 					}
 				}
-				std::cout << "Found number of peaks: " << peaks.size() << std::endl;
+
+				/*std::cout << "Found number of peaks: " << peaks.size() << std::endl;
 				for (int idx = 0; idx <= peaks.size(); idx++)
 				{
 					std::cout << peaks[idx] << std::endl;
@@ -488,7 +489,8 @@ int main(int argc, char* argv[])
 
 					std::cout << pe_beginnings[idx] << " " << pe_endings[idx] << " " << current_spe_q << std::endl;
 				}
-				return 0;
+				return 0;*/
+
 				// Raise muon veto flag if more than three muons have been found
 				// If less than 3 have been found fill the vector with -1 for postprocessing
 				if (muon_peaks.size() > 3)
@@ -503,7 +505,10 @@ int main(int argc, char* argv[])
 				// no linear gate and no muon veto flag, otherwise continue to next
 				// waveform without bothering to analyze this one
 				// ========================================================================
-				if (peaks.size() > 0 && !overflow && !linear_gate && !muon_veto_flag)
+				bool analyze = (peaks.size() > 0 && !overflow && !linear_gate && !muon_veto_flag);
+				if (data_set == 2) { analyze = true; }
+
+				if (analyze)
 				{
 					// -------------------------------------------------------------
 					// Integrate all SPE found in the PT and histogram their charge
@@ -513,11 +518,11 @@ int main(int argc, char* argv[])
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
-							for (int i = pe_beginnings[idx] - 2; i <= pe_endings[idx] + 2; i++)
+							for (int i = pe_beginnings[idx] - 2; i < pe_endings[idx] + 2; i++)
 							{
 								if (i >= 0){ current_spe_q += csi[i]; }
 							}
-							if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[current_spe_q+50] += 1; }
+							if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[(current_spe_q+50)] += 1; }
 						}
 						else { break; }
 					}
