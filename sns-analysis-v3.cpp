@@ -442,7 +442,6 @@ int main(int argc, char* argv[])
 					}            
 				} */
 
-				for (int)
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
