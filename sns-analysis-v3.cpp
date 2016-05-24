@@ -477,7 +477,7 @@ int main(int argc, char* argv[])
 								above_pe_threshold = 0;
 								pe_beginnings.push_back(i - current_pe_width - 2);
 								pe_endings.push_back(i - 2);
-								current_pe_width = 0
+								current_pe_width = 0;
 							}
 						}
 					}
