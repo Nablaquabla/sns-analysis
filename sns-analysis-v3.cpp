@@ -472,7 +472,10 @@ int main(int argc, char* argv[])
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
-							for (int i = pe_beginnings[idx]; i <= pe_endings[idx]; i++)	{ current_spe_q += csi[i]; }
+							for (int i = pe_beginnings[idx] - 2; i <= pe_endings[idx] + 2; i++)
+							{
+								if (i >= 0){ current_spe_q += csi[i]; }
+							}
 							if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[current_spe_q+50] += 1; }
 						}
 						else { break; }
