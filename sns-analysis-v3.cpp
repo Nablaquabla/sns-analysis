@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
 	int data_set = 1;
 	std::cout << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " " << argv[5] << " " << std::endl;
-    if (argc == 5) 
+    if (argc == 6) 
     {
 		data_set = atoi(argv[1]);
         main_dir = std::string(argv[2]); 
