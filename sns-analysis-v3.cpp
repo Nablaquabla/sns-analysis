@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
 					//          Analyze CsI[Na] waveform
 					// -------------------------------------------
 					csi[i] = med_csi - csi[i];
-					std::cout << csi[i];
+					std::cout << csi[i] << std::endl;
 
 					// Peak finder
 					if (csi[i] >= 4) { current_peak_width++; }
