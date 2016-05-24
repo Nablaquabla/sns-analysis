@@ -188,6 +188,10 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
+		unsigned int BG_PT[2] = {};
+		unsigned int BG_ROI[2] = {};
+		unsigned int S_PT[2] = {};
+		unsigned int S_ROI[2] = {};
 		std::cout << "Arguments not matching! Aborting now!" << std::endl;
 		return 1;
 	}
