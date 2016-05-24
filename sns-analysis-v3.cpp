@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
 	int data_set = 1;
+	std::cout << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " " << argv[5] << " " << std::endl;
     if (argc == 5) 
     {
 		data_set = atoi(argv[1]);
@@ -171,6 +172,7 @@ int main(int argc, char* argv[])
         std::cout << "Arguments not matching! Aborting now!" << std::endl;
         return 1;
     }
+
 	unsigned int BG_PT[2] = {};
 	unsigned int BG_ROI[2] = {};
 	unsigned int S_PT[2] = {};
