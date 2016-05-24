@@ -345,7 +345,7 @@ int main(int argc, char* argv[])
 					c = contents[zidx++];
 					timestamp += zeroPad((int) c, 2);  
 				}
-				std::cout << "Waveform timestamp: " << timestamp << std::endl;
+
 				// ---------------------------------------------------------------
 				// Read the full CsI and muon veto waveforms from the zip-stream
 				// + Apply bit transformation
@@ -358,7 +358,6 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c - (int) floor(((float) c + 5.0)/11.0);
 					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
-					std::cout << c << " " << csi[i] << std::endl;
 
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
@@ -399,7 +398,7 @@ int main(int argc, char* argv[])
 					if (!med_csi_found)
 					{
 						med_csi_sum += med_csi_arr[i];
-						if (med_csi_sum >= 17499)
+						if (med_csi_sum >= 10000)
 						{
 							med_csi = i-128;
 							med_csi_found=true;
@@ -409,15 +408,13 @@ int main(int argc, char* argv[])
 					if (!med_mv_found)
 					{
 						med_mv_sum += med_mv_arr[i];
-						if (med_mv_sum >= 17499)
+						if (med_mv_sum >= 10000)
 						{
 							med_mv = i-128;
 							med_mv_found=true;	
 						}
 					}
 				} 
-				std::cout << "Found Median: " << med_csi << std::endl;
-				std::cout << "Offset Waveform: " << std::endl;
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
@@ -426,9 +423,8 @@ int main(int argc, char* argv[])
 					// -------------------------------------------
 					//          Analyze CsI[Na] waveform
 					// -------------------------------------------
-					// Additional offset of 1 necessary?!
 					csi[i] = med_csi - csi[i];
-					std::cout << csi[i] << std::endl;
+
 					// Peak finder
 					if (csi[i] >= 3) { current_peak_width++; }
 					else
@@ -475,6 +471,16 @@ int main(int argc, char* argv[])
 						if (m_peak_width >= 3) { muon_peaks.push_back(i-m_peak_width); }
 						m_peak_width = 0;
 					}
+				}
+				std::cout << "Found number of peaks: " << peaks.size() << std::endl;
+				for (int idx = 0; idx <= peaks.size(); idx++)
+				{
+					std::cout << peaks[idx] << std::endl;
+				}
+				std::cout << "Found number of PE: " << pe_beginnings.size() << std::endl;
+				for (int idx = 0; idx <= pe_beginnings.size(); idx++)
+				{
+					std::cout << pe_beginnings[idx] << pe_endings[idx] << std::endl;
 				}
 				return 0;
 				// Raise muon veto flag if more than three muons have been found
