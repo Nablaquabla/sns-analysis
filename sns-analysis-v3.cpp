@@ -481,7 +481,7 @@ int main(int argc, char* argv[])
 				for (int idx = 0; idx <= pe_beginnings.size(); idx++)
 				{
 					current_spe_q = 0;
-					for (int i = pe_beginnings[idx] - 2; i <= pe_endings[idx] + 2; i++)
+					for (int i = pe_beginnings[idx] - 2; i < pe_endings[idx] + 2; i++)
 					{
 						if (i >= 0){ current_spe_q += csi[i]; }
 					}
