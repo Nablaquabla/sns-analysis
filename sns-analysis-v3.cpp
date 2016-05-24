@@ -178,32 +178,28 @@ int main(int argc, char* argv[])
 	unsigned int S_PT[2] = {};
 	unsigned int S_ROI[2] = {};
 
-	if (data_set == 1)
+	switch (data_set)
 	{
-		BG_PT[0] = 0;
-		BG_PT[1] = 20000;
-		BG_ROI[0] = 20000;
-		BG_ROI[1] = 26000;
-		S_PT[0] = 7500;
-		S_PT[1] = 27500;
-		S_ROI[0] = 27500;
-		S_ROI[1] = 33500;
-	}
-	else if (data_set == 2)
-	{
-		BG_PT[0] = 0;
-		BG_PT[1] = 20000;
-		BG_ROI[0] = 20000;
-		BG_ROI[1] = 26000;
-		S_PT[0] = 7450;
-		S_PT[1] = 27450;
-		S_ROI[0] = 27450;
-		S_ROI[1] = 33500;
-	}
-	else
-	{
-		std::cout << "Arguments not matching! Aborting now!" << std::endl;
-		return 1;
+	case 1: BG_PT[0] = 0;
+			BG_PT[1] = 20000;
+			BG_ROI[0] = 20000;
+			BG_ROI[1] = 26000;
+			S_PT[0] = 7500;
+			S_PT[1] = 27500;
+			S_ROI[0] = 27500;
+			S_ROI[1] = 33500;
+			break;
+	case 2: BG_PT[0] = 0;
+			BG_PT[1] = 20000;
+			BG_ROI[0] = 20000;
+			BG_ROI[1] = 26000;
+			S_PT[0] = 7450;
+			S_PT[1] = 27450;
+			S_ROI[0] = 27450;
+			S_ROI[1] = 33500;
+			break;
+	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
+			 return 1;
 	}
 
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
