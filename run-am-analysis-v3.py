@@ -14,7 +14,7 @@ def createCondorFile(dataDir,outDir,run,day,times):
         # Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	    # Set current time to be analzyed (w/o .zip extension!), e.g. 184502
 	    # Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
-        f.write('Arguments = \"1 %s $(Process) %s 0\"\n'%(dataDir,outDir)) 
+        f.write('Arguments = \"2 %s $(Process) %s 0\"\n'%(dataDir,outDir)) 
         
         # Standard cluster universe
         f.write('universe   = vanilla\n')
@@ -46,49 +46,12 @@ def main():
     mainOutDir = '/var/phy/project/phil/grayson/COHERENT/CsI/bjs-analysis/'
 
     # Choose run to analyze
-#    run = 'Run-15-06-25-12-53-44'
-#    run = 'Run-15-06-26-11-23-13'
-#    run = 'Run-15-07-31-18-30-14'
-#    run = 'Run-15-08-18-14-51-18'
-#    run = 'Run-15-08-31-00-23-36'
-    run = 'Run-15-09-21-20-58-01'
-#    run = 'Run-15-09-23-21-16-00'
-#    run = 'Run-15-10-03-09-26-22'
-#    run = 'Run-15-10-13-13-27-09'
-#    run = 'Run-15-10-21-13-12-27'
-#    run = 'Run-15-10-29-15-56-36'   
-#    run = 'Run-15-11-09-11-30-13'
-#    run = 'Run-15-11-20-11-34-48'
-#    run = 'Run-15-12-14-11-21-45'
-#    run = 'Run-15-12-26-08-30-40'
-#    run = 'Run-16-01-07-12-16-36'
-     
+    run = 'Position-1'
+    
     subdirs = {}
+    subdirs[run] = 'am_calibration_1350v'
     days_in = {}
-    read_subdirs = False
-    read_days = False
-    with open('runtimes-data.dat','r') as f:
-        for line in f:
-            if 'Start sub-dirs' in line:
-                read_subdirs = True
-                continue
-            if 'End sub-dirs' in line:
-                read_subdirs = False
-                continue
-            if 'Start days' in line:
-                read_days = True
-                continue
-            if 'End days' in line:
-                read_days = False
-                continue
-            
-            if read_subdirs:
-                key,data = line.strip().split(':')
-                subdirs[key] = data.strip()
-            if read_days:
-                key,data = line.strip().split(':')
-                days_in[key] = eval(data)
-
+    days_in[run] = '150617'
     # Iterate through all days in a given run folder, create a condor file and run it.                
     for day in days_in[run]:
 
@@ -102,8 +65,8 @@ def main():
 
         # Get all times within the day folder chosen and prepare condor submit files
         tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
-        #createCondorFile(dataRunDir,outDir,run,day,len(tList))
-        createCondorFile(dataRunDir,outDir,run,day,2)
+        createCondorFile(dataRunDir,outDir,run,day,len(tList))
+#        createCondorFile(dataRunDir,outDir,run,day,2)
         cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
         os.system(cmd)
         tm.sleep(1)
