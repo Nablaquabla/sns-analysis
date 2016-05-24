@@ -171,30 +171,39 @@ int main(int argc, char* argv[])
         std::cout << "Arguments not matching! Aborting now!" << std::endl;
         return 1;
     }
+	unsigned int BG_PT[2] = {};
+	unsigned int BG_ROI[2] = {};
+	unsigned int S_PT[2] = {};
+	unsigned int S_ROI[2] = {};
 
 	if (data_set == 1)
 	{
-		unsigned int BG_PT[2] = { 0, 20000 };
-		unsigned int BG_ROI[2] = { 20000, 26000 };
-		unsigned int S_PT[2] = { 7500, 27500 };
-		unsigned int S_ROI[2] = { 27500, 33500 };
+		BG_PT[0] = 0;
+		BG_PT[1] = 20000;
+		BG_ROI[0] = 20000;
+		BG_ROI[1] = 26000;
+		S_PT[0] = 7500;
+		S_PT[1] = 27500;
+		S_ROI[0] = 27500;
+		S_ROI[1] = 33500;
 	}
 	else if (data_set == 2)
 	{
-		unsigned int BG_PT[2] = { 0, 20000 };
-		unsigned int BG_ROI[2] = { 20000, 26000 };
-		unsigned int S_PT[2] = { 7450, 27450 };
-		unsigned int S_ROI[2] = { 27450, 33500 };
+		BG_PT[0] = 0;
+		BG_PT[1] = 20000;
+		BG_ROI[0] = 20000;
+		BG_ROI[1] = 26000;
+		S_PT[0] = 7450;
+		S_PT[1] = 27450;
+		S_ROI[0] = 27450;
+		S_ROI[1] = 33500;
 	}
 	else
 	{
-		unsigned int BG_PT[2] = {};
-		unsigned int BG_ROI[2] = {};
-		unsigned int S_PT[2] = {};
-		unsigned int S_ROI[2] = {};
 		std::cout << "Arguments not matching! Aborting now!" << std::endl;
 		return 1;
 	}
+
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
 	if (single_time == 0)
 	{
