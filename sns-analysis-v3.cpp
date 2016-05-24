@@ -158,7 +158,6 @@ int main(int argc, char* argv[])
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
 	int data_set = 1;
-	std::cout << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " " << argv[5] << " " << std::endl;
     if (argc == 6) 
     {
 		data_set = atoi(argv[1]);
@@ -273,7 +272,6 @@ int main(int argc, char* argv[])
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
-		std::cout << "Entered if condition" << std::endl;
 		waveformCtr = 0;
 		zidx = 0;
 
@@ -293,7 +291,6 @@ int main(int argc, char* argv[])
 				c = contents[zidx++];
 				no_channels = no_channels << 8 | (unsigned char) c;
 			}
-			std::cout << no_samples << std::endl;
 
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
@@ -359,7 +356,7 @@ int main(int argc, char* argv[])
 					// CsI
 					c = contents[zidx++];
 					_tmpC = (int) c - (int) floor(((float) c + 5.0)/11.0);
-					med_csi_arr[ _tmpC + 128] += 1;
+					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
 
 					// Gate check
@@ -401,7 +398,7 @@ int main(int argc, char* argv[])
 					if (!med_csi_found)
 					{
 						med_csi_sum += med_csi_arr[i];
-						if (med_csi_sum >= 17500)
+						if (med_csi_sum >= 17499)
 						{
 							med_csi = i-128;
 							med_csi_found=true;
@@ -411,7 +408,7 @@ int main(int argc, char* argv[])
 					if (!med_mv_found)
 					{
 						med_mv_sum += med_mv_arr[i];
-						if (med_mv_sum >= 17500)
+						if (med_mv_sum >= 17499)
 						{
 							med_mv = i-128;
 							med_mv_found=true;	
@@ -520,6 +517,7 @@ int main(int argc, char* argv[])
 					// -------------------------------------------------------------
 					for (int idx = 0; idx <= pe_beginnings.size(); idx++)
 					{
+						std::cout << pe_beginnings[idx] << " " << pe_endings[idx] << std::endl;
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
