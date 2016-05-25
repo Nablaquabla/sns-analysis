@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
     // Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
-	int data_set = 1;
+	int data_set = 0;
     if (argc == 6) 
     {
 		data_set = atoi(argv[1]);
@@ -171,6 +171,8 @@ int main(int argc, char* argv[])
         std::cout << "Arguments not matching! Aborting now!" << std::endl;
         return 1;
     }
+
+	std::cout << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " " << argv[5] << std::endl;
 
 	unsigned int BG_PT[2] = {};
 	unsigned int BG_ROI[2] = {};
@@ -242,6 +244,9 @@ int main(int argc, char* argv[])
 
 		// Prepare paths to zipped and unzipped files
 		current_zip_file = main_dir + "/" + time_files[current_time] + ".zip";
+
+		std::cout << current_zip_file << std::endl;
+
 		time_name_in_zip = time_files[current_time];
 	}
 
@@ -290,7 +295,6 @@ int main(int argc, char* argv[])
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
-
 			// Read LabView header and get the total number of samples written for each channel in the next chunk of data
 			for (int i=0;i<4;i++)
 			{
@@ -309,7 +313,7 @@ int main(int argc, char* argv[])
 			{
 				break;
 			}
-
+			std::cout << no_samples << std::endl;
 			// ----------------------------------------------------------------
 			//  Process XYZ consecutive waveforms without encountering another
 			// LabView header inbetween
