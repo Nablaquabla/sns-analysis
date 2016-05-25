@@ -187,15 +187,17 @@ int main(int argc, char* argv[])
 			S_PT[1]   = 27500;
 			S_ROI[0]  = 27500;
 			S_ROI[1]  = 35000;
+			PE_max_PT = 10;
 			break;
 	case 2: BG_PT[0]  = 0;
 			BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
-			BG_ROI[1] = 27450;
-			S_PT[0]   = 7450;
-			S_PT[1]   = 27450;
-			S_ROI[0]  = 27450;
+			BG_ROI[1] = 27400;
+			S_PT[0]   = 7400;
+			S_PT[1]   = 27400;
+			S_ROI[0]  = 27400;
 			S_ROI[1]  = 35000;
+			PE_max_PT = 20;
 			break;
 	case 3: BG_PT[0]  = 0;
 		    BG_PT[1]  = 20000;
@@ -205,6 +207,7 @@ int main(int argc, char* argv[])
 			S_PT[1]   = 25000;
 			S_ROI[0]  = 25000;
 			S_ROI[1]  = 30000;
+			PE_max_PT = 20;
 			break;
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
 			 return 1;
@@ -496,9 +499,10 @@ int main(int argc, char* argv[])
 				// no linear gate and no muon veto flag, otherwise continue to next
 				// waveform without bothering to analyze this one
 				// ========================================================================
-				bool analyze = (peaks.size() > 0 && !overflow && !linear_gate && !muon_veto_flag);
-				if (data_set == 2) { analyze = true; }
-				if (data_set == 3) { analyze = true; }
+				bool analyze = false;
+				if (data_set == 1 && peaks.size() > 0 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
+				if (data_set == 2 && peaks.size() > 0) { analyze = true; }
+				if (data_set == 3 && peaks.size() > 0) { analyze = true; }
 
 				if (analyze)
 				{
@@ -530,11 +534,12 @@ int main(int argc, char* argv[])
 					s_iw_ct = 0;
 					for (int idx = 0; idx < peaks.size(); idx++)
 					{
-						if (peaks[idx] >= BG_PT[0]  && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
-						if (peaks[idx] >= S_PT[0]   && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
+						if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
+						if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 						if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
-						if (peaks[idx] >= S_ROI[0]  && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
+						if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
 					}
+
 					// -------------------------------------------------------------
 					//    Only analzye BG region if there are a maximum of PE_max_PT
 					//    & at least one PE in ROI
