@@ -287,6 +287,7 @@ int main(int argc, char* argv[])
 	infoOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "I-")).c_str(), std::ofstream::out | std::ofstream::trunc);
             
 	// Begin data processing if file has been properly opened
+	std::cout << "ERROR?! " << err << std::endl;
 	if(err == 0)
 	{
 		waveformCtr = 0;
