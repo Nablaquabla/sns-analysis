@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     unsigned int bg_roi_ct = 0;
     unsigned int s_iw_ct = 0;
     unsigned int bg_iw_ct = 0;
-	unsigned int PE_max_PT = 100000;
+	unsigned int PE_max_PT = 10;
 
     // Buffers to store current peak width in CsI and muon veto waveform
 	int above_pe_threshold = 0;
@@ -179,23 +179,32 @@ int main(int argc, char* argv[])
 
 	switch (data_set)
 	{
-	case 1: BG_PT[0] = 0;
-			BG_PT[1] = 20000;
+	case 1: BG_PT[0]  = 0;
+			BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
-			BG_ROI[1] = 26000;
-			S_PT[0] = 7500;
-			S_PT[1] = 27500;
-			S_ROI[0] = 27500;
-			S_ROI[1] = 33500;
+			BG_ROI[1] = 27500;
+			S_PT[0]   = 7500;
+			S_PT[1]   = 27500;
+			S_ROI[0]  = 27500;
+			S_ROI[1]  = 35000;
 			break;
-	case 2: BG_PT[0] = 0;
-			BG_PT[1] = 20000;
+	case 2: BG_PT[0]  = 0;
+			BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
-			BG_ROI[1] = 26000;
-			S_PT[0] = 7450;
-			S_PT[1] = 27450;
-			S_ROI[0] = 27450;
-			S_ROI[1] = 33500;
+			BG_ROI[1] = 27450;
+			S_PT[0]   = 7450;
+			S_PT[1]   = 27450;
+			S_ROI[0]  = 27450;
+			S_ROI[1]  = 35000;
+			break;
+	case 3: BG_PT[0]  = 0;
+		    BG_PT[1]  = 20000;
+			BG_ROI[0] = 20000;
+			BG_ROI[1] = 25000;
+			S_PT[0]   = 5000;
+			S_PT[1]   = 25000;
+			S_ROI[0]  = 25000;
+			S_ROI[1]  = 30000;
 			break;
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
 			 return 1;
@@ -473,24 +482,6 @@ int main(int argc, char* argv[])
 					}
 				}
 
-				/*std::cout << "Found number of peaks: " << peaks.size() << std::endl;
-				for (int idx = 0; idx <= peaks.size(); idx++)
-				{
-					std::cout << peaks[idx] << std::endl;
-				}
-				std::cout << "Found number of PE: " << pe_beginnings.size() << std::endl;
-				for (int idx = 0; idx <= pe_beginnings.size(); idx++)
-				{
-					current_spe_q = 0;
-					for (int i = pe_beginnings[idx] - 2; i < pe_endings[idx] + 2; i++)
-					{
-						if (i >= 0){ current_spe_q += csi[i]; }
-					}
-
-					std::cout << pe_beginnings[idx] << " " << pe_endings[idx] << " " << current_spe_q << std::endl;
-				}
-				return 0;*/
-
 				// Raise muon veto flag if more than three muons have been found
 				// If less than 3 have been found fill the vector with -1 for postprocessing
 				if (muon_peaks.size() > 3)
@@ -507,6 +498,7 @@ int main(int argc, char* argv[])
 				// ========================================================================
 				bool analyze = (peaks.size() > 0 && !overflow && !linear_gate && !muon_veto_flag);
 				if (data_set == 2) { analyze = true; }
+				if (data_set == 3) { analyze = true; }
 
 				if (analyze)
 				{
@@ -572,7 +564,9 @@ int main(int argc, char* argv[])
 								break;
 							}
 						}
-						idx_0 -= 10;
+						idx_0 -= 5;
+						std::cout << idx_0;
+							return 1;
 
 						// -------------------------------------------------------------
 						// Only analyze if the full integration window is within the ROI
