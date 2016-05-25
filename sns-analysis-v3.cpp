@@ -672,8 +672,6 @@ int main(int argc, char* argv[])
 							}
 						}
 						idx_0 -= 5;
-						std::cout << idx_0;
-						return 1;
 
 						// -------------------------------------------------------------
 						// Only analyze if the full integration window is within the ROI
