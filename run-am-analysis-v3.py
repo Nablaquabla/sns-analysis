@@ -47,7 +47,7 @@ def main(r):
     mainOutDir = '/var/phy/project/phil/grayson/COHERENT/CsI/bjs-analysis/'
 
     # Choose run to analyze
-    run = 'Position-%i'%r
+    run = 'Position-%s'%r
     
     subdirs = {}
     subdirs[run] = 'am_calibration_1350v'
