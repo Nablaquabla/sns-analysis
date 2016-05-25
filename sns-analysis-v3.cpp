@@ -172,8 +172,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-	std::cout << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " " << argv[5] << std::endl;
-
 	unsigned int BG_PT[2] = {};
 	unsigned int BG_ROI[2] = {};
 	unsigned int S_PT[2] = {};
@@ -245,8 +243,6 @@ int main(int argc, char* argv[])
 		// Prepare paths to zipped and unzipped files
 		current_zip_file = main_dir + "/" + time_files[current_time] + ".zip";
 
-		std::cout << current_zip_file << std::endl;
-
 		time_name_in_zip = time_files[current_time];
 	}
 
@@ -313,7 +309,6 @@ int main(int argc, char* argv[])
 			{
 				break;
 			}
-			std::cout << no_samples << std::endl;
 			// ----------------------------------------------------------------
 			//  Process XYZ consecutive waveforms without encountering another
 			// LabView header inbetween
