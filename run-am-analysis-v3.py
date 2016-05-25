@@ -1,5 +1,6 @@
 import os
 import time as tm
+import sys
 
 # Handles the creation of condor files for a given set of directories
 # -----------------------------------------------------------------------------
@@ -38,7 +39,7 @@ def createCondorFile(dataDir,outDir,run,day,times):
 
 # Main function handling all internals
 # -----------------------------------------------------------------------------
-def main():       
+def main(r):       
     # Choose main directory, i.e. ~/csi/beam_on_data/Run-15-06-25-xyz/
     mainRunDir = '/var/phy/project/phil/grayson/COHERENT/CsI/'
     
@@ -46,7 +47,7 @@ def main():
     mainOutDir = '/var/phy/project/phil/grayson/COHERENT/CsI/bjs-analysis/'
 
     # Choose run to analyze
-    run = 'Position-1'
+    run = r
     
     subdirs = {}
     subdirs[run] = 'am_calibration_1350v'
@@ -72,7 +73,7 @@ def main():
         tm.sleep(1)
  
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
 
     
 
