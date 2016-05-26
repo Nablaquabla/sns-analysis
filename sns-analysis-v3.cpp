@@ -735,7 +735,7 @@ int main(int argc, char* argv[])
 
 								for (int j = 0; j < 3; j++)
 								{
-									if (_t1 < thresholds[j] && _t2 >= thresholds[j]){ bg_rt[j] = i + (thresholds[j] - _t1) / (_t2 - _t1); }
+									if (_t1 < thresholds[j] && _t2 >= thresholds[j]){ s_rt[j] = i + (thresholds[j] - _t1) / (_t2 - _t1); }
 								}
 							}
 
@@ -748,7 +748,7 @@ int main(int argc, char* argv[])
 							s_out_file << s_rt[0] << " " << s_rt[1] << " " << s_rt[2] << " ";
 							s_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
 
-							// Keeps track of how many S waveforms have actually been analyzed
+							// Keeps track of how many BG waveforms have actually been analyzed
 							s_counter++;
 						}
 					}
