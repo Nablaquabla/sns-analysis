@@ -56,6 +56,7 @@ def main():
 #    run = 'Run-15-05-11-11-46-30'
 #    run = 'Run-15-05-19-17-04-44'
 #    run = 'Run-15-05-27-11-13-46'
+    runDirs = ['Run-15-05-05-16-09-12','Run-15-05-11-11-46-30','Run-15-05-19-17-04-44','Run-15-05-27-11-13-46']
     
     subdirs = {}
     subdirs[run] = 'brillance_data'
@@ -69,24 +70,25 @@ def main():
                'Run-15-05-19-17-04-44': ['150519','150520','150521','150522','150523','150524','150525','150526','150527'],
                'Run-15-05-27-11-13-46': ['150527','150528','150529','150530','150531','150601','150602','150603','150604','150605','150606','150607','150608','150609']}
                
-    # Iterate through all days in a given run folder, create a condor file and run it.                
-    for day in days_in[run]:
+    for run in runDirs:           
+        # Iterate through all days in a given run folder, create a condor file and run it.                
+        for day in days_in[run]:
 
-        # Prepare paths for further processing
-        dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
-        outDir = mainOutDir + '%s/%s'%(run,day)
-    
-        # Create output directory if it does not exist
-        if not os.path.exists(outDir):
-            os.makedirs(outDir)    
+            # Prepare paths for further processing
+            dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
+            outDir = mainOutDir + '%s/%s'%(run,day)
+        
+            # Create output directory if it does not exist
+            if not os.path.exists(outDir):
+                os.makedirs(outDir)    
 
-        # Get all times within the day folder chosen and prepare condor submit files
-        tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
-        createCondorFile(dataRunDir,outDir,run,day,len(tList))
-#        createCondorFile(dataRunDir,outDir,run,day,2)
-        cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
-        os.system(cmd)
-        tm.sleep(1)
+            # Get all times within the day folder chosen and prepare condor submit files
+            tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
+            createCondorFile(dataRunDir,outDir,run,day,len(tList))
+    #        createCondorFile(dataRunDir,outDir,run,day,2)
+            cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
+            os.system(cmd)
+            tm.sleep(1)
  
 if __name__ == '__main__':
     main()
