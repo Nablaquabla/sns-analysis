@@ -46,7 +46,7 @@ def main():
     mainOutDir = '/var/phy/project/phil/grayson/COHERENT/CsI/bjs-analysis/'
 
     # Choose run to analyze
-    run = 'Run-15-03-27-12-42-26'
+#    run = 'Run-15-03-27-12-42-26'
 #    run = 'Run-15-03-30-13-33-05'
 #    run = 'Run-15-04-08-11-38-28'
 #    run = 'Run-15-04-17-16-56-59'
@@ -54,7 +54,7 @@ def main():
 #    run = 'Run-15-05-05-16-09-12'
 #    run = 'Run-15-05-11-11-46-30'
 #    run = 'Run-15-05-19-17-04-44'
-#    run = 'Run-15-05-27-11-13-46'
+    run = 'Run-15-05-27-11-13-46'
     runDirs = ['Run-15-05-05-16-09-12','Run-15-05-11-11-46-30','Run-15-05-19-17-04-44','Run-15-05-27-11-13-46']
     
     subdirs = {}
