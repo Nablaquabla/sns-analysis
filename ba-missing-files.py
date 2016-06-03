@@ -1,5 +1,6 @@
 import os
 import time as tm
+import sys
 
 # Handles the creation of condor files for a given set of directories
 # -----------------------------------------------------------------------------
@@ -38,7 +39,7 @@ def createCondorFile(dataDir,outDir,run,day,time):
         
 # Main function handling all internals
 # -----------------------------------------------------------------------------
-def main():       
+def main(runMissing):       
    # Choose main directory, i.e. ~/csi/beam_on_data/Run-15-06-25-xyz/
     mainRunDir = '/var/phy/project/phil/grayson/COHERENT/CsI/'
     
@@ -47,14 +48,14 @@ def main():
 
     # Choose run to analyze
 #    run = 'Run-15-03-27-12-42-26'
-#    run = 'Run-15-03-30-13-33-05'
+    run = 'Run-15-03-30-13-33-05'
 #    run = 'Run-15-04-08-11-38-28'
 #    run = 'Run-15-04-17-16-56-59'
 #    run = 'Run-15-04-29-16-34-44'
 #    run = 'Run-15-05-05-16-09-12'
 #    run = 'Run-15-05-11-11-46-30'
 #    run = 'Run-15-05-19-17-04-44'
-    run = 'Run-15-05-27-11-13-46'
+#    run = 'Run-15-05-27-11-13-46'
     runDirs = ['Run-15-05-05-16-09-12','Run-15-05-11-11-46-30','Run-15-05-19-17-04-44','Run-15-05-27-11-13-46']
     
     subdirs = {}
@@ -89,11 +90,15 @@ def main():
             missing = list(set(inputList) - set(outputList_B))
             if len(missing) > 0: 
             	print len(missing)
-		#for m in missing:
-		#	print m
+            if runMissing == 1:
+                for m in missing:
+                    createCondorFile(dataRunDir,outDir,run,day,m)
+                    cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s-%s.condor'%(run,day,m)
+                    os.system(cmd)
+
              
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
 
     
 
