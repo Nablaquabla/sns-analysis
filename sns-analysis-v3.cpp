@@ -94,6 +94,13 @@ int main(int argc, char* argv[])
 	int spe_integration_ctr = 0;
 	int spe_integration_charge = 0;
 
+	// Buffers for peaks in pretrace
+	int bg_pe_pt[22] = {};
+	int s_pe_pt[22] = {};
+
+	// Buffer for baseline
+	int baseline_hist[32] = {};
+
     // Rising and falling threshold crossings used for linear gate detection
     int _previous_c = 0;
     int gate_down = 0;
@@ -499,9 +506,9 @@ int main(int argc, char* argv[])
 				// waveform without bothering to analyze this one
 				// ========================================================================
 				bool analyze = false;
-				if (data_set == 1 && peaks.size() > 0 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
-				if (data_set == 2 && peaks.size() > 0) { analyze = true; }
-				if (data_set == 3 && peaks.size() > 0) { analyze = true; }
+				if (data_set == 1 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
+				if (data_set == 2) { analyze = true; }
+				if (data_set == 3) { analyze = true; }
 
 				if (analyze)
 				{
@@ -531,12 +538,28 @@ int main(int argc, char* argv[])
 					s_pt_ct = 0;
 					s_roi_ct = 0;
 					s_iw_ct = 0;
-					for (int idx = 0; idx < peaks.size(); idx++)
+					if (peaks.size() > 0)
 					{
-						if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
-						if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
-						if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
-						if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
+						for (int idx = 0; idx < peaks.size(); idx++)
+						{
+							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
+							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
+							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
+							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
+						}
+					}
+
+					// Histogram baseline and peaks in pretrace
+					if (!overflow && !linear_gate && !muon_veto_flag)
+					{
+						if (med_csi >= 85 && med_csi <= 115) { baseline_hist[med_csi - 85]++; }
+						else { baseline_hist[31]++; }
+
+						if (bg_pt_ct <= 20) { bg_pe_pt[bg_pt_ct]++; }
+						else { bg_pe_pt[21]++; }
+
+						if (s_pt_ct <= 20) { s_pe_pt[s_pt_ct]++; }
+						else { s_pe_pt[21]++; }
 					}
 
 					// -------------------------------------------------------------
@@ -765,49 +788,62 @@ int main(int argc, char* argv[])
 	// Write run info
 	if (infoOut.is_open())
 	{
-		// Description of output
-		infoOut << "0:  Total number of Waveforms processed" << std::endl;
-		infoOut << "1:  Number of triggers with linear gates in CsI channel" << std::endl;
-		infoOut << "2:  Number of triggers with overflows in either channel" << std::endl;
-		infoOut << "3:  Number of triggers with more than 3 muons in muon veto channel" << std::endl;
-		infoOut << "4:  Number of triggers that have actually been analyzed in the background window (less than x PE/peaks in PT + at least one PE/peak in ROI)" << std::endl;
-		infoOut << "5:  Number of triggers that have actually been analyzed in the signal window (less than x PE/peaks in PT + at least one PE/peak in ROI)" << std::endl;
-		infoOut << "6:  Maximum number of PE/peaks in the pretrace" << std::endl;
-		infoOut << "7:  Integration threshold" << std::endl;
-		infoOut << "8:  Background pretrace start" << std::endl;
-		infoOut << "9:  Background pretrace stop" << std::endl;
-		infoOut << "10: Background ROI start" << std::endl;
-		infoOut << "11: Background ROI stop" << std::endl;
-		infoOut << "12: Signal pretrace start" << std::endl;
-		infoOut << "13: Signal pretrace stop" << std::endl;
-		infoOut << "14: Signal ROI start" << std::endl;
-		infoOut << "15: Signal ROI stop" << std::endl;
-		infoOut << "16: Unzipped file size" << std::endl;
-		infoOut << "17: SPE histogram" << std::endl;
-
-		// Actual output
-		infoOut << "0\t" << waveformCtr << std::endl;
-		infoOut << "1\t" << linearGateCtr << std::endl;
-		infoOut << "2\t" << overflowCtr << std::endl;
-		infoOut << "3\t" << muonVetoCtr << std::endl;
-		infoOut << "4\t" << bgAnalysisCtr << std::endl;
-		infoOut << "5\t" << sAnalysisCtr << std::endl;
-		infoOut << "6\t" << PE_max_PT << std::endl;
-		infoOut << "7\t" << "Not In Use" << std::endl;
-		infoOut << "8\t" << BG_PT[0] << std::endl;
-		infoOut << "9\t" << BG_PT[1] << std::endl;
-		infoOut << "10\t" << BG_ROI[0] << std::endl;
-		infoOut << "11\t" << BG_ROI[1] << std::endl;
-		infoOut << "12\t" << S_PT[0] << std::endl;
-		infoOut << "13\t" << S_PT[1] << std::endl;
-		infoOut << "14\t" << S_ROI[0] << std::endl;
-		infoOut << "15\t" << S_ROI[1] << std::endl;
-		infoOut << "16\t" << fileSize << std::endl;
-		infoOut << "17\t";
+		infoOut << "Total number of Waveforms processed" << std::endl;
+		infoOut << waveformCtr << std::endl;
+		infoOut << "Number of triggers with linear gates in CsI channel" << std::endl;
+		infoOut << linearGateCtr << std::endl;
+		infoOut << "Number of triggers with overflows in either channel" << std::endl;
+		infoOut << overflowCtr << std::endl;
+		infoOut << "Number of triggers with more than 3 muons in muon veto channel" << std::endl;
+		infoOut << muonVetoCtr << std::endl;
+		infoOut << "Number of triggers that have actually been analyzed in the background window (less than x PE/peaks in PT + at least one PE/peak in ROI)" << std::endl;
+		infoOut << bgAnalysisCtr << std::endl;
+		infoOut << "Number of triggers that have actually been analyzed in the signal window (less than x PE/peaks in PT + at least one PE/peak in ROI)" << std::endl;
+		infoOut << sAnalysisCtr << std::endl;
+		infoOut << "Maximum number of PE/peaks in the pretrace" << std::endl;
+		infoOut << PE_max_PT << std::endl;
+		infoOut << "Background pretrace start" << std::endl;
+		infoOut << BG_PT[0] << std::endl;
+		infoOut << "Background pretrace stop" << std::endl;
+		infoOut << BG_PT[1] << std::endl;
+		infoOut << "Background ROI start" << std::endl;
+		infoOut << BG_ROI[0] << std::endl;
+		infoOut << "Background ROI stop" << std::endl;
+		infoOut << BG_ROI[1] << std::endl;
+		infoOut << "Signal pretrace start" << std::endl;
+		infoOut << S_PT[0] << std::endl;
+		infoOut << "Signal pretrace stop" << std::endl;
+		infoOut << S_PT[1] << std::endl;
+		infoOut << "Signal ROI start" << std::endl;
+		infoOut << S_ROI[0] << std::endl;
+		infoOut << "Signal ROI stop" << std::endl;
+		infoOut << S_ROI[1] << std::endl;
+		infoOut << "Unzipped file size" << std::endl;
+		infoOut << fileSize << std::endl;
+		infoOut << "SPE histogram" << std::endl;
 		for (int idx = 0; idx < 300; idx++)
 		{
 			infoOut << spe_charge_dist[idx] << " ";
 		}
+		infoOut << std::endl;
+		infoOut << "Background - Peaks in pretrace histogram" << std::endl;
+		for (int idx = 0; idx < 22; idx++)
+		{
+			infoOut << bg_pe_pt[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "Signa - Peaks in pretrace histogram" << std::endl;
+		for (int idx = 0; idx < 22; idx++)
+		{
+			infoOut << s_pe_pt[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "CsI baseline histogram" << std::endl;
+		for (int idx = 0; idx < 32; idx++)
+		{
+			infoOut << baseline_hist[idx] << " ";
+		}
+		infoOut << std::endl;
 		infoOut.close();
 	}
     return 0;
