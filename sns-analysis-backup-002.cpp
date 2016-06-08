@@ -140,33 +140,10 @@ int main(int argc, char* argv[])
     int s_q_arr [1500] = {};
     int bg_q_arr [1500] = {};
     
-	// LogLikelihood prefactors & estimators
-	double lnL_pf_real[1500] = {};
-	double lnL_pf_flat[1500] = {};
-	double lnL_real = 0;
-	double lnL_flat = 0;
-
-	// Calculate prefactors for loglikelihood analysis
-		// from Am241 calibration
-	double r = 0.691;
-	double tf = 308.5;
-	double ts = 1649.0;
-
-		// total integration window is 3 us long -> tMax = 1499
-	double _tFast = 1.0 / ((1.0 + r) * tf * (1 - exp(-1499.0 / tf)));
-	double _tSlow = r / ((1.0 + r) * ts * (1 - exp(-1499.0 / ts)));
-		
-		// Calculate prefactor for each time step
-	for (int i = 0; i < 1500; i++)
-	{
-		lnL_pf_real[i] = log(_tFast * exp(-(double)i / tf) + _tSlow * exp(-(double)i / ts));
-		lnL_pf_flat[i] = log(1.0 / 1499.0);
-	}
-
     // Threshold buffer and measured rise times
-    double thresholds [3] = {};
-    double bg_rt [3] = {};
-    double s_rt [3] = {};    
+    float thresholds [3] = {};
+    float bg_rt [3] = {};
+    float s_rt [3] = {};    
 
     // Buffers used during window analysis
     int idx_0 = 0;
@@ -174,8 +151,8 @@ int main(int argc, char* argv[])
     int i_peak = 0;
 	int i_pe = 0;
     int q_int = 0;   
-    double _t1 = 0.0;
-    double _t2 = 0.0;
+    float _t1 = 0.0;
+    float _t2 = 0.0;
     
     std::string main_dir;
 	int current_time;
@@ -396,7 +373,7 @@ int main(int argc, char* argv[])
 				{
 					// CsI
 					c = contents[zidx++];
-					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
+					_tmpC = (int) c - (int) floor(((float) c + 5.0)/11.0);
 					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
 
@@ -407,7 +384,7 @@ int main(int argc, char* argv[])
 
 					// Muon veto
 					c = contents[zidx++];
-					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
+					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((float) c))/11.0));
 					med_mv_arr[_tmpC + 128] += 1;
 					mv[i] = _tmpC;
 				}
@@ -598,8 +575,6 @@ int main(int argc, char* argv[])
 						i_peak = 0;
 						i_pe = 0;
 						q_int = 0;
-						lnL_real = 0.0;
-						lnL_flat = 0.0;
 						_t1 = 0.0;
 						_t2 = 0.0;
 
@@ -648,12 +623,10 @@ int main(int argc, char* argv[])
 								// Get proper 'real' index that includes the onset offset
 								idx_w_offset = i + idx_0;
 
-								// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
+								// Add sample if it is within one of the PE regions identified previously
 								if (idx_w_offset >= pe_beginnings[i_pe] && idx_w_offset <= pe_endings[i_pe])
 								{
 									q_int += csi[idx_w_offset];
-									lnL_real += lnL_pf_real[i] * csi[idx_w_offset];
-									lnL_flat += lnL_pf_flat[i] * csi[idx_w_offset];
 									if (idx_w_offset == pe_endings[i_pe]) { i_pe += ((i_pe + 1) < pe_beginnings.size()) ? 1 : 0; }
 								}
 
@@ -673,8 +646,8 @@ int main(int argc, char* argv[])
 							// Determine threshold crossing times
 							for (int i = 0; i < 1499; i++)
 							{
-								_t1 = (double)bg_q_arr[i];
-								_t2 = (double)bg_q_arr[i + 1];
+								_t1 = (float)bg_q_arr[i];
+								_t2 = (float)bg_q_arr[i + 1];
 
 								for (int j = 0; j < 3; j++)
 								{
@@ -687,7 +660,7 @@ int main(int argc, char* argv[])
 							// -------------------------------------------------------------
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
 							bg_out_file << bg_pt_ct << " " << bg_roi_ct << " ";
-							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " " lnL_real << " " << lnL_flat << " ";
+							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " ";
 							bg_out_file << bg_rt[0] << " " << bg_rt[1] << " " << bg_rt[2] << " ";
 							bg_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
 
@@ -709,8 +682,6 @@ int main(int argc, char* argv[])
 						i_peak = 0;
 						i_pe = 0;
 						q_int = 0;
-						lnL_real = 0.0;
-						lnL_flat = 0.0;
 						_t1 = 0.0;
 						_t2 = 0.0;
 
@@ -759,12 +730,10 @@ int main(int argc, char* argv[])
 								// Get proper 'real' index that includes the onset offset
 								idx_w_offset = i + idx_0;
 
-								// Add sample if it is within one of the PE regions identified previously & update loglikelihood estimators
+								// Add sample if it is within one of the PE regions identified previously
 								if (idx_w_offset >= pe_beginnings[i_pe] && idx_w_offset <= pe_endings[i_pe])
 								{
 									q_int += csi[idx_w_offset];
-									lnL_real += lnL_pf_real[i] * csi[idx_w_offset];
-									lnL_flat += lnL_pf_flat[i] * csi[idx_w_offset];
 									if (idx_w_offset == pe_endings[i_pe]) { i_pe += ((i_pe + 1) < pe_beginnings.size()) ? 1 : 0; }
 								}
 
@@ -784,8 +753,8 @@ int main(int argc, char* argv[])
 							// Determine threshold crossing times
 							for (int i = 0; i < 1499; i++)
 							{
-								_t1 = (double)s_q_arr[i];
-								_t2 = (double)s_q_arr[i + 1];
+								_t1 = (float)s_q_arr[i];
+								_t2 = (float)s_q_arr[i + 1];
 
 								for (int j = 0; j < 3; j++)
 								{
@@ -798,7 +767,7 @@ int main(int argc, char* argv[])
 							// -------------------------------------------------------------
 							s_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
 							s_out_file << s_pt_ct << " " << s_roi_ct << " ";
-							s_out_file << s_iw_ct << " " << idx_0 << " " << s_q_arr[1499] << " " lnL_real << " " << lnL_flat << " ";
+							s_out_file << s_iw_ct << " " << idx_0 << " " << s_q_arr[1499] << " ";
 							s_out_file << s_rt[0] << " " << s_rt[1] << " " << s_rt[2] << " ";
 							s_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
 
