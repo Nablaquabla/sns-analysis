@@ -863,7 +863,7 @@ int main(int argc, char* argv[])
 			infoOut << bg_pe_pt[idx] << " ";
 		}
 		infoOut << std::endl;
-		infoOut << "Signa - Peaks in pretrace histogram" << std::endl;
+		infoOut << "Signal - Peaks in pretrace histogram" << std::endl;
 		for (int idx = 0; idx < 22; idx++)
 		{
 			infoOut << s_pe_pt[idx] << " ";
