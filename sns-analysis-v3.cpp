@@ -133,6 +133,9 @@ int main(int argc, char* argv[])
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
 
+	// Keep track of all peak/pe locations in the full minute
+	int peak_distribution[350] = {};
+
     // Charge of PE in PT
     int current_spe_q = 0;
     
@@ -565,6 +568,7 @@ int main(int argc, char* argv[])
 					{
 						for (int idx = 0; idx < peaks.size(); idx++)
 						{
+							peak_distribution[peaks[idx]/350] += 1;
 							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
@@ -851,7 +855,7 @@ int main(int argc, char* argv[])
 		infoOut << S_ROI[1] << std::endl;
 		infoOut << "Unzipped file size" << std::endl;
 		infoOut << fileSize << std::endl;
-		infoOut << "SPE histogram" << std::endl;
+		infoOut << "SPE charge histogram" << std::endl;
 		for (int idx = 0; idx < 300; idx++)
 		{
 			infoOut << spe_charge_dist[idx] << " ";
@@ -875,6 +879,11 @@ int main(int argc, char* argv[])
 			infoOut << baseline_hist[idx] << " ";
 		}
 		infoOut << std::endl;
+		infoOut << "Peak distribution in full waveform" << std::endl;
+		for (int idx = 0; idx < 350; idx++)
+		{
+			infoOut << peak_distribution[idx] << " ";
+		}
 		infoOut.close();
 	}
     return 0;
