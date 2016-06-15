@@ -618,7 +618,7 @@ int main(int argc, char* argv[])
 						}
 
 						// if (bg_pt_ct <= 10)
-						if (s_pt_ct <= 3)
+						if (true)
 						{
 							for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 							{
