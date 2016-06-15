@@ -566,7 +566,7 @@ int main(int argc, char* argv[])
 					s_iw_ct = 0;
 					if (peaks.size() > 0)
 					{
-						for (int idx = 0; idx < peaks.size(); idx++)
+						for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 						{
 							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
@@ -576,9 +576,9 @@ int main(int argc, char* argv[])
 
 						if (bg_pt_ct <= 10)
 						{
-							for (auto const& p : peaks)
+							for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 							{
-								peak_distribution[p / 100] += 1;
+								peak_distribution[peaks[idx] / 100] += 1;
 							}
 						}
 					}
