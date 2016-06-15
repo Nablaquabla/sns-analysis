@@ -12,6 +12,7 @@
 #include <limits>
 #include <zip.h>
 #include <string>
+#include <queue>
 
 std::string zeroPad(int num, int size)
 {
