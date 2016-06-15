@@ -574,7 +574,8 @@ int main(int argc, char* argv[])
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
 						}
 
-						if (bg_pt_ct <= 10)
+						// if (bg_pt_ct <= 10)
+						if (bg_pt_ct <= 10 && bg_roi_ct <= 30 && bg_roi_ct >= 5)
 						{
 							for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 							{
