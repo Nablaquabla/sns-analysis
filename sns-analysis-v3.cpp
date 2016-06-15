@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
 			S_ROI[1]  = 35000;
 			PE_max_PT = 20;
 			break;
-	case 3: BG_PT[0]  = 0;
+	/*case 3: BG_PT[0]  = 0;
 			BG_PT[1]  = 16500;
 			BG_ROI[0] = 16500;
 			BG_ROI[1] = 24000;
@@ -241,8 +241,8 @@ int main(int argc, char* argv[])
 			S_ROI[0]  = 24000;
 			S_ROI[1]  = 31500;
 			PE_max_PT = 20;
-			break;
-	/*case 3: BG_PT[0]  = 0;
+			break;*/
+	case 3: BG_PT[0]  = 0;
 		    BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
 			BG_ROI[1] = 25000;
@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
 			S_ROI[0]  = 25000;
 			S_ROI[1]  = 30000;
 			PE_max_PT = 20;
-			break;*/
+			break;
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
 			 return 1;
 	}
@@ -585,7 +585,7 @@ int main(int argc, char* argv[])
 						}
 
 						// if (bg_pt_ct <= 10)
-						if (bg_pt_ct <= 15)
+						if (bg_pt_ct <= 3)
 						{
 							for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 							{
