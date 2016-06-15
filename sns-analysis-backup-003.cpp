@@ -469,48 +469,16 @@ int main(int argc, char* argv[])
 						}
 					}
 				} 
-
-				std::queue<int> csi_q;
-				int csi_h[13] = {};
-				int filtersize = 60;
-				int _tc = 0;
-				int nh = 0;
-				int cmed = 0;
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
-				for (int i = 0; i < 35000; i++)
+				for(int i=0;i<35000; i++)
 				{
 					// -------------------------------------------
 					//          Analyze CsI[Na] waveform
 					// -------------------------------------------
 					csi[i] = med_csi - csi[i];
 
-					_tc = csi[i];
-					if (_tc < -5){ _tc = -6; }
-					else if (_tc > 5) { _tc = 6; }
-
-					csi_h[_tc + 6]++;
-					csi_q.push(_tc);
-					if (i >= filtersize)
-					{
-						csi_h[csi_q.front() + 6]--;
-						csi_q.pop();
-						for (int idx = 0; idx < 13; idx++)
-						{
-							nh += csi_h[idx];
-							if (nh >= filtersize / 2)
-							{
-								cmed = idx + 6;
-								break;
-							}
-						}
-					}
-					csi[i - filtersize / 2] = csi[i - filtersize / 2] - cmed;
-				}
-
-				for (int i = 0; i < 35000;i++)
-				{
 					// Peak finder
 					if (csi[i] >= 3) { current_peak_width++; }
 					else
