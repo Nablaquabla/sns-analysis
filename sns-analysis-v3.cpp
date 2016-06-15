@@ -568,11 +568,18 @@ int main(int argc, char* argv[])
 					{
 						for (int idx = 0; idx < peaks.size(); idx++)
 						{
-							peak_distribution[peaks[idx]/100] += 1;
 							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
+						}
+
+						if (bg_pt_ct <= 10)
+						{
+							for (auto const& p : peaks)
+							{
+								peak_distribution[p / 100] += 1;
+							}
 						}
 					}
 
