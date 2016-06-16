@@ -513,7 +513,7 @@ int main(int argc, char* argv[])
 				for (int i = 0; i < 35000;i++)
 				{
 					// Peak finder
-					if (csi[i] >= 3) { current_peak_width++; }
+					if (csi[i] >= 4) { current_peak_width++; }
 					else
 					{
 						if (current_peak_width >= 3) { peaks.push_back(i - current_peak_width); }
@@ -618,7 +618,8 @@ int main(int argc, char* argv[])
 						}
 
 						// if (bg_pt_ct <= 10)
-						if (peaks.size() <= 100)
+						// if (peaks.size() <= 100)
+						if (true)
 						{
 							for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 							{
