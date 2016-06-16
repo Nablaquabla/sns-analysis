@@ -624,7 +624,7 @@ int main(int argc, char* argv[])
 						// if (peaks.size() <= 100)
 						if (true)
 						{
-							int sz = peaks.size() / 10;
+							int sz = peaks.size() / 2;
 							if (sz < 350)
 							{
 								for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
