@@ -473,7 +473,7 @@ int main(int argc, char* argv[])
 
 				std::queue<int> csi_q;
 				int csi_h[13] = {};
-				int filtersize = 60;
+				int filtersize = 200;
 				int _tc = 0;
 				int nh = 0;
 				int cmed = 0;
