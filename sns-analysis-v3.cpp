@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     std::vector<int> muon_peaks; 
 
 	// Keep track of all peak/pe locations in the full minute
-	int peak_distribution[350] = {};
+	int peak_distribution[350][350] = {};
 
     // Charge of PE in PT
     int current_spe_q = 0;
@@ -487,6 +487,8 @@ int main(int argc, char* argv[])
 					// -------------------------------------------
 					csi[i] = med_csi - csi[i];
 
+					// Rolling median baseline subtraction - For loop has to be split such that the peak finder uses the right values
+					/*
 					_tc = csi[i];
 					if (_tc < -5){ _tc = -6; }
 					else if (_tc > 5) { _tc = 6; }
@@ -511,9 +513,10 @@ int main(int argc, char* argv[])
 				}
 
 				for (int i = 0; i < 35000;i++)
-				{
+				{*/
+
 					// Peak finder
-					if (csi[i] >= 4) { current_peak_width++; }
+					if (csi[i] >= 3) { current_peak_width++; }
 					else
 					{
 						if (current_peak_width >= 3) { peaks.push_back(i - current_peak_width); }
@@ -621,9 +624,13 @@ int main(int argc, char* argv[])
 						// if (peaks.size() <= 100)
 						if (true)
 						{
-							for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
+							int sz = peaks.size() / 10;
+							if (sz < 350)
 							{
-								peak_distribution[peaks[idx] / 100] += 1;
+								for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
+								{
+									peak_distribution[sz][peaks[idx] / 100] += 1;
+								}
 							}
 						}
 					}
@@ -932,9 +939,13 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 		infoOut << "Peak distribution in full waveform" << std::endl;
-		for (int idx = 0; idx < 350; idx++)
+		for (int idx_1 = 0; idx_1 < 350; idx_1++)
 		{
-			infoOut << peak_distribution[idx] << " ";
+			for (int idx_2 = 0; idx_2 < 350; idx_2++)
+			{
+				infoOut << peak_distribution[idx_1][idx_2] << " ";
+			}
+			infoOut << std::endl;
 		}
 		infoOut.close();
 	}
