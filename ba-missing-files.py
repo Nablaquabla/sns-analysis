@@ -72,31 +72,32 @@ def main(runMissing):
                'Run-15-05-19-17-04-44': ['150519','150520','150521','150522','150523','150524','150525','150526','150527'],
                'Run-15-05-27-11-13-46': ['150527','150528','150529','150530','150531','150601','150602','150603','150604','150605','150606','150607','150608','150609']}
                
-    for day in days_in[run]:
-        subdirs[run] = 'brillance_data'    
-        print run,day
-        # Prepare paths for further processing
-        dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
-        outDir = mainOutDir + '%s/%s'%(run,day)
-        
-        # Get all times within the day folder chosen
-        inputList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
-         
-        # Get all times within the day folder chosen
-        outputList_B = [x.split('-')[1] for x in os.listdir(outDir) if 'B-' in x]
-        outputList_S = [x.split('-')[1] for x in os.listdir(outDir) if 'S-' in x]
-        outputList_I = [x.split('-')[1] for x in os.listdir(outDir) if 'I-' in x]
-        
-        # Check if there is a file missing in the day folder
-        if len(inputList) != len(outputList_B) or len(inputList) != len(outputList_S) or len(inputList) != len(outputList_I):
-            missing = list(set(inputList) - set(outputList_B))
-            if len(missing) > 0: 
-            	print len(missing)
-            if runMissing == 1:
-                for m in missing:
-                    createCondorFile(dataRunDir,outDir,run,day,m)
-                    cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s-%s.condor'%(run,day,m)
-                    os.system(cmd)
+    for run in runDirs:           
+        for day in days_in[run]:
+            subdirs[run] = 'brillance_data'    
+            print run,day
+            # Prepare paths for further processing
+            dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
+            outDir = mainOutDir + '%s/%s'%(run,day)
+            
+            # Get all times within the day folder chosen
+            inputList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
+             
+            # Get all times within the day folder chosen
+            outputList_B = [x.split('-')[1] for x in os.listdir(outDir) if 'B-' in x]
+            outputList_S = [x.split('-')[1] for x in os.listdir(outDir) if 'S-' in x]
+            outputList_I = [x.split('-')[1] for x in os.listdir(outDir) if 'I-' in x]
+            
+            # Check if there is a file missing in the day folder
+            if len(inputList) != len(outputList_B) or len(inputList) != len(outputList_S) or len(inputList) != len(outputList_I):
+                missing = list(set(inputList) - set(outputList_B))
+                if len(missing) > 0: 
+                    print len(missing)
+                if runMissing == 1:
+                    for m in missing:
+                        createCondorFile(dataRunDir,outDir,run,day,m)
+                        cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s-%s.condor'%(run,day,m)
+                        os.system(cmd)
 
              
 if __name__ == '__main__':
