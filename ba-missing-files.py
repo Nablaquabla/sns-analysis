@@ -93,7 +93,7 @@ def main(runMissing):
                 missing = list(set(inputList) - set(outputList_B))
                 if len(missing) > 0: 
                     print len(missing)
-                if runMissing == 1:
+                if runMissing == '1':
                     for m in missing:
                         createCondorFile(dataRunDir,outDir,run,day,m)
                         cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s-%s.condor'%(run,day,m)
