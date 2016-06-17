@@ -752,7 +752,7 @@ int main(int argc, char* argv[])
 							bg_out_file << bg_pt_ct << " " << bg_roi_ct << " ";
 							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " " << lnL_real << " " << lnL_flat << " ";
 							bg_out_file << bg_rt[0] << " " << bg_rt[1] << " " << bg_rt[2] << " ";
-							bg_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
+							bg_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << " " << peaks.size() << std::endl;
 
 							// Keeps track of how many BG waveforms have actually been analyzed
 							bg_counter++;
@@ -863,7 +863,7 @@ int main(int argc, char* argv[])
 							s_out_file << s_pt_ct << " " << s_roi_ct << " ";
 							s_out_file << s_iw_ct << " " << idx_0 << " " << s_q_arr[1499] << " " << lnL_real << " " << lnL_flat << " ";
 							s_out_file << s_rt[0] << " " << s_rt[1] << " " << s_rt[2] << " ";
-							s_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << std::endl;
+							s_out_file << muon_peaks[0] << " " << muon_peaks[1] << " " << muon_peaks[2] << " " << peaks.size() << std::endl;
 
 							// Keeps track of how many BG waveforms have actually been analyzed
 							s_counter++;
