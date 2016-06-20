@@ -622,7 +622,7 @@ int main(int argc, char* argv[])
 
 						// if (bg_pt_ct <= 10)
 						// if (peaks.size() <= 100)
-						if (s_pt_ct <= 30)
+						if (s_pt_ct <= 15)
 						{
 							int sz = peaks.size() / 2;
 							if (sz < 350)
