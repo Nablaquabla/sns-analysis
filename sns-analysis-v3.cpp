@@ -579,8 +579,8 @@ int main(int argc, char* argv[])
 				// ========================================================================
 				bool analyze = false;
 				if (data_set == 1 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
-				if (data_set == 2) { analyze = true; }
-				if (data_set == 3) { analyze = true; }
+				if (data_set == 2 && !overflow && !linear_gate) { analyze = true; }
+				if (data_set == 3 && !overflow && !linear_gate) { analyze = true; }
 
 				if (analyze)
 				{
@@ -622,7 +622,7 @@ int main(int argc, char* argv[])
 
 						// if (bg_pt_ct <= 10)
 						// if (peaks.size() <= 100)
-						if (bg_pt_ct <= 15)
+						if (true)
 						{
 							int sz = peaks.size() / 2;
 							if (sz < 350)
