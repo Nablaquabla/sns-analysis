@@ -137,6 +137,9 @@ int main(int argc, char* argv[])
 	// Keep track of all peak/pe locations in the full minute
 	int peak_distribution[350][350] = {};
 
+	// Get peak width distribution
+	int peak_width_distribution[51] = {};
+
     // Charge of PE in PT
     int current_spe_q = 0;
     
@@ -542,6 +545,7 @@ int main(int argc, char* argv[])
 							{
 								above_pe_threshold = 0;
 								pe_beginnings.push_back(i - current_pe_width - 2);
+								peak_width_distribution[(current_pe_width < 50) ? current_pe_width : 50] += 1;
 								pe_endings.push_back(i - 2);
 								current_pe_width = 0;
 							}
@@ -620,8 +624,7 @@ int main(int argc, char* argv[])
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
 						}
 
-						// if (bg_pt_ct <= 10)
-						// if (peaks.size() <= 100)
+						/* Distribution of peak onsets
 						if (true)
 						{
 							int sz = peaks.size() / 2;
@@ -630,6 +633,19 @@ int main(int argc, char* argv[])
 								for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 								{
 									peak_distribution[sz][peaks[idx] / 100] += 1;
+								}
+							}
+						}*/
+
+						// Distribution of charge (only add >= 3)
+						if (true)
+						{
+							int sz = peaks.size() / 2;
+							if (sz < 350)
+							{
+								for (int idx = 0; idx < 35000; idx++)
+								{
+									peak_distribution[sz][idx / 100] += (csi[idx] >= 3) ? csi[idx] : 0;
 								}
 							}
 						}
@@ -946,6 +962,11 @@ int main(int argc, char* argv[])
 				infoOut << peak_distribution[idx_1][idx_2] << " ";
 			}
 			infoOut << std::endl;
+		}
+		infoOut << "Peak width distribution" << std::endl;
+		for (int idx = 0; idx <= 50; idx++)
+		{
+			infoOut << peak_width_distribution[idx] << " ";
 		}
 		infoOut.close();
 	}
