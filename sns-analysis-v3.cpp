@@ -237,23 +237,23 @@ int main(int argc, char* argv[])
 			PE_max_PT = 20;
 			break;
 	/*case 3: BG_PT[0]  = 0;
-			BG_PT[1]  = 16500;
-			BG_ROI[0] = 16500;
-			BG_ROI[1] = 24000;
-			S_PT[0]   = 7500;
-			S_PT[1]   = 24000;
-			S_ROI[0]  = 24000;
-			S_ROI[1]  = 31500;
-			PE_max_PT = 20;
-			break;*/
-	case 3: BG_PT[0]  = 0;
-		    BG_PT[1]  = 20000;
+			BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
 			BG_ROI[1] = 25000;
 			S_PT[0]   = 5000;
 			S_PT[1]   = 25000;
 			S_ROI[0]  = 25000;
 			S_ROI[1]  = 30000;
+			PE_max_PT = 20;
+			break;*/
+	case 3: BG_PT[0]  = 0;
+		    BG_PT[1]  = 20000;
+			BG_ROI[0] = 20000;
+			BG_ROI[1] = 25125;
+			S_PT[0]   = 5125;
+			S_PT[1]   = 25125;
+			S_ROI[0]  = 25125;
+			S_ROI[1]  = 30250;
 			PE_max_PT = 20;
 			break;
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
@@ -537,18 +537,20 @@ int main(int argc, char* argv[])
 						below_pe_threshold += 1;
 
 						// Less than three consecutive samples have been found to be above threshold before the 'drop'-> No PE & continue streaming
-						if (above_pe_threshold < 5) { above_pe_threshold = 0; }
+						if (above_pe_threshold < 5) 
+						{ 
+							above_pe_threshold = 0; 
+							current_pe_width = 0;
+						}
 						else
 						{
-							// Ignore single dips below threshold, but 'close' the PE window if there are two consecutive samples below threshold.
-							if (below_pe_threshold >= 2)
-							{
-								above_pe_threshold = 0;
-								pe_beginnings.push_back(i - current_pe_width - 2);
-								peak_width_distribution[(current_pe_width < 50) ? current_pe_width : 50] += 1;
-								pe_endings.push_back(i - 2);
-								current_pe_width = 0;
-							}
+							above_pe_threshold = 0;
+							peak_width_distribution[(current_pe_width < 50) ? current_pe_width : 50] += 1;
+							// Offset of -2 yields exact positive threshold crossing
+							pe_beginnings.push_back(i - current_pe_width - 2);
+							// Offset of -1 yields exact negative threshold crossing
+							pe_endings.push_back(i - 1);
+							current_pe_width = 0;
 						}
 					}
 					current_pe_width += (above_pe_threshold >= 3) ? 1 : 0;
