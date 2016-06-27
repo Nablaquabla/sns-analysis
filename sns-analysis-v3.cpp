@@ -393,6 +393,7 @@ int main(int argc, char* argv[])
 				current_spe_q = 0;
 				m_peak_width = 0;
 				peaks.clear();
+				peak_heights.clear();
 				pe_beginnings.clear();
 				pe_endings.clear();
 				muon_peaks.clear();
