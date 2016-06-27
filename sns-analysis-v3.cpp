@@ -130,6 +130,11 @@ int main(int argc, char* argv[])
 
     // PE location in CsI, Muon locations in muon veto
     std::vector<int> peaks;
+	std::vector<int> peak_heights;
+	int peak_height_dist[100] = {};
+	int peak_amplitude = 0;
+	int max_peak_charge = -1;
+	int max_peak_charge_dist[100] = {};
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
@@ -393,7 +398,7 @@ int main(int argc, char* argv[])
 				muon_peaks.clear();
 				spe_integration_ctr = 0;
 				spe_integration_charge = 0;
-
+				max_peak_charge = -1;
 				// -------------------------------------------------------------
 				//  Read current timestamp
 				// -------------------------------------------------------------
@@ -526,21 +531,24 @@ int main(int argc, char* argv[])
 						current_peak_width = 0;
 					}
 
+					peak_amplitude = 0;
 					// Determine integration windows for possible photoelectrons
 					if (csi[i] >= 2)
 					{
 						above_pe_threshold += 1;
 						below_pe_threshold = 0;
+						peak_amplitude = csi[i] > peak_amplitude ? csi[i] : peak_amplitude;
 					}
 					else
 					{
 						below_pe_threshold += 1;
 
-						// Less than three consecutive samples have been found to be above threshold before the 'drop'-> No PE & continue streaming
+						// Less than five consecutive samples have been found to be above threshold before the 'drop'-> No PE & continue streaming
 						if (above_pe_threshold < 5) 
 						{ 
 							above_pe_threshold = 0; 
 							current_pe_width = 0;
+							peak_amplitude = 0;
 						}
 						else
 						{
@@ -550,6 +558,8 @@ int main(int argc, char* argv[])
 							pe_beginnings.push_back(i - current_pe_width - 2);
 							// Offset of -1 yields exact negative threshold crossing
 							pe_endings.push_back(i - 1);
+							peak_heights.push_back(peak_amplitude);
+							peak_amplitude = 0;
 							current_pe_width = 0;
 						}
 					}
@@ -567,6 +577,36 @@ int main(int argc, char* argv[])
 						if (m_peak_width >= 3) { muon_peaks.push_back(i-m_peak_width); }
 						m_peak_width = 0;
 					}
+				}
+
+				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
+				if peaks_heights.size() > 0)
+				{
+					int peak_max = -1;
+					int peak_max_idx = -1;
+					for (int idx = 0; idx < peak_heights.size(); idx++)
+					{
+						if (peak_heights[idx] > peak_max)
+						{
+							peak_max = peak_heights[idx];
+							peak_max_idx = idx;
+						}
+						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99] += 1;
+					}
+
+					int onset = pe_beginnings[peak_max_idx] - 5;
+					for (int i = 0; i < 1500; i++)
+					{
+						// Get proper 'real' index that includes the onset
+						idx_w_onset = i + onset;
+
+						// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
+						if (idx_w_onset >= pe_beginnings[i_pe] && idx_w_onset <= pe_endings[i_pe])
+						{
+							max_peak_charge += csi[idx_w_onset];
+						}
+					}
+					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99]
 				}
 
 				// Raise muon veto flag if more than three muons have been found
@@ -969,6 +1009,18 @@ int main(int argc, char* argv[])
 		for (int idx = 0; idx <= 50; idx++)
 		{
 			infoOut << peak_width_distribution[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "PE amplitudes" << std::endl;
+		for (int idx = 0; idx < 100; idx++)
+		{
+			infoOut << peak_height_dist[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "Maximum peak charge distribution" << std::endl;
+		for (int idx = 0; idx < 100; idx++)
+		{
+			infoOut << max_peak_charge_dist[idx] << " ";
 		}
 		infoOut.close();
 	}
