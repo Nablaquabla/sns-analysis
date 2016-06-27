@@ -485,6 +485,7 @@ int main(int argc, char* argv[])
 				int _tc = 0;
 				int nh = 0;
 				int cmed = 0;
+				peak_amplitude = 0;
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
@@ -531,7 +532,6 @@ int main(int argc, char* argv[])
 						current_peak_width = 0;
 					}
 
-					peak_amplitude = 0;
 					// Determine integration windows for possible photoelectrons
 					if (csi[i] >= 2)
 					{
