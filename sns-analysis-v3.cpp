@@ -580,7 +580,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
-				if peaks_heights.size() > 0)
+				if (peaks_heights.size() > 0)
 				{
 					int peak_max = -1;
 					int peak_max_idx = -1;
