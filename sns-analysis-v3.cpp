@@ -580,7 +580,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
-				if (peaks_heights.size() > 0)
+				if (peak_heights.size() > 0)
 				{
 					int peak_max = -1;
 					int peak_max_idx = -1;
@@ -595,6 +595,7 @@ int main(int argc, char* argv[])
 					}
 
 					int onset = pe_beginnings[peak_max_idx] - 5;
+					int idx_w_onset = 0;
 					for (int i = 0; i < 1500; i++)
 					{
 						// Get proper 'real' index that includes the onset
@@ -606,7 +607,7 @@ int main(int argc, char* argv[])
 							max_peak_charge += csi[idx_w_onset];
 						}
 					}
-					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99]
+					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99];
 				}
 
 				// Raise muon veto flag if more than three muons have been found
