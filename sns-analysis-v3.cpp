@@ -605,6 +605,7 @@ int main(int argc, char* argv[])
 						if (idx_w_onset >= pe_beginnings[i_pe] && idx_w_onset <= pe_endings[i_pe])
 						{
 							max_peak_charge += csi[idx_w_onset];
+							if (idx_w_onset == pe_endings[i_pe]) { i_pe += ((i_pe + 1) < pe_beginnings.size()) ? 1 : 0; }
 						}
 					}
 					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99];
