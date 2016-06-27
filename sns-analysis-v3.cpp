@@ -591,7 +591,7 @@ int main(int argc, char* argv[])
 							peak_max = peak_heights[idx];
 							peak_max_idx = idx;
 						}
-						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99] += 1;
+						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99]++;
 					}
 
 					int onset = pe_beginnings[peak_max_idx] - 5;
