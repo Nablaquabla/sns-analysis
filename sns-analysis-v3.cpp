@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 	int peak_height_dist[100] = {};
 	int peak_amplitude = 0;
 	int max_peak_charge = -1;
-	int max_peak_charge_dist[100] = {};
+	int max_peak_charge_dist[1000] = {};
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
@@ -581,7 +581,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
-				if (peak_heights.size() > 0)
+				if (peak_heights.size() > 0 && !overflow && !linear_gate)
 				{
 					int peak_max = -1;
 					int peak_max_idx = -1;
@@ -610,7 +610,7 @@ int main(int argc, char* argv[])
 							if (idx_w_onset >= pe_endings[current_pe_idx]) { current_pe_idx += ((current_pe_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
 						}
 					}
-					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99] += 1;
+					max_peak_charge_dist[(max_peak_charge / 500 < 1000) ? max_peak_charge / 500 : 999] += 1;
 				}
 
 				// Raise muon veto flag if more than three muons have been found
