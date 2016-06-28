@@ -597,17 +597,16 @@ int main(int argc, char* argv[])
 
 					int onset = pe_beginnings[peak_max_idx] - 5;
 					int idx_w_onset = 0;
-					std::cout << peak_max << " " << peak_max_idx << " " << onset << " " << std::endl;
 					for (int i = 0; i < 1500; i++)
 					{
 						// Get proper 'real' index that includes the onset
 						idx_w_onset = i + onset;
 
 						// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-						if (idx_w_onset >= pe_beginnings[i_pe] && idx_w_onset <= pe_endings[i_pe])
+						if (idx_w_onset >= pe_beginnings[peak_max_idx] && idx_w_onset <= pe_endings[peak_max_idx])
 						{
 							max_peak_charge += csi[idx_w_onset];
-							if (idx_w_onset == pe_endings[i_pe]) { i_pe += ((i_pe + 1) < pe_beginnings.size()) ? 1 : 0; }
+							if (idx_w_onset == pe_endings[peak_max_idx]) { peak_max_idx += ((peak_max_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
 						}
 					}
 					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99];
