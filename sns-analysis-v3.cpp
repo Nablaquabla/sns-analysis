@@ -597,6 +597,7 @@ int main(int argc, char* argv[])
 
 					int onset = pe_beginnings[peak_max_idx] - 5;
 					int idx_w_onset = 0;
+					std::cout << peak_max << " " << peak_max_idx << " " << onset " " << std::endl;
 					for (int i = 0; i < 1500; i++)
 					{
 						// Get proper 'real' index that includes the onset
