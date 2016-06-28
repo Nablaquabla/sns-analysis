@@ -595,21 +595,22 @@ int main(int argc, char* argv[])
 						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99]++;
 					}
 
-					int onset = pe_beginnings[peak_max_idx] - 5;
+					int onset = pe_beginnings[peak_max_idx];
 					int idx_w_onset = 0;
+					int current_pe_idx = peak_max_idx;
 					for (int i = 0; i < 1500; i++)
 					{
 						// Get proper 'real' index that includes the onset
 						idx_w_onset = i + onset;
 
 						// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-						if (idx_w_onset >= pe_beginnings[peak_max_idx] && idx_w_onset <= pe_endings[peak_max_idx])
+						if (idx_w_onset >= pe_beginnings[current_pe_idx] && idx_w_onset <= pe_endings[current_pe_idx])
 						{
 							max_peak_charge += csi[idx_w_onset];
-							if (idx_w_onset == pe_endings[peak_max_idx]) { peak_max_idx += ((peak_max_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
+							if (idx_w_onset >= pe_endings[current_pe_idx]) { current_pe_idx += ((current_pe_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
 						}
 					}
-					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99];
+					max_peak_charge_dist[(max_peak_charge / 800 < 100) ? max_peak_charge / 800 : 99] += 1;
 				}
 
 				// Raise muon veto flag if more than three muons have been found
