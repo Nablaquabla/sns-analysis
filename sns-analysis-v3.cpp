@@ -1022,7 +1022,7 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 		infoOut << "Maximum peak charge distribution" << std::endl;
-		for (int idx = 0; idx < 100; idx++)
+		for (int idx = 0; idx < 1000; idx++)
 		{
 			infoOut << max_peak_charge_dist[idx] << " ";
 		}
