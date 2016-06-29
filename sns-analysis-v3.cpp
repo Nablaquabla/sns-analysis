@@ -610,7 +610,7 @@ int main(int argc, char* argv[])
 							if (idx_w_onset >= pe_endings[current_pe_idx]) { current_pe_idx += ((current_pe_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
 						}
 					}
-					max_peak_charge_dist[(max_peak_charge / 500 < 1000) ? max_peak_charge / 500 : 999] += 1;
+					max_peak_charge_dist[(max_peak_charge / 100 < 1000) ? max_peak_charge / 100 : 999] += 1;
 				}
 
 				// Raise muon veto flag if more than three muons have been found
