@@ -448,7 +448,7 @@ int main(int argc, char* argv[])
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
-					if (!overflow && (c >= 127 || c == -128)
+					if (!overflow && (c >= 127 || c == -128))
 					{
 						overflow = true;
 						overflowCtr += 1;
