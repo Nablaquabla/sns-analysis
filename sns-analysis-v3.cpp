@@ -448,6 +448,11 @@ int main(int argc, char* argv[])
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
+					if (!overflow && c >= 255)
+					{
+						overflow = true;
+						overflowCtr += 1;
+					}
 					_previous_c = _tmpC;
 
 					// Muon veto
@@ -469,11 +474,11 @@ int main(int argc, char* argv[])
 				// -------------------------------------------------
 				//  Adjust overflow counter if wf shows an overflow
 				// -------------------------------------------------
-				if (med_csi_arr[12] > 0 || med_csi_arr[243] > 0)
+				/*if (med_csi_arr[12] > 0 || med_csi_arr[243] > 0)
 				{
 					overflow = true;
 					overflowCtr += 1;
-				} 
+				} */
 
 				// ---------------------------------------
 				//  Calculate the median of both channels
