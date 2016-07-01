@@ -419,6 +419,8 @@ int main(int argc, char* argv[])
 				spe_integration_ctr = 0;
 				spe_integration_charge = 0;
 				max_peak_charge = -1;
+				passed_cuts = false;
+
 				// -------------------------------------------------------------
 				//  Read current timestamp
 				// -------------------------------------------------------------
