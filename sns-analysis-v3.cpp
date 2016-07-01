@@ -195,6 +195,18 @@ int main(int argc, char* argv[])
     std::string out_dir;
 	std::string current_zip_file;
 	std::string time_name_in_zip;
+	
+	// Save waveforms as ascii - Counter,cuts etc
+	int save_wf_ctr = 0;
+	int no_total_peaks[2] = { 100, 200 };
+	int minimum_no_peaks_IW = 6;
+	int rt1090_bottom_left[2] = { 750, 1150 };
+	int rt050_bottom_left[2] = { 235, 345 };
+	int rt1090_upper_right[2] = { 1080, 1280 };
+	int rt050_upper_right[2] = { 520, 760 };
+	bool save_waveforms = true;
+	bool passed_cuts_bg = false;
+	bool passed_cuts_s = false;
 
     // Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
@@ -333,6 +345,10 @@ int main(int argc, char* argv[])
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	s_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "S-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	infoOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "I-")).c_str(), std::ofstream::out | std::ofstream::trunc);
+	if (save_waveforms)
+	{
+		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
+	}
             
 	// Begin data processing if file has been properly opened
 	if(err == 0)
@@ -603,7 +619,7 @@ int main(int argc, char* argv[])
 						// Get proper 'real' index that includes the onset
 						idx_w_onset = i + onset;
 
-						// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
+						// Add sample if it is within one of the PE regions identified previously
 						if (idx_w_onset >= pe_beginnings[current_pe_idx] && idx_w_onset <= pe_endings[current_pe_idx])
 						{
 							max_peak_charge += csi[idx_w_onset];
@@ -808,6 +824,21 @@ int main(int argc, char* argv[])
 							}
 
 							// -------------------------------------------------------------
+							//  If waveforms are being saved check whether cuts are passed
+							// -------------------------------------------------------------
+							if (save_waveforms)
+							{
+								int rt1090 = (bg_rt[2] - bg_rt[0]);
+								int rt050 = bg_rt[1];
+
+								bool bottom_left_cut = (rt1090 >= rt1090_bottom_left[0]) && (rt1090 <= rt1090_bottom_left[1]) && (rt050 >= rt050_bottom_left[0]) && (rt050 <= rt050_bottom_left[1]);
+								bool upper_right_cut = (rt1090 >= rt1090_upper_right[0]) && (rt1090 <= rt1090_upper_right[1]) && (rt050 >= rt050_upper_right[0]) && (rt050 <= rt050_upper_right[1]);
+								bool min_peak_cut = (bg_iw_ct >= minimum_no_peaks_iw);
+								bool total_peak_cut = (peaks.size() >= no_total_peaks[0]) && (peaks.size() <= no_total_peaks[1]);
+
+								passed_cuts_bg = (bottom_left_cut || upper_right_cut) && min_peak_cut && total_peak_cut;
+							}
+							// -------------------------------------------------------------
 							//    Write analysis results to file
 							// -------------------------------------------------------------
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
@@ -919,6 +950,21 @@ int main(int argc, char* argv[])
 							}
 
 							// -------------------------------------------------------------
+							//  If waveforms are being saved check whether cuts are passed
+							// -------------------------------------------------------------
+							if (save_waveforms)
+							{
+								int rt1090 = (s_rt[2] - s_rt[0]);
+								int rt050 = s_rt[1];
+
+								bool bottom_left_cut = (rt1090 >= rt1090_bottom_left[0]) && (rt1090 <= rt1090_bottom_left[1]) && (rt050 >= rt050_bottom_left[0]) && (rt050 <= rt050_bottom_left[1]);
+								bool upper_right_cut = (rt1090 >= rt1090_upper_right[0]) && (rt1090 <= rt1090_upper_right[1]) && (rt050 >= rt050_upper_right[0]) && (rt050 <= rt050_upper_right[1]);
+								bool min_peak_cut = (s_iw_ct >= minimum_no_peaks_iw);
+								bool total_peak_cut = (peaks.size() >= no_total_peaks[0]) && (peaks.size() <= no_total_peaks[1]);
+
+								passed_cuts_s = (bottom_left_cut || upper_right_cut) && min_peak_cut && total_peak_cut;
+							}
+							// -------------------------------------------------------------
 							//    Write analysis results to file
 							// -------------------------------------------------------------
 							s_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
@@ -931,6 +977,22 @@ int main(int argc, char* argv[])
 							s_counter++;
 						}
 					}
+
+					// -------------------------------------------------------------
+					//  Save waveform if cuts have been passed for either ROI
+					// -------------------------------------------------------------
+					if (save_waveforms && (passed_cuts_bg || passed_cuts_s))
+					{
+						for (int idx = 0; idx < 35000; idx++)
+						{
+							waveformOut << csi[idx] << " ";
+						}
+						for (int idx = 0; i < pe_beginnings.size(); i++)
+						{
+							waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
+						}
+						waveformOut << std::endl;
+					}
 					
 				}
 			}
@@ -940,6 +1002,7 @@ int main(int argc, char* argv[])
     // Before exiting, make sure that both output files are properly closed to prevent data loss.
     if (bg_out_file.is_open()) { bg_out_file.close(); }
     if (s_out_file.is_open()) { s_out_file.close(); }
+
 
 	// Write run info
 	if (infoOut.is_open())
