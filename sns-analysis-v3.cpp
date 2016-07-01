@@ -583,9 +583,11 @@ int main(int argc, char* argv[])
 							above_pe_threshold = 0;
 							peak_width_distribution[(current_pe_width < 50) ? current_pe_width : 50] += 1;
 							// Offset of -2 yields exact positive threshold crossing
-							pe_beginnings.push_back(i - current_pe_width - 2);
+							// Offset of -4 includes an additional +/- 2 sample for each PE 
+							pe_beginnings.push_back(i - current_pe_width - 4);
 							// Offset of -1 yields exact negative threshold crossing
-							pe_endings.push_back(i - 1);
+							// Offset of +1 includes an additional +/- 2 sample for each PE
+							pe_endings.push_back(i + 1);
 							peak_heights.push_back(peak_amplitude);
 							peak_amplitude = 0;
 							current_pe_width = 0;
