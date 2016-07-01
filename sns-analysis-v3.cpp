@@ -63,6 +63,9 @@ int main(int argc, char* argv[])
 	// Run Info output
 	std::ofstream infoOut;
 
+	// Saved waveforms
+	std::ofstream waveformOut;
+
     // LabView headers
     int no_samples = 0;
     int no_channels = 0;
@@ -199,7 +202,7 @@ int main(int argc, char* argv[])
 	// Save waveforms as ascii - Counter,cuts etc
 	int save_wf_ctr = 0;
 	int no_total_peaks[2] = { 100, 200 };
-	int minimum_no_peaks_IW = 6;
+	int minimum_no_peaks_iw = 6;
 	int rt1090_bottom_left[2] = { 750, 1150 };
 	int rt050_bottom_left[2] = { 235, 345 };
 	int rt1090_upper_right[2] = { 1080, 1280 };
@@ -987,7 +990,7 @@ int main(int argc, char* argv[])
 						{
 							waveformOut << csi[idx] << " ";
 						}
-						for (int idx = 0; i < pe_beginnings.size(); i++)
+						for (int idx = 0; idx < pe_beginnings.size(); idx++)
 						{
 							waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
 						}
