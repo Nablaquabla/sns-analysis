@@ -983,29 +983,27 @@ int main(int argc, char* argv[])
 							s_counter++;
 						}
 					}
-
-					// -------------------------------------------------------------
-					//  Save waveform if cuts have been passed for either ROI
-					// -------------------------------------------------------------
-					if (save_waveforms && (passed_cuts_bg || passed_cuts_s))
+				}
+				// -------------------------------------------------------------
+				//  Save waveform if cuts have been passed for either ROI
+				// -------------------------------------------------------------
+				if (save_waveforms && (passed_cuts_bg || passed_cuts_s))
+				{
+					for (int idx = 0; idx < 35000; idx++)
 					{
-						for (int idx = 0; idx < 35000; idx++)
-						{
-							waveformOut << csi[idx] << " ";
-						}
-						for (int idx = 0; idx < peaks.size(); idx++)
-						{
-							waveformOut << peaks[idx] <<  " ";
-						}
-						waveformOut << std::endl;
-						/*
-						for (int idx = 0; idx < pe_beginnings.size(); idx++)
-						{
-							waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
-						}
-						waveformOut << std::endl;*/
+						waveformOut << csi[idx] << " ";
 					}
-					
+					for (int idx = 0; idx < peaks.size(); idx++)
+					{
+						waveformOut << peaks[idx] << " ";
+					}
+					waveformOut << std::endl;
+					/*
+					for (int idx = 0; idx < pe_beginnings.size(); idx++)
+					{
+					waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
+					}
+					waveformOut << std::endl;*/
 				}
 			}
 		}            
