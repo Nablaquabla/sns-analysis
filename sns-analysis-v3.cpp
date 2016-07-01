@@ -993,17 +993,18 @@ int main(int argc, char* argv[])
 					{
 						waveformOut << csi[idx] << " ";
 					}
+					/*
 					for (int idx = 0; idx < peaks.size(); idx++)
 					{
 						waveformOut << peaks[idx] << " ";
 					}
-					waveformOut << std::endl;
-					/*
+					waveformOut << std::endl;*/
+
 					for (int idx = 0; idx < pe_beginnings.size(); idx++)
 					{
 					waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
 					}
-					waveformOut << std::endl;*/
+					waveformOut << std::endl;
 				}
 			}
 		}            
