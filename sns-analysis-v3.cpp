@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
 	int rt050_bottom_left[2] = { 235, 345 };
 	int rt1090_upper_right[2] = { 1080, 1280 };
 	int rt050_upper_right[2] = { 520, 760 };
-	bool save_waveforms = true;
+	bool save_waveforms = false;
 	bool passed_cuts_bg = false;
 	bool passed_cuts_s = false;
 
