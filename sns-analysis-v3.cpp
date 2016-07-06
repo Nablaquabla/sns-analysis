@@ -137,8 +137,8 @@ int main(int argc, char* argv[])
 	int peak_height_dist[100] = {};
 	int peak_amplitude = 0;
 	int max_peak_charge = -1;
-	int max_peak_charge_dist[1000] = {};
-	int max_peak_charge_dist_mv[1000] = {};
+	int max_peak_charge_dist[5000] = {};
+	int max_peak_charge_dist_mv[5000] = {};
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
@@ -660,8 +660,8 @@ int main(int argc, char* argv[])
 					}
 					if (_tmpCtr >= 5)
 					{
-						max_peak_charge_dist[(max_peak_charge / 100 < 1000) ? max_peak_charge / 100 : 999] += 1;
-						if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 100 < 1000) ? max_peak_charge / 100 : 999] += 1; }
+						max_peak_charge_dist[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1;
+						if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1; }
 					} 
 				}
 
@@ -1126,13 +1126,13 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 		infoOut << "Maximum peak charge distribution" << std::endl;
-		for (int idx = 0; idx < 1000; idx++)
+		for (int idx = 0; idx < 5000; idx++)
 		{
 			infoOut << max_peak_charge_dist[idx] << " ";
 		}
 		infoOut << std::endl;
 		infoOut << "Maximum peak charge distribution excluding muon veto hits" << std::endl;
-		for (int idx = 0; idx < 1000; idx++)
+		for (int idx = 0; idx < 5000; idx++)
 		{
 			infoOut << max_peak_charge_dist_mv[idx] << " ";
 		}
