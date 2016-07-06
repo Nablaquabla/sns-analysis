@@ -138,12 +138,14 @@ int main(int argc, char* argv[])
 	int peak_amplitude = 0;
 	int max_peak_charge = -1;
 	int max_peak_charge_dist[1000] = {};
+	int max_peak_charge_dist_mv[1000] = {};
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
 
 	// Keep track of all peak/pe locations in the full minute
 	int peak_distribution[350][350] = {};
+	int charge_distribution[350][350] = {};
 
 	// Get peak width distribution
 	int peak_width_distribution[51] = {};
@@ -421,6 +423,7 @@ int main(int argc, char* argv[])
 				max_peak_charge = -1;
 				passed_cuts_s = false;
 				passed_cuts_bg = false;
+				peak_amplitude = 0;
 
 				// -------------------------------------------------------------
 				//  Read current timestamp
@@ -461,7 +464,7 @@ int main(int argc, char* argv[])
 					med_mv_arr[_tmpC + 128] += 1;
 					mv[i] = _tmpC;
 				}
-                        
+
 				// ----------------------------------------------
 				//  Adjust linear gate counter if wf is gated
 				// ----------------------------------------------
@@ -470,7 +473,7 @@ int main(int argc, char* argv[])
 					linear_gate = true;
 					linearGateCtr += 1;
 				}
-         
+
 				// -------------------------------------------------
 				//  Adjust overflow counter if wf shows an overflow
 				// -------------------------------------------------
@@ -507,13 +510,13 @@ int main(int argc, char* argv[])
 					}
 				} 
 
-				std::queue<int> csi_q;
+				/*std::queue<int> csi_q;
 				int csi_h[13] = {};
 				int filtersize = 200;
 				int _tc = 0;
 				int nh = 0;
-				int cmed = 0;
-				peak_amplitude = 0;
+				int cmed = 0;*/
+
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
@@ -552,7 +555,7 @@ int main(int argc, char* argv[])
 				for (int i = 0; i < 35000;i++)
 				{*/
 
-					// Peak finder
+					// Simple peak finder using threshold crossing with history
 					if (csi[i] >= 3) { current_peak_width++; }
 					else
 					{
@@ -609,6 +612,15 @@ int main(int argc, char* argv[])
 					}
 				}
 
+				// Raise muon veto flag if more than three muons have been found
+				// If less than 3 have been found fill the vector with -1 for postprocessing
+				if (muon_peaks.size() > 3)
+				{
+					muon_veto_flag = true;
+					muonVetoCtr += 1;
+				}
+				else { muon_peaks.resize(3, -1); }
+
 				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
 				if (peak_heights.size() > 0 && !overflow && !linear_gate)
 				{
@@ -639,17 +651,19 @@ int main(int argc, char* argv[])
 							if (idx_w_onset >= pe_endings[current_pe_idx]) { current_pe_idx += ((current_pe_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
 						}
 					}
-					max_peak_charge_dist[(max_peak_charge / 100 < 1000) ? max_peak_charge / 100 : 999] += 1;
+					// Only add integrated charge to histogram if there are at least 5 threshold crossings in the integration window
+					// Supposed to get rid of most of the Cherenkov radiation.
+					int _tmpCtr = 0;
+					for (int idx = 0; idx < peaks.size(); idx++)
+					{
+						_tmpCtr += (peaks[idx]>onset && peaks[idx] < (onset + 1500)) ? 1 : 0;
+					}
+					if (_tmpCtr >= 5)
+					{
+						max_peak_charge_dist[(max_peak_charge / 100 < 1000) ? max_peak_charge / 100 : 999] += 1;
+						if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 100 < 1000) ? max_peak_charge / 100 : 999] += 1; }
+					} 
 				}
-
-				// Raise muon veto flag if more than three muons have been found
-				// If less than 3 have been found fill the vector with -1 for postprocessing
-				if (muon_peaks.size() > 3)
-				{
-					muon_veto_flag = true;
-					muonVetoCtr += 1;
-				}
-				else { muon_peaks.resize(3,-1); }
 
 				// ========================================================================
 				// Check that there is at least one PE in the trace, there is no overflow, 
@@ -699,7 +713,7 @@ int main(int argc, char* argv[])
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
 						}
 
-						/* Distribution of peak onsets
+						// Distribution of peak onsets
 						if (true)
 						{
 							int sz = peaks.size() / 2;
@@ -710,7 +724,7 @@ int main(int argc, char* argv[])
 									peak_distribution[sz][peaks[idx] / 100] += 1;
 								}
 							}
-						}*/
+						}
 
 						// Distribution of charge (only add >= 3)
 						if (true)
@@ -720,7 +734,7 @@ int main(int argc, char* argv[])
 							{
 								for (int idx = 0; idx < 35000; idx++)
 								{
-									peak_distribution[sz][idx / 100] += (csi[idx] >= 3) ? csi[idx] : 0;
+									charge_distribution[sz][idx / 100] += (csi[idx] >= 3) ? csi[idx] : 0;
 								}
 							}
 						}
@@ -1090,6 +1104,15 @@ int main(int argc, char* argv[])
 			}
 			infoOut << std::endl;
 		}
+		infoOut << "Charge distribution in full waveform" << std::endl;
+		for (int idx_1 = 0; idx_1 < 350; idx_1++)
+		{
+			for (int idx_2 = 0; idx_2 < 350; idx_2++)
+			{
+				infoOut << charge_distribution[idx_1][idx_2] << " ";
+			}
+			infoOut << std::endl;
+		}
 		infoOut << "Peak width distribution" << std::endl;
 		for (int idx = 0; idx <= 50; idx++)
 		{
@@ -1106,6 +1129,12 @@ int main(int argc, char* argv[])
 		for (int idx = 0; idx < 1000; idx++)
 		{
 			infoOut << max_peak_charge_dist[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "Maximum peak charge distribution excluding muon veto hits" << std::endl;
+		for (int idx = 0; idx < 1000; idx++)
+		{
+			infoOut << max_peak_charge_dist_mv[idx] << " ";
 		}
 		infoOut.close();
 	}
