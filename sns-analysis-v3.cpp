@@ -126,7 +126,6 @@ int main(int argc, char* argv[])
 
     // Buffers to store current peak width in CsI and muon veto waveform
 	int above_pe_threshold = 0;
-	int below_pe_threshold = 0;
 	int current_peak_width = 0;
 	int current_pe_width = 0;
     int m_peak_width = 0;
@@ -258,7 +257,7 @@ int main(int argc, char* argv[])
 			S_ROI[1]  = 35000;
 			PE_max_PT = 20;
 			break;
-	/*case 3: BG_PT[0]  = 0;
+	case 3: BG_PT[0]  = 0;
 			BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
 			BG_ROI[1] = 25000;
@@ -267,8 +266,8 @@ int main(int argc, char* argv[])
 			S_ROI[0]  = 25000;
 			S_ROI[1]  = 30000;
 			PE_max_PT = 20;
-			break;*/
-	case 3: BG_PT[0]  = 0;
+			break;
+	/*case 3: BG_PT[0]  = 0;
 		    BG_PT[1]  = 20000;
 			BG_ROI[0] = 20000;
 			BG_ROI[1] = 25125;
@@ -277,7 +276,7 @@ int main(int argc, char* argv[])
 			S_ROI[0]  = 25125;
 			S_ROI[1]  = 30250;
 			PE_max_PT = 20;
-			break;
+			break;*/
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
 			 return 1;
 	}
@@ -408,7 +407,6 @@ int main(int argc, char* argv[])
 				med_csi_sum = 0;
 				med_mv_sum = 0;     
 				above_pe_threshold = 0;
-				below_pe_threshold = 0;
 				current_peak_width = 0;
 				current_pe_width = 0;
 				current_spe_q = 0;
@@ -451,13 +449,15 @@ int main(int argc, char* argv[])
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
+					_previous_c = _tmpC;
+
+					// Overflow check
 					if (!overflow && (c >= 127 || c == -128))
 					{
 						overflow = true;
 						overflowCtr += 1;
 					}
-					_previous_c = _tmpC;
-
+					
 					// Muon veto
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
@@ -474,19 +474,9 @@ int main(int argc, char* argv[])
 					linearGateCtr += 1;
 				}
 
-				// -------------------------------------------------
-				//  Adjust overflow counter if wf shows an overflow
-				// -------------------------------------------------
-				/*if (med_csi_arr[12] > 0 || med_csi_arr[243] > 0)
-				{
-					overflow = true;
-					overflowCtr += 1;
-				} */
-
 				// ---------------------------------------
 				//  Calculate the median of both channels
 				// ---------------------------------------
-				
 				for(int i=0; i<256; i++)
 				{
 					if (!med_csi_found)
@@ -510,13 +500,6 @@ int main(int argc, char* argv[])
 					}
 				} 
 
-				/*std::queue<int> csi_q;
-				int csi_h[13] = {};
-				int filtersize = 200;
-				int _tc = 0;
-				int nh = 0;
-				int cmed = 0;*/
-
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
@@ -527,34 +510,6 @@ int main(int argc, char* argv[])
 					// -------------------------------------------
 					csi[i] = med_csi - csi[i];
 
-					// Rolling median baseline subtraction - For loop has to be split such that the peak finder uses the right values
-					/*
-					_tc = csi[i];
-					if (_tc < -5){ _tc = -6; }
-					else if (_tc > 5) { _tc = 6; }
-
-					csi_h[_tc + 6]++;
-					csi_q.push(_tc);
-					if (i >= filtersize)
-					{
-						csi_h[csi_q.front() + 6]--;
-						csi_q.pop();
-						for (int idx = 0; idx < 13; idx++)
-						{
-							nh += csi_h[idx];
-							if (nh >= filtersize / 2)
-							{
-								cmed = idx + 6;
-								break;
-							}
-						}
-					}
-					csi[i - filtersize / 2] = csi[i - filtersize / 2] - cmed;
-				}
-
-				for (int i = 0; i < 35000;i++)
-				{*/
-
 					// Simple peak finder using threshold crossing with history
 					if (csi[i] >= 3) { current_peak_width++; }
 					else
@@ -563,40 +518,24 @@ int main(int argc, char* argv[])
 						current_peak_width = 0;
 					}
 
-					// Determine integration windows for possible photoelectrons
-					if (csi[i] >= 2)
+					// Determine integration windows for possible photoelectrons (Threshold = 3, Width = 3)
+					if (csi[i] >= 3)
 					{
 						above_pe_threshold += 1;
-						below_pe_threshold = 0;
 						peak_amplitude = csi[i] > peak_amplitude ? csi[i] : peak_amplitude;
 					}
 					else
 					{
-						below_pe_threshold += 1;
-
-						// Less than five consecutive samples have been found to be above threshold before the 'drop'-> No PE & continue streaming
-						if (above_pe_threshold < 5) 
+						if (above_pe_threshold >= 3) 
 						{ 
-							above_pe_threshold = 0; 
-							current_pe_width = 0;
-							peak_amplitude = 0;
-						}
-						else
-						{
-							above_pe_threshold = 0;
-							peak_width_distribution[(current_pe_width < 50) ? current_pe_width : 50] += 1;
-							// Offset of -2 yields exact positive threshold crossing
-							// Offset of -4 includes an additional +/- 2 sample for each PE 
-							pe_beginnings.push_back(i - current_pe_width - 4);
-							// Offset of -1 yields exact negative threshold crossing
-							// Offset of +1 includes an additional +/- 2 sample for each PE
+							peak_width_distribution[(above_pe_threshold < 50) ? above_pe_threshold : 50] += 1;
+							pe_beginnings.push_back(i - above_pe_threshold - 2);
 							pe_endings.push_back(i + 1);
 							peak_heights.push_back(peak_amplitude);
-							peak_amplitude = 0;
-							current_pe_width = 0;
 						}
+						peak_amplitude = 0;
+						above_pe_threshold = 0;
 					}
-					current_pe_width += (above_pe_threshold >= 3) ? 1 : 0;
 					
 					// -------------------------------------------
 					//        Analyze muon veto waveform
@@ -635,34 +574,34 @@ int main(int argc, char* argv[])
 						}
 						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99]++;
 					}
+					int onset = pe_beginnings[peak_max_idx] - 5;
 
-					int onset = pe_beginnings[peak_max_idx];
-					int idx_w_onset = 0;
-					int current_pe_idx = peak_max_idx;
-					for (int i = 0; i < 1500; i++)
+					// Only integrate if we are looking at a large peak and not only at a single photoelectron.
+					// Also make sure that the full integration window is contained in the waveform
+					if (peak_max >= 40 && onset >= 0 && onset <= 33499)
 					{
-						// Get proper 'real' index that includes the onset
-						idx_w_onset = i + onset;
-
-						// Add sample if it is within one of the PE regions identified previously
-						if (idx_w_onset >= pe_beginnings[current_pe_idx] && idx_w_onset <= pe_endings[current_pe_idx])
+						int idx_w_onset = 0;
+						int current_pe_idx = peak_max_idx;
+						for (int i = 0; i < 1500; i++)
 						{
-							max_peak_charge += csi[idx_w_onset];
-							if (idx_w_onset >= pe_endings[current_pe_idx]) { current_pe_idx += ((current_pe_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
+							// Get proper 'real' index that includes the onset
+							idx_w_onset = i + onset;
+
+							// Add sample if it is within one of the PE regions identified previously
+							if (idx_w_onset >= pe_beginnings[current_pe_idx] && idx_w_onset <= pe_endings[current_pe_idx])
+							{
+								max_peak_charge += csi[idx_w_onset];
+								if (idx_w_onset >= pe_endings[current_pe_idx]) { current_pe_idx += ((current_pe_idx + 1) < pe_beginnings.size()) ? 1 : 0; }
+							}
+						}
+						// Only add integrated charge to histogram if there are at least 5 PE in the integration window
+						// Supposed to get rid of most of the Cherenkov radiation that passes the amplitude cut
+						if (current_pe_idx - peak_max_idx >= 5)
+						{
+							max_peak_charge_dist[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1;
+							if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1; }
 						}
 					}
-					// Only add integrated charge to histogram if there are at least 5 threshold crossings in the integration window
-					// Supposed to get rid of most of the Cherenkov radiation.
-					int _tmpCtr = 0;
-					for (int idx = 0; idx < peaks.size(); idx++)
-					{
-						_tmpCtr += (peaks[idx]>onset && peaks[idx] < (onset + 1500)) ? 1 : 0;
-					}
-					if (_tmpCtr >= 5)
-					{
-						max_peak_charge_dist[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1;
-						if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1; }
-					} 
 				}
 
 				// ========================================================================
