@@ -363,7 +363,9 @@ int main(int argc, char* argv[])
 	{
 		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	}
-            
+    
+	int csi_raw[35000] = {};
+
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
@@ -456,6 +458,7 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
 					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
+					csi_raw[i] = _tmpC;
 
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
@@ -995,7 +998,7 @@ int main(int argc, char* argv[])
 				{
 					for (int idx = 0; idx < 35000; idx++)
 					{
-						waveformOut << csi[idx] << " ";
+						waveformOut << csi_raw[idx] << " ";
 					}
 					/*
 					for (int idx = 0; idx < peaks.size(); idx++)
