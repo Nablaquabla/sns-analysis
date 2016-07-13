@@ -682,7 +682,7 @@ int main(int argc, char* argv[])
 									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
 									{
 										charge_distribution[sz][idx / 100] += csi[idx];
-										if (idx_w_onset >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
+										if (idx >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
 									}
 								}
 							}
