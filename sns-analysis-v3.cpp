@@ -460,6 +460,8 @@ int main(int argc, char* argv[])
 					csi[i] = _tmpC;
 					csi_raw[i] = _tmpC;
 
+					if (i == 0) { previous_c = _tmpC; }
+
 					// Gate check
 					if (_tmpC <= 18 && _previous_c > 18) { gate_down++; }
 					if (_previous_c <= 18 && _tmpC > 18) { gate_up++; }
