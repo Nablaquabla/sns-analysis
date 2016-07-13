@@ -596,7 +596,7 @@ int main(int argc, char* argv[])
 						}
 						// Only add integrated charge to histogram if there are at least 5 PE in the integration window
 						// Supposed to get rid of most of the Cherenkov radiation that passes the amplitude cut
-						if (current_pe_idx - peak_max_idx >= 5)
+						if (current_pe_idx - peak_max_idx >= 6)
 						{
 							max_peak_charge_dist[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1;
 							if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1; }
@@ -671,9 +671,19 @@ int main(int argc, char* argv[])
 							int sz = peaks.size() / 2;
 							if (sz < 350)
 							{
+								//for (int idx = 0; idx < 35000; idx++)
+								//{
+								//	charge_distribution[sz][idx / 100] += (csi[idx] >= 3) ? csi[idx] : 0;
+								//}
+								int cpi = 0;
 								for (int idx = 0; idx < 35000; idx++)
 								{
-									charge_distribution[sz][idx / 100] += (csi[idx] >= 3) ? csi[idx] : 0;
+									// Add sample if it is within one of the PE regions identified previously
+									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
+									{
+										charge_distribution[sz][idx / 100] += csi[idx];
+										if (idx_w_onset >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
+									}
 								}
 							}
 						}
