@@ -145,7 +145,16 @@ int main(int argc, char* argv[])
 	// Keep track of all peak/pe locations in the full minute
 	int peak_distribution[350][350] = {};
 	int charge_distribution[350][350] = {};
-
+	int charge_distribution_mat[350][350] = {};
+	for (int i1 = 0; i1 < 350; i1++)
+	{
+		for (int i2 = 0; i2 < 350; i2++)
+		{
+			peak_distribution[i1][i2] = 0;
+			charge_distribution[i1][i2] = 0;
+			charge_distribution[i1][i2] = 0;
+		}
+	}
 	// Get peak width distribution
 	int peak_width_distribution[51] = {};
 
@@ -578,7 +587,7 @@ int main(int argc, char* argv[])
 
 					// Only integrate if we are looking at a large peak and not only at a single photoelectron.
 					// Also make sure that the full integration window is contained in the waveform
-					if (peak_max >= 40 && onset >= 0 && onset <= 33499)
+					if (peak_max >= 64 && onset >= 0 && onset <= 33499)
 					{
 						int idx_w_onset = 0;
 						int current_pe_idx = peak_max_idx;
@@ -682,6 +691,27 @@ int main(int argc, char* argv[])
 									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
 									{
 										charge_distribution[sz][idx / 100] += csi[idx];
+										if (idx >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
+									}
+								}
+							}
+
+							double mat = 0;
+							for (int idx = 0; idx < pe_beginnings.size(); idx++)
+							{
+								mat += 0.5*(pe_beginnings[idx] + pe_endings[idx]);
+							}
+							mat = trunc(mat / pe_beginnings.size() / 100.0);
+							int imat = (int)mat;
+							if (imat < 350)
+							{
+								int cpi = 0;
+								for (int idx = 0; idx < 35000; idx++)
+								{
+									// Add sample if it is within one of the PE regions identified previously
+									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
+									{
+										charge_distribution_mat[imat][idx / 100] += csi[idx];
 										if (idx >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
 									}
 								}
@@ -1084,6 +1114,15 @@ int main(int argc, char* argv[])
 		for (int idx = 0; idx < 5000; idx++)
 		{
 			infoOut << max_peak_charge_dist_mv[idx] << " ";
+		}
+		infoOut << "Charge distribution in full waveform vs mean arrival time" << std::endl;
+		for (int idx_1 = 0; idx_1 < 350; idx_1++)
+		{
+			for (int idx_2 = 0; idx_2 < 350; idx_2++)
+			{
+				infoOut << charge_distribution_mat[idx_1][idx_2] << " ";
+			}
+			infoOut << std::endl;
 		}
 		infoOut.close();
 	}
