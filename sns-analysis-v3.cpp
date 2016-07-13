@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
     bool med_csi_found = false;
     bool med_mv_found = false;
     bool overflow = false;
-      
+
 	// Buffers for SPE integration
 	int spe_charge_dist[300] = {};
 	int spe_integration_ctr = 0;
@@ -217,11 +217,12 @@ int main(int argc, char* argv[])
 	int rt050_bottom_left[2] = { 235, 345 };
 	int rt1090_upper_right[2] = { 1080, 1280 };
 	int rt050_upper_right[2] = { 520, 760 };
-	bool save_waveforms = false;
+	bool save_waveforms = true;
 	bool passed_cuts_bg = false;
 	bool passed_cuts_s = false;
+	bool passed_cut = false;
 
-    // Set main run directory, e.g. Run-15-10-02-27-32-23/151002
+	// Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
 	int data_set = 0;
@@ -430,6 +431,7 @@ int main(int argc, char* argv[])
 				max_peak_charge = -1;
 				passed_cuts_s = false;
 				passed_cuts_bg = false;
+				passed_cut = false;
 				peak_amplitude = 0;
 
 				// -------------------------------------------------------------
@@ -667,6 +669,7 @@ int main(int argc, char* argv[])
 							int sz = peaks.size() / 2;
 							if (sz < 350)
 							{
+								passed_cut = (sz == 11);
 								for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 								{
 									peak_distribution[sz][peaks[idx] / 100] += 1;
@@ -987,7 +990,8 @@ int main(int argc, char* argv[])
 				// -------------------------------------------------------------
 				//  Save waveform if cuts have been passed for either ROI
 				// -------------------------------------------------------------
-				if (save_waveforms && (passed_cuts_bg || passed_cuts_s))
+				// if (save_waveforms && (passed_cuts_bg || passed_cuts_s))
+				if (save_waveforms && passed_cut)
 				{
 					for (int idx = 0; idx < 35000; idx++)
 					{
