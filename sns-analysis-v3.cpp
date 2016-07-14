@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
 	int rt050_bottom_left[2] = { 235, 345 };
 	int rt1090_upper_right[2] = { 1080, 1280 };
 	int rt050_upper_right[2] = { 520, 760 };
-	bool save_waveforms = false;
+	bool save_waveforms = true;
 	bool passed_cuts_bg = false;
 	bool passed_cuts_s = false;
 	bool passed_cut = false;
@@ -595,6 +595,7 @@ int main(int argc, char* argv[])
 							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
 							if (running_charge > _tmp_max_charge){ _tmp_max_charge = running_charge; }
 						}
+						passed_cut = (max_charge == 0);
 					}
 					max_charge.push_back(_tmp_max_charge);
 
@@ -694,7 +695,6 @@ int main(int argc, char* argv[])
 							int sz = peaks.size() / 2;
 							if (sz < 350)
 							{
-								passed_cut = (sz == 11);
 								for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 								{
 									peak_distribution[sz][peaks[idx] / 100] += 1;
@@ -1145,7 +1145,7 @@ int main(int argc, char* argv[])
 			infoOut << max_peak_charge_dist_mv[idx] << " ";
 		}
 		infoOut << std::endl;
-		infoOut << "Maximum peak charge distribution excluding muon veto hits" << std::endl;
+		infoOut << "Maximum charge in 3 us window detected in trace" << std::endl;
 		for (int idx = 0; idx < max_charge.size(); idx++)
 		{
 			infoOut << max_charge[idx] << " ";
