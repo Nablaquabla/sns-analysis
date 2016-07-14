@@ -138,6 +138,7 @@ int main(int argc, char* argv[])
 	int max_peak_charge = -1;
 	int max_peak_charge_dist[5000] = {};
 	int max_peak_charge_dist_mv[5000] = {};
+	std::vector<int> max_charge;
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
@@ -217,7 +218,7 @@ int main(int argc, char* argv[])
 	int rt050_bottom_left[2] = { 235, 345 };
 	int rt1090_upper_right[2] = { 1080, 1280 };
 	int rt050_upper_right[2] = { 520, 760 };
-	bool save_waveforms = true;
+	bool save_waveforms = false;
 	bool passed_cuts_bg = false;
 	bool passed_cuts_s = false;
 	bool passed_cut = false;
@@ -579,6 +580,25 @@ int main(int argc, char* argv[])
 				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
 				if (peak_heights.size() > 0 && !overflow && !linear_gate)
 				{
+					// Find maximum integrated charge for a 3 us window in the waveform.
+					int running_charge = 0;
+					int _tmp_max_charge = 0;
+					for (int idx = 0; idx < 35000; idx++)
+					{
+						if (idx < 1500)
+						{
+							running_charge += csi[idx];
+						}
+						else
+						{
+							running_charge -= csi[idx - 1500] >= 3 ? csi[idx - 1500] : 0;
+							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
+							if (running_charge > _tmp_max_charge){ _tmp_max_charge = running_charge; }
+						}
+					}
+					max_charge.push_back(_tmp_max_charge);
+
+					// Find PE with largest amplitude
 					int peak_max = -1;
 					int peak_max_idx = -1;
 					for (int idx = 0; idx < peak_heights.size(); idx++)
@@ -704,7 +724,7 @@ int main(int argc, char* argv[])
 								}
 							}
 
-							double mat = 0;
+							/*double mat = 0;
 							for (int idx = 0; idx < pe_beginnings.size(); idx++)
 							{
 								mat += 0.5*(pe_beginnings[idx] + pe_endings[idx]);
@@ -723,7 +743,7 @@ int main(int argc, char* argv[])
 										if (idx >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
 									}
 								}
-							}
+							}*/
 						}
 					}
 
@@ -1124,14 +1144,11 @@ int main(int argc, char* argv[])
 		{
 			infoOut << max_peak_charge_dist_mv[idx] << " ";
 		}
-		infoOut << "Charge distribution in full waveform vs mean arrival time" << std::endl;
-		for (int idx_1 = 0; idx_1 < 350; idx_1++)
+		infoOut << std::endl;
+		infoOut << "Maximum peak charge distribution excluding muon veto hits" << std::endl;
+		for (int idx = 0; idx < max_charge.size(); idx++)
 		{
-			for (int idx_2 = 0; idx_2 < 350; idx_2++)
-			{
-				infoOut << charge_distribution_mat[idx_1][idx_2] << " ";
-			}
-			infoOut << std::endl;
+			infoOut << max_charge[idx] << " ";
 		}
 		infoOut.close();
 	}
