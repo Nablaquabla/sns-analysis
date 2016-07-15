@@ -142,6 +142,7 @@ int main(int argc, char* argv[])
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
+	std::vector<int> tmp_waveform;
 
 	// Keep track of all peak/pe locations in the full minute
 	int peak_distribution[350][350] = {};
@@ -440,7 +441,7 @@ int main(int argc, char* argv[])
 				peak_amplitude = 0;
 				running_charge = 0;
 				_tmp_max_charge = 0;
-
+				tmp_waveform.clear();
 				// -------------------------------------------------------------
 				//  Read current timestamp
 				// -------------------------------------------------------------
@@ -597,8 +598,9 @@ int main(int argc, char* argv[])
 							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
 							if (running_charge > _tmp_max_charge){ _tmp_max_charge = running_charge; }
 						}
-						passed_cut = (_tmp_max_charge == 0);
+						tmp_waveform.push_back(running_charge)
 					}
+					passed_cut = (_tmp_max_charge == 0);
 					max_charge.push_back(_tmp_max_charge);
 
 					// Find PE with largest amplitude
@@ -1023,6 +1025,10 @@ int main(int argc, char* argv[])
 					for (int idx = 0; idx < 35000; idx++)
 					{
 						waveformOut << csi_raw[idx] << " ";
+					}
+					for (int idx = 0; idx < 35000; idx++)
+					{
+						waveformOut << tmp_waveform[idx] << " ";
 					}
 					/*
 					for (int idx = 0; idx < peaks.size(); idx++)
