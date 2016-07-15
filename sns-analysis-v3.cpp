@@ -165,7 +165,9 @@ int main(int argc, char* argv[])
     // Integration window buffers
     int s_q_arr [1500] = {};
     int bg_q_arr [1500] = {};
-    
+	int running_charge = 0;
+	int _tmp_max_charge = 0;
+
 	// LogLikelihood prefactors & estimators
 	double lnL_pf_real[1500] = {};
 	double lnL_pf_flat[1500] = {};
@@ -436,6 +438,8 @@ int main(int argc, char* argv[])
 				passed_cuts_bg = false;
 				passed_cut = false;
 				peak_amplitude = 0;
+				running_charge = 0;
+				_tmp_max_charge = 0;
 
 				// -------------------------------------------------------------
 				//  Read current timestamp
@@ -581,8 +585,6 @@ int main(int argc, char* argv[])
 				if (peak_heights.size() > 0 && !overflow && !linear_gate)
 				{
 					// Find maximum integrated charge for a 3 us window in the waveform.
-					int running_charge = 0;
-					int _tmp_max_charge = 0;
 					for (int idx = 0; idx < 35000; idx++)
 					{
 						if (idx < 1500)
