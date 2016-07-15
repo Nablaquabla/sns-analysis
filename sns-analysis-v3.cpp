@@ -1115,6 +1115,30 @@ int main(int argc, char* argv[])
 			infoOut << baseline_hist[idx] << " ";
 		}
 		infoOut << std::endl;
+		infoOut << "Peak width distribution" << std::endl;
+		for (int idx = 0; idx <= 50; idx++)
+		{
+			infoOut << peak_width_distribution[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "PE amplitudes" << std::endl;
+		for (int idx = 0; idx < 100; idx++)
+		{
+			infoOut << peak_height_dist[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "Maximum charge in 3 us window detected in trace" << std::endl;
+		for (int idx = 0; idx < max_charge.size(); idx++)
+		{
+			infoOut << max_charge[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "Maximum charge in 3 us window detected in trace - without muon vetoed traces" << std::endl;
+		for (int idx = 0; idx < max_charge.size(); idx++)
+		{
+			infoOut << max_charge_mv[idx] << " ";
+		}
+		infoOut << std::endl;
 		infoOut << "Peak distribution in full waveform" << std::endl;
 		for (int idx_1 = 0; idx_1 < 350; idx_1++)
 		{
@@ -1136,7 +1160,6 @@ int main(int argc, char* argv[])
 				}
 				infoOut << std::endl;
 			}
-			else if (idx_1 == 349) { infoOut << std::endl; }
 		}
 		infoOut << "Charge distribution in full waveform" << std::endl;
 		for (int idx_1 = 0; idx_1 < 350; idx_1++)
@@ -1158,43 +1181,6 @@ int main(int argc, char* argv[])
 				}
 				infoOut << std::endl;
 			}
-			else if (idx_1 == 349) { infoOut << std::endl; }
-		}
-		infoOut << "Peak width distribution" << std::endl;
-		for (int idx = 0; idx <= 50; idx++)
-		{
-			infoOut << peak_width_distribution[idx] << " ";
-		}
-		infoOut << std::endl;
-		infoOut << "PE amplitudes" << std::endl;
-		for (int idx = 0; idx < 100; idx++)
-		{
-			infoOut << peak_height_dist[idx] << " ";
-		}
-		infoOut << std::endl;
-		/*
-		infoOut << "Maximum peak charge distribution" << std::endl;
-		for (int idx = 0; idx < 5000; idx++)
-		{
-			infoOut << max_peak_charge_dist[idx] << " ";
-		}
-		infoOut << std::endl;
-		infoOut << "Maximum peak charge distribution excluding muon veto hits" << std::endl;
-		for (int idx = 0; idx < 5000; idx++)
-		{
-			infoOut << max_peak_charge_dist_mv[idx] << " ";
-		}
-		infoOut << std::endl;*/
-		infoOut << "Maximum charge in 3 us window detected in trace" << std::endl;
-		for (int idx = 0; idx < max_charge.size(); idx++)
-		{
-			infoOut << max_charge[idx] << " ";
-		}
-		infoOut << std::endl;
-		infoOut << "Maximum charge in 3 us window detected in trace - without muon vetoed traces" << std::endl;
-		for (int idx = 0; idx < max_charge.size(); idx++)
-		{
-			infoOut << max_charge_mv[idx] << " ";
 		}
 		infoOut.close();
 	}
