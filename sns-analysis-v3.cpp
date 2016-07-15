@@ -139,10 +139,11 @@ int main(int argc, char* argv[])
 	int max_peak_charge_dist[5000] = {};
 	int max_peak_charge_dist_mv[5000] = {};
 	std::vector<int> max_charge;
+	std::vector<int> max_charge_mv;
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
-	std::vector<int> tmp_waveform;
+	// std::vector<int> tmp_waveform;
 
 	// Keep track of all peak/pe locations in the full minute
 	int peak_distribution[350][350] = {};
@@ -221,7 +222,7 @@ int main(int argc, char* argv[])
 	int rt050_bottom_left[2] = { 235, 345 };
 	int rt1090_upper_right[2] = { 1080, 1280 };
 	int rt050_upper_right[2] = { 520, 760 };
-	bool save_waveforms = true;
+	bool save_waveforms = false;
 	bool passed_cuts_bg = false;
 	bool passed_cuts_s = false;
 	bool passed_cut = false;
@@ -439,9 +440,8 @@ int main(int argc, char* argv[])
 				passed_cuts_bg = false;
 				passed_cut = false;
 				peak_amplitude = 0;
-				running_charge = 0;
-				_tmp_max_charge = 0;
-				tmp_waveform.clear();
+				// tmp_waveform.clear();
+
 				// -------------------------------------------------------------
 				//  Read current timestamp
 				// -------------------------------------------------------------
@@ -586,6 +586,8 @@ int main(int argc, char* argv[])
 				if (peak_heights.size() > 0 && !overflow && !linear_gate)
 				{
 					// Find maximum integrated charge for a 3 us window in the waveform.
+					running_charge = 0;
+					_tmp_max_charge = 0;
 					for (int idx = 0; idx < 35000; idx++)
 					{
 						if (idx < 1500)
@@ -598,11 +600,13 @@ int main(int argc, char* argv[])
 							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
 							if (running_charge > _tmp_max_charge){ _tmp_max_charge = running_charge; }
 						}
-						tmp_waveform.push_back(running_charge);
+						// tmp_waveform.push_back(running_charge);
 					}
-					passed_cut = (_tmp_max_charge == 0);
+					// passed_cut = (_tmp_max_charge == 0);
 					max_charge.push_back(_tmp_max_charge);
+					if (!muon_veto_flag) { max_charge_mv.push_back(_tmp_max_charge); }
 
+					/*
 					// Find PE with largest amplitude
 					int peak_max = -1;
 					int peak_max_idx = -1;
@@ -642,7 +646,7 @@ int main(int argc, char* argv[])
 							max_peak_charge_dist[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1;
 							if (muonVetoCtr == 0){ max_peak_charge_dist_mv[(max_peak_charge / 20 < 5000) ? max_peak_charge / 20 : 4999] += 1; }
 						}
-					}
+					}*/
 				}
 
 				// ========================================================================
@@ -1141,6 +1145,7 @@ int main(int argc, char* argv[])
 			infoOut << peak_height_dist[idx] << " ";
 		}
 		infoOut << std::endl;
+		/*
 		infoOut << "Maximum peak charge distribution" << std::endl;
 		for (int idx = 0; idx < 5000; idx++)
 		{
@@ -1152,7 +1157,7 @@ int main(int argc, char* argv[])
 		{
 			infoOut << max_peak_charge_dist_mv[idx] << " ";
 		}
-		infoOut << std::endl;
+		infoOut << std::endl;*/
 		infoOut << "Maximum charge in 3 us window detected in trace" << std::endl;
 		for (int idx = 0; idx < max_charge.size(); idx++)
 		{
