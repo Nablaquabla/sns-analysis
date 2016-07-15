@@ -1120,7 +1120,7 @@ int main(int argc, char* argv[])
 		{
 			for (int idx_2 = 0; idx_2 < 350; idx_2++)
 			{
-				if peak_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << peak_distribution[idx_1][idx_2] << " "; }
+				if (peak_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << peak_distribution[idx_1][idx_2] << " "; }
 			}
 			infoOut << std::endl;
 		}
@@ -1129,7 +1129,7 @@ int main(int argc, char* argv[])
 		{
 			for (int idx_2 = 0; idx_2 < 350; idx_2++)
 			{
-				if charge_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << charge_distribution[idx_1][idx_2] << " "; }
+				if (charge_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << charge_distribution[idx_1][idx_2] << " "; }
 			}
 			infoOut << std::endl;
 		}
