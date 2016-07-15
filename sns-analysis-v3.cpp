@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
 					max_charge.push_back(_tmp_max_charge);
 					if (muonVetoCtr == 0) { max_charge_mv.push_back(_tmp_max_charge); }
 
-					/*
+					
 					// Find PE with largest amplitude
 					int peak_max = -1;
 					int peak_max_idx = -1;
@@ -619,8 +619,8 @@ int main(int argc, char* argv[])
 						}
 						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99]++;
 					}
+					/*
 					int onset = pe_beginnings[peak_max_idx] - 5;
-
 					// Only integrate if we are looking at a large peak and not only at a single photoelectron.
 					// Also make sure that the full integration window is contained in the waveform
 					if (peak_max >= 64 && onset >= 0 && onset <= 33499)
@@ -1175,6 +1175,7 @@ int main(int argc, char* argv[])
 			}
 			if (printLine)
 			{
+				infoOut << idx_1 << " ";
 				for (int idx_2 = 0; idx_2 < 350; idx_2++)
 				{
 					if (charge_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << charge_distribution[idx_1][idx_2] << " "; }
