@@ -590,7 +590,7 @@ int main(int argc, char* argv[])
 					{
 						if (idx < 1500)
 						{
-							running_charge += csi[idx];
+							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
 						}
 						else
 						{
