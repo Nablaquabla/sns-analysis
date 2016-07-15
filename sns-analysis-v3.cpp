@@ -1028,7 +1028,7 @@ int main(int argc, char* argv[])
 						waveformOut << peaks[idx] << " ";
 					}
 					waveformOut << std::endl;*/
-					waveformOut << gate_up << " " << gate_down << " " << med_csi << " ";
+					waveformOut << gate_up << " " << gate_down << " " << med_csi << " " << _tmp_max_charge << " ";
 					for (int idx = 0; idx < pe_beginnings.size(); idx++)
 					{
 					waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
