@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
 							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
 							if (running_charge > _tmp_max_charge){ _tmp_max_charge = running_charge; }
 						}
-						tmp_waveform.push_back(running_charge)
+						tmp_waveform.push_back(running_charge);
 					}
 					passed_cut = (_tmp_max_charge == 0);
 					max_charge.push_back(_tmp_max_charge);
