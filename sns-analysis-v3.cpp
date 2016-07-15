@@ -1118,20 +1118,47 @@ int main(int argc, char* argv[])
 		infoOut << "Peak distribution in full waveform" << std::endl;
 		for (int idx_1 = 0; idx_1 < 350; idx_1++)
 		{
+			bool printLine = false;
 			for (int idx_2 = 0; idx_2 < 350; idx_2++)
 			{
-				if (peak_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << peak_distribution[idx_1][idx_2] << " "; }
+				if (peak_distribution[idx_1][idx_2] > 0)
+				{
+					printLine = true;
+					break;
+				}
 			}
-			infoOut << std::endl;
+			if (printLine)
+			{
+				infoOut << idx_1 << " ";
+				for (int idx_2 = 0; idx_2 < 350; idx_2++)
+				{
+					if (peak_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << peak_distribution[idx_1][idx_2] << " "; }
+				}
+				infoOut << std::endl;
+			}
+			else if (idx_1 == 349) { infoOut << std::endl; }
 		}
 		infoOut << "Charge distribution in full waveform" << std::endl;
 		for (int idx_1 = 0; idx_1 < 350; idx_1++)
 		{
+			bool printLine = false;
 			for (int idx_2 = 0; idx_2 < 350; idx_2++)
 			{
-				if (charge_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << charge_distribution[idx_1][idx_2] << " "; }
+				if (charge_distribution[idx_1][idx_2] > 0)
+				{
+					printLine = true;
+					break;
+				}
 			}
-			infoOut << std::endl;
+			if (printLine)
+			{
+				for (int idx_2 = 0; idx_2 < 350; idx_2++)
+				{
+					if (charge_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << charge_distribution[idx_1][idx_2] << " "; }
+				}
+				infoOut << std::endl;
+			}
+			else if (idx_1 == 349) { infoOut << std::endl; }
 		}
 		infoOut << "Peak width distribution" << std::endl;
 		for (int idx = 0; idx <= 50; idx++)
