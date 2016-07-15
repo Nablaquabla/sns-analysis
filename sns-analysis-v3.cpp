@@ -1030,10 +1030,10 @@ int main(int argc, char* argv[])
 					{
 						waveformOut << csi_raw[idx] << " ";
 					}
-					for (int idx = 0; idx < 35000; idx++)
+					/*for (int idx = 0; idx < 35000; idx++)
 					{
 						waveformOut << tmp_waveform[idx] << " ";
-					}
+					}*/
 					/*
 					for (int idx = 0; idx < peaks.size(); idx++)
 					{
