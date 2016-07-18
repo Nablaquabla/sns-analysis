@@ -374,18 +374,21 @@ int main(int argc, char* argv[])
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
+		std::cout << "Opened file..." << std::endl;
 		waveformCtr = 0;
 		zidx = 0;
 
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
+			std::cout << "Reading header..."
 			// Read LabView header and get the total number of samples written for each channel in the next chunk of data
 			for (int i=0;i<4;i++)
 			{
 				c = contents[zidx++];
 				no_samples = no_samples << 8 | (unsigned char) c;
 			}
+			
 			// Read LabView header and get the total number of channels written in next chunk of data (always 2 in our case)
 			for (int i=0;i<4;i++)
 			{
