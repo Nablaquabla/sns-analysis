@@ -336,6 +336,8 @@ int main(int argc, char* argv[])
 		time_name_in_zip = zeroPad(current_time,6);
 	}
 
+	std::cout << time_name_in_zip << std::endl;
+
 	//Open the ZIP archive
 	int err = 0;
 	int zidx = 0;
@@ -370,7 +372,7 @@ int main(int argc, char* argv[])
 	}
     
 	int csi_raw[35000] = {};
-
+	std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
