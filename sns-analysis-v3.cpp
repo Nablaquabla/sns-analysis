@@ -343,6 +343,7 @@ int main(int argc, char* argv[])
 	int zidx = 0;
 	int fileSize = 0;
 	zip *z = zip_open(current_zip_file.c_str(), 0, &err);
+	std::cout << "Opened zip" << std::endl;
 
 	//Search for the file of given name
 	const char *name = time_name_in_zip.c_str();
@@ -355,6 +356,7 @@ int main(int argc, char* argv[])
 
 	//Read the compressed file
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
+	std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
 	zip_fread(f, contents, fileSize);
 	zip_fclose(f);
