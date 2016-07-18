@@ -363,6 +363,7 @@ int main(int argc, char* argv[])
 
 	//And close the archive
 	zip_close(z);
+	std::cout << "Zip closed" << std::endl;
 
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
@@ -372,10 +373,12 @@ int main(int argc, char* argv[])
 	{
 		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	}
-    
+	std::cout << "Created output files" << std::endl;
+
 	int csi_raw[35000] = {};
 	std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
+	std::cout << "Trying to process" << std::endl;
 	if(err == 0)
 	{
 		std::cout << "Opened file..." << std::endl;
