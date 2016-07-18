@@ -336,14 +336,14 @@ int main(int argc, char* argv[])
 		time_name_in_zip = zeroPad(current_time,6);
 	}
 
-	std::cout << time_name_in_zip << std::endl;
+	//std::cout << time_name_in_zip << std::endl;
 
 	//Open the ZIP archive
 	int err = 0;
 	int zidx = 0;
 	int fileSize = 0;
 	zip *z = zip_open(current_zip_file.c_str(), 0, &err);
-	std::cout << "Opened zip" << std::endl;
+	//std::cout << "Opened zip" << std::endl;
 
 	//Search for the file of given name
 	const char *name = time_name_in_zip.c_str();
@@ -356,16 +356,16 @@ int main(int argc, char* argv[])
 
 	//Read the compressed file
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
-	std::cout << "Reading file" << std::endl;
+	//std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
-	std::cout << fileSize << std::endl;
+	//std::cout << fileSize << std::endl;
 	zip_fread(f, contents, fileSize);
-	std::cout << "Read chunk" << std::endl;
+	//std::cout << "Read chunk" << std::endl;
 	zip_fclose(f);
 
 	//And close the archive
 	zip_close(z);
-	std::cout << "Zip closed" << std::endl;
+	//std::cout << "Zip closed" << std::endl;
 
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
@@ -375,10 +375,10 @@ int main(int argc, char* argv[])
 	{
 		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	}
-	std::cout << "Created output files" << std::endl;
+	//std::cout << "Created output files" << std::endl;
 
 	int csi_raw[35000] = {};
-	std::cout << err << std::endl;
+	//std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
 	std::cout << "Trying to process" << std::endl;
 	if(err == 0)
