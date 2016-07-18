@@ -358,7 +358,9 @@ int main(int argc, char* argv[])
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
 	std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
+	std::cout << fileSize << std::endl;
 	zip_fread(f, contents, fileSize);
+	std::cout << "Read chunk" << std::endl;
 	zip_fclose(f);
 
 	//And close the archive
