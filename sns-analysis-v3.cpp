@@ -381,7 +381,7 @@ int main(int argc, char* argv[])
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
-			std::cout << "Reading header..."
+			std::cout << "Reading header..." << std::endl;
 			// Read LabView header and get the total number of samples written for each channel in the next chunk of data
 			for (int i=0;i<4;i++)
 			{
