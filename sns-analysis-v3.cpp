@@ -616,7 +616,7 @@ int main(int argc, char* argv[])
 					}
 					// passed_cut = (_tmp_max_charge == 0);
 					max_charge.push_back(_tmp_max_charge);
-					if (muonVetoCtr == 0) { max_charge_mv.push_back(_tmp_max_charge); }
+					if (muon_peaks.size() == 0) { max_charge_mv.push_back(_tmp_max_charge); }
 
 					
 					// Find PE with largest amplitude
@@ -1146,7 +1146,7 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 		infoOut << "Maximum charge in 3 us window detected in trace - without muon vetoed traces" << std::endl;
-		for (int idx = 0; idx < max_charge.size(); idx++)
+		for (int idx = 0; idx < max_charge_mv.size(); idx++)
 		{
 			infoOut << max_charge_mv[idx] << " ";
 		}
