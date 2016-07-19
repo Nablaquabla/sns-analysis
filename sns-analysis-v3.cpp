@@ -587,6 +587,7 @@ int main(int argc, char* argv[])
 
 				// Raise muon veto flag if more than three muons have been found
 				// If less than 3 have been found fill the vector with -1 for postprocessing
+				int muons_found = muon_peaks.size();
 				if (muon_peaks.size() > 3)
 				{
 					muon_veto_flag = true;
@@ -616,7 +617,7 @@ int main(int argc, char* argv[])
 					}
 					// passed_cut = (_tmp_max_charge == 0);
 					max_charge.push_back(_tmp_max_charge);
-					if (muon_peaks.size() == 0) { max_charge_mv.push_back(_tmp_max_charge); }
+					if (muons_found == 0) { max_charge_mv.push_back(_tmp_max_charge); }
 
 					
 					// Find PE with largest amplitude
