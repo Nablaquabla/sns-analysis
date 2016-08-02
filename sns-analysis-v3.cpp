@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
 	int spe_integration_charge = 0;
 
 	// Buffers for peaks in pretrace
-	int bg_pe_pt[22] = {};
-	int s_pe_pt[22] = {};
+	int bg_pe_pt[52] = {};
+	int s_pe_pt[52] = {};
 
 	// Buffer for baseline
 	int baseline_hist[32] = {};
@@ -773,11 +773,11 @@ int main(int argc, char* argv[])
 						if (med_csi >= 85 && med_csi <= 115) { baseline_hist[med_csi - 85]++; }
 						else { baseline_hist[31]++; }
 
-						if (bg_pt_ct <= 20) { bg_pe_pt[bg_pt_ct]++; }
-						else { bg_pe_pt[21]++; }
+						if (bg_pt_ct <= 50) { bg_pe_pt[bg_pt_ct]++; }
+						else { bg_pe_pt[51]++; }
 
-						if (s_pt_ct <= 20) { s_pe_pt[s_pt_ct]++; }
-						else { s_pe_pt[21]++; }
+						if (s_pt_ct <= 50) { s_pe_pt[s_pt_ct]++; }
+						else { s_pe_pt[51]++; }
 					}
 
 					// -------------------------------------------------------------
@@ -1110,13 +1110,13 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 		infoOut << "Background - Peaks in pretrace histogram" << std::endl;
-		for (int idx = 0; idx < 22; idx++)
+		for (int idx = 0; idx < 52; idx++)
 		{
 			infoOut << bg_pe_pt[idx] << " ";
 		}
 		infoOut << std::endl;
 		infoOut << "Signal - Peaks in pretrace histogram" << std::endl;
-		for (int idx = 0; idx < 22; idx++)
+		for (int idx = 0; idx < 52; idx++)
 		{
 			infoOut << s_pe_pt[idx] << " ";
 		}
