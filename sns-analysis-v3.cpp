@@ -499,15 +499,6 @@ int main(int argc, char* argv[])
 					mv[i] = _tmpC;
 				}
 
-				// ----------------------------------------------
-				//  Adjust linear gate counter if wf is gated
-				// ----------------------------------------------
-				if (gate_down != gate_up) 
-				{ 
-					linear_gate = true;
-					linearGateCtr += 1;
-				}
-
 				// ---------------------------------------
 				//  Calculate the median of both channels
 				// ---------------------------------------
@@ -534,6 +525,14 @@ int main(int argc, char* argv[])
 					}
 				} 
 
+				// ----------------------------------------------
+				//  Adjust linear gate counter if wf is gated
+				// ----------------------------------------------
+				if (gate_down != gate_up || med_csi < 50)
+				{
+					linear_gate = true;
+					linearGateCtr += 1;
+				}
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
