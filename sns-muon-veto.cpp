@@ -359,12 +359,12 @@ int main(int argc, char* argv[])
 						m_peak_width = 0;
 					}
 				}
-
+				
 				if (muon_peaks.size() > 0)
 				{
 					for (int i = 0; i < muon_peaks.size(); i++)
 					{
-						out_file << muon_peaks[i] << " " << (linear_gate) ? 1 : 0 << std::endl;
+						out_file << muon_peaks[i] << " " << (int) linear_gate << std::endl;
 					}
 				}
 			}
