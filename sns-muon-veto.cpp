@@ -121,33 +121,76 @@ int main(int argc, char* argv[])
 	//==========================================================
 	//		Reading zipped data into memory
 	//==========================================================
-	// Prepare data paths
-	current_zip_file = main_dir + "/" + zeroPad(current_time,6) +".zip";
-	time_name_in_zip = zeroPad(current_time,6);
+	// Full analysis -> Converts $(Process) from condor submit to the current time file
+	if (single_time == 0)
+	{
+		// Buffers used to process data files and to step through directories
+		std::vector<std::string> time_files;
+		DIR *dpdf;
+		struct dirent *epdf;
 
-	// Open the ZIP archive
+		// Find all time files and sort them
+		time_files.clear();
+		dpdf = opendir(main_dir.c_str());
+		if (dpdf != NULL)
+		{
+			std::string _tmp;
+			while (epdf = readdir(dpdf))
+			{
+				_tmp = epdf->d_name;
+				if (_tmp != "." && _tmp != ".." && _tmp.substr(7) == "zip")
+				{
+					time_files.push_back(_tmp.substr(0, 6));
+				}
+			}
+		}
+
+		// Sort time files by time in ascending order to convert current_time index to proper file
+		std::sort(time_files.begin(), time_files.end(), timeSort);
+
+		// Prepare paths to zipped and unzipped files
+		current_zip_file = main_dir + "/" + time_files[current_time] + ".zip";
+
+		time_name_in_zip = time_files[current_time];
+	}
+
+	// Single file analysis -> Directly convert input to current time file
+	else
+	{
+		current_zip_file = main_dir + "/" + zeroPad(current_time, 6) + ".zip";
+		time_name_in_zip = zeroPad(current_time, 6);
+	}
+
+	//std::cout << time_name_in_zip << std::endl;
+
+	//Open the ZIP archive
 	int err = 0;
 	int zidx = 0;
 	int fileSize = 0;
 	zip *z = zip_open(current_zip_file.c_str(), 0, &err);
+	//std::cout << "Opened zip" << std::endl;
 
-	// Search for the file of given name, i.e. the only one present in said zip
+	//Search for the file of given name
 	const char *name = time_name_in_zip.c_str();
 	struct zip_stat st;
 	zip_stat_init(&st);
 	zip_stat(z, name, 0, &st);
 
-	// Alloc memory for its uncompressed contents
+	//Alloc memory for its uncompressed contents
 	char *contents = new char[st.size];
 
-	// Read the compressed file
+	//Read the compressed file
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
+	//std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
+	//std::cout << fileSize << std::endl;
 	zip_fread(f, contents, fileSize);
+	//std::cout << "Read chunk" << std::endl;
 	zip_fclose(f);
 
-	// And close the archive
+	//And close the archive
 	zip_close(z);
+	//std::cout << "Zip closed" << std::endl;
 
 	// Create output file
 	std::ofstream out_file;
