@@ -31,6 +31,11 @@ std::string fileName(int num, std::string prefix)
    return ss.str();
 }
 
+bool timeSort(std::string i, std::string j)
+{
+	return atoi(i.c_str())<atoi(j.c_str());
+}
+
 //==========================================================
 //		Main
 //==========================================================
