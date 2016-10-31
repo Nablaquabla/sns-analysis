@@ -111,11 +111,14 @@ int main(int argc, char* argv[])
 	// Main run directory, e.g. Run-15-10-02-27-32-23/151002
 	// Current time to be analzyed eg 145921 (i.e. 14:59:21)
 	// Set output directory, eg ./Output/Run-15-10-02-27-32-23/151002
-	if (argc == 4) 
+	int data_set = 0;
+	if (argc == 6)
 	{
-		main_dir = std::string(argv[1]); 
-		current_time = atoi(argv[2]);
-		out_dir = std::string(argv[3]);
+		data_set = atoi(argv[1]);
+		main_dir = std::string(argv[2]);
+		current_time = atoi(argv[3]);
+		out_dir = std::string(argv[4]);
+		single_time = atoi(argv[5]);
 	}
 	else
 	{
