@@ -360,10 +360,12 @@ int main(int argc, char* argv[])
 					}
 				}
 
-				if (muon_peaks.size() > 0 && !linear_gate)
+				if (muon_peaks.size() > 0)
 				{
 					for (int i = 0; i < muon_peaks.size(); i++)
-						out_file << muon_peaks[i] << std::endl;
+					{
+						out_file << muon_peaks[i] << " " << (linear_gate) ? 1 : 0 << std::endl;
+					}
 				}
 			}
 		}
