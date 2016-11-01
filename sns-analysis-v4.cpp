@@ -138,8 +138,6 @@ int main(int argc, char* argv[])
 	int max_peak_charge = -1;
 	int max_peak_charge_dist[5000] = {};
 	int max_peak_charge_dist_mv[5000] = {};
-	std::vector<int> max_charge;
-	std::vector<int> max_charge_mv;
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
@@ -168,7 +166,6 @@ int main(int argc, char* argv[])
     int s_q_arr [1500] = {};
     int bg_q_arr [1500] = {};
 	int running_charge = 0;
-	int _tmp_max_charge = 0;
 
 	// LogLikelihood prefactors & estimators
 	double lnL_pf_real[1500] = {};
@@ -176,21 +173,27 @@ int main(int argc, char* argv[])
 	double lnL_real = 0;
 	double lnL_flat = 0;
 
-	// Calculate prefactors for loglikelihood analysis
-		// from Am241 calibration
-	double r = 0.691;
-	double tf = 308.5;
-	double ts = 1649.0;
+	// Big pulse detection
+	bool bP_detected = false;
+	int _t_bP_idx = 0;
+	std::vector<int> bP_onset_arr;
+	std::vector<int> bP_charge_arr;
 
-		// total integration window is 3 us long -> tMax = 1499
-	double _tFast = 1.0 / ((1.0 + r) * tf * (1 - exp(-1499.0 / tf)));
-	double _tSlow = r / ((1.0 + r) * ts * (1 - exp(-1499.0 / ts)));
+	// Calculate prefactors for loglikelihood analysis
+	// timing and fraction from NIMA paper
+	double r = 041;
+	double tf = 527.0;
+	double ts = 5600.0;
+
+	// total integration window is 3 us long -> tMax = 1500
+	double _tFast = 1.0 / ((1.0 + r) * tf * (1 - exp(-1500.0 / tf)));
+	double _tSlow = r / ((1.0 + r) * ts * (1 - exp(-1500.0 / ts)));
 		
-		// Calculate prefactor for each time step
+	// Calculate prefactor for each time step
 	for (int i = 0; i < 1500; i++)
 	{
 		lnL_pf_real[i] = log(_tFast * exp(-(double)i / tf) + _tSlow * exp(-(double)i / ts));
-		lnL_pf_flat[i] = log(1.0 / 1499.0);
+		lnL_pf_flat[i] = log(1.0 / 1500.0);
 	}
 
     // Threshold buffer and measured rise times
@@ -452,6 +455,8 @@ int main(int argc, char* argv[])
 				passed_cuts_bg = false;
 				passed_cut = false;
 				peak_amplitude = 0;
+				bP_detected = false;
+				_t_bP_idx = 0;
 				// tmp_waveform.clear();
 
 				// -------------------------------------------------------------
@@ -547,7 +552,15 @@ int main(int argc, char* argv[])
 					if (csi[i] >= 3) { current_peak_width++; }
 					else
 					{
-						if (current_peak_width >= 3) { peaks.push_back(i - current_peak_width); }
+						if (current_peak_width >= 3)
+						{
+							peaks.push_back(i - current_peak_width);
+							if (!bP_detected && current_peak_width >= 35)
+							{
+								bP_detected = true;
+								bP_onset_arr.push_back(i-current_peak_width)
+							}
+						}
 						current_peak_width = 0;
 					}
 
@@ -584,6 +597,17 @@ int main(int argc, char* argv[])
 					}
 				}
 
+				// If there was a big pulse in the trace integrate it
+				if (bP_detected)
+				{
+					int _t_charge = 0;
+					for (int i = bP_onset_arr.back(); i < 1499 + bP_onset_arr.back(); i++)
+					{
+						_t_charge += csi[i] >= 3 ? csi[i] : 0;
+					}
+					bP_charge_arr.push_back(_t_charge);
+				}
+
 				// Raise muon veto flag if more than three muons have been found
 				// If less than 3 have been found fill the vector with -1 for postprocessing
 				int muons_found = muon_peaks.size();
@@ -594,41 +618,11 @@ int main(int argc, char* argv[])
 				}
 				else { muon_peaks.resize(3, -1); }
 
-				// Find PE with maximum amplitude and integrate 3us around it if there is at least one PE
+				// Add PE peaks to peak height distribution
 				if (peak_heights.size() > 0 && !overflow && !linear_gate)
 				{
-					// Find maximum integrated charge for a 3 us window in the waveform.
-					running_charge = 0;
-					_tmp_max_charge = 0;
-					for (int idx = 0; idx < 35000; idx++)
-					{
-						if (idx < 1500)
-						{
-							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
-						}
-						else
-						{
-							running_charge -= csi[idx - 1500] >= 3 ? csi[idx - 1500] : 0;
-							running_charge += csi[idx] >= 3 ? csi[idx] : 0;
-							if (running_charge > _tmp_max_charge){ _tmp_max_charge = running_charge; }
-						}
-						// tmp_waveform.push_back(running_charge);
-					}
-					// passed_cut = (_tmp_max_charge == 0);
-					max_charge.push_back(_tmp_max_charge);
-					if (muons_found == 0) { max_charge_mv.push_back(_tmp_max_charge); }
-
-					
-					// Find PE with largest amplitude
-					int peak_max = -1;
-					int peak_max_idx = -1;
 					for (int idx = 0; idx < peak_heights.size(); idx++)
 					{
-						if (peak_heights[idx] > peak_max)
-						{
-							peak_max = peak_heights[idx];
-							peak_max_idx = idx;
-						}
 						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99]++;
 					}
 				}
@@ -715,27 +709,6 @@ int main(int argc, char* argv[])
 									}
 								}
 							}
-
-							/*double mat = 0;
-							for (int idx = 0; idx < pe_beginnings.size(); idx++)
-							{
-								mat += 0.5*(pe_beginnings[idx] + pe_endings[idx]);
-							}
-							mat = trunc(mat / pe_beginnings.size() / 100.0);
-							int imat = (int)mat;
-							if (imat < 350)
-							{
-								int cpi = 0;
-								for (int idx = 0; idx < 35000; idx++)
-								{
-									// Add sample if it is within one of the PE regions identified previously
-									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
-									{
-										charge_distribution_mat[imat][idx / 100] += csi[idx];
-										if (idx >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
-									}
-								}
-							}*/
 						}
 					}
 
@@ -1024,7 +997,7 @@ int main(int argc, char* argv[])
 						waveformOut << peaks[idx] << " ";
 					}
 					waveformOut << std::endl;*/
-					waveformOut << gate_up << " " << gate_down << " " << med_csi << " " << _tmp_max_charge << " ";
+					waveformOut << gate_up << " " << gate_down << " " << med_csi << " ";
 					for (int idx = 0; idx < pe_beginnings.size(); idx++)
 					{
 					waveformOut << pe_beginnings[idx] << " " << pe_endings[idx] << " ";
@@ -1111,16 +1084,16 @@ int main(int argc, char* argv[])
 			infoOut << peak_height_dist[idx] << " ";
 		}
 		infoOut << std::endl;
-		infoOut << "Maximum charge in 3 us window detected in trace" << std::endl;
-		for (int idx = 0; idx < max_charge.size(); idx++)
+		infoOut << "Big pulse onsets" << std::endl;
+		for (int idx = 0; idx < bP_onset_arr.size(); idx++)
 		{
-			infoOut << max_charge[idx] << " ";
+			infoOut << bP_onset_arr[idx] << " ";
 		}
 		infoOut << std::endl;
-		infoOut << "Maximum charge in 3 us window detected in trace - without muon vetoed traces" << std::endl;
-		for (int idx = 0; idx < max_charge_mv.size(); idx++)
+		infoOut << "Big pulse charges" << std::endl;
+		for (int idx = 0; idx < bP_charge_arr.size(); idx++)
 		{
-			infoOut << max_charge_mv[idx] << " ";
+			infoOut << bP_charge_arr[idx] << " ";
 		}
 		infoOut << std::endl;
 		infoOut << "Peak distribution in full waveform" << std::endl;
