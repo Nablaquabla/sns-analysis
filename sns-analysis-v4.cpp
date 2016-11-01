@@ -141,6 +141,8 @@ int main(int argc, char* argv[])
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
     std::vector<int> muon_peaks; 
+
+	std::vector<int> muon_onset_arr;
 	// std::vector<int> tmp_waveform;
 
 	// Keep track of all peak/pe locations in the full minute
@@ -592,7 +594,10 @@ int main(int argc, char* argv[])
 					if (mv[i] >= 10) { m_peak_width++; }
 					else
 					{
-						if (m_peak_width >= 3) { muon_peaks.push_back(i-m_peak_width); }
+						if (m_peak_width >= 3)
+						{
+							muon_peaks.push_back(i-m_peak_width);
+						}
 						m_peak_width = 0;
 					}
 				}
@@ -611,6 +616,21 @@ int main(int argc, char* argv[])
 				// Raise muon veto flag if more than three muons have been found
 				// If less than 3 have been found fill the vector with -1 for postprocessing
 				int muons_found = muon_peaks.size();
+
+				if (muons_found > 0)
+				{
+					if (linear_gate)
+					{
+						muon_onset_arr.push_back(muon_peaks[0]);
+					}
+					else
+					{
+						for (int idx = 0; idx < muons_found; idx++)
+						{
+							muon_onset_arr.push_back(muon_peaks[idx]);
+						}
+					}
+				}
 				if (muon_peaks.size() > 3)
 				{
 					muon_veto_flag = true;
@@ -1094,6 +1114,12 @@ int main(int argc, char* argv[])
 		for (int idx = 0; idx < bP_charge_arr.size(); idx++)
 		{
 			infoOut << bP_charge_arr[idx] << " ";
+		}
+		infoOut << std::endl;
+		infoOut << "All muon onsets - If linear gate present only the first is recorded" << std::endl;
+		for (int idx = 0; idx < muon_onset_arr.size(); idx++)
+		{
+			infoOut << muon_onset_arr[idx] << " ";
 		}
 		infoOut << std::endl;
 		infoOut << "Peak distribution in full waveform" << std::endl;
