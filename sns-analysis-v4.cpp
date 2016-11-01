@@ -558,7 +558,7 @@ int main(int argc, char* argv[])
 							if (!bP_detected && current_peak_width >= 35)
 							{
 								bP_detected = true;
-								bP_onset_arr.push_back(i-current_peak_width)
+								bP_onset_arr.push_back(i - current_peak_width);
 							}
 						}
 						current_peak_width = 0;
