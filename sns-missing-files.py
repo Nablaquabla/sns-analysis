@@ -48,12 +48,12 @@ def main(runMissing):
 
     # Choose run to analyze
 #    runDirs = ['Run-15-06-25-12-53-44']
-#    run = 'Run-15-06-26-11-23-13'
+    runDirs = ['Run-15-06-26-11-23-13']
 #    runDirs = ['Run-15-07-31-18-30-14']
 #    run = 'Run-15-08-18-14-51-18'
 #    run = 'Run-15-08-31-00-23-36'
 #    run = 'Run-15-09-21-20-58-01'
-    runDirs = ['Run-15-09-23-21-16-00']
+#    runDirs = ['Run-15-09-23-21-16-00']
 #    run = 'Run-15-10-03-09-26-22'
 #    run = 'Run-15-10-13-13-27-09'
 #    run = 'Run-15-10-21-13-12-27'
@@ -113,6 +113,7 @@ def main(runMissing):
             # Check if there is a file missing in the day folder
             if len(inputList) != len(outputList_B) or len(inputList) != len(outputList_S) or len(inputList) != len(outputList_I):
                 missing = list(set(inputList) - set(outputList_B))
+		print missing
                 if len(missing) > 0: 
                     print len(missing)
                 if runMissing == '1':
