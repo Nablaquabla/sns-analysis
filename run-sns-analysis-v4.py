@@ -8,7 +8,7 @@ def createCondorFile(dataDir,outDir,run,day,times):
     with open('/home/bjs66/CondorFiles/%s-%s.condor'%(run,day),'w') as f:
         
         # Fixed program location'
-        f.write('Executable = /home/bjs66/GitHub/sns-analysis/sns-analysis-v3\n')
+        f.write('Executable = /home/bjs66/GitHub/sns-analysis/sns-analysis-v4\n')
         
         # Arguments passed to the exe:
         # Set main run directory, e.g. Run-15-10-02-27-32-23/151002
@@ -102,8 +102,8 @@ def main():
 
         # Get all times within the day folder chosen and prepare condor submit files
         tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
-        createCondorFile(dataRunDir,outDir,run,day,len(tList))
-        #createCondorFile(dataRunDir,outDir,run,day,2)
+        #createCondorFile(dataRunDir,outDir,run,day,len(tList))
+        createCondorFile(dataRunDir,outDir,run,day,2)
         cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
         os.system(cmd)
         tm.sleep(1)
