@@ -385,17 +385,14 @@ int main(int argc, char* argv[])
 	int csi_raw[35000] = {};
 	//std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
-	std::cout << "Trying to process" << std::endl;
 	if(err == 0)
 	{
-		std::cout << "Opened file..." << std::endl;
 		waveformCtr = 0;
 		zidx = 0;
 
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
-			std::cout << "Reading header..." << std::endl;
 			// Read LabView header and get the total number of samples written for each channel in the next chunk of data
 			for (int i=0;i<4;i++)
 			{
@@ -603,7 +600,8 @@ int main(int argc, char* argv[])
 				}
 
 				// If there was a big pulse in the trace integrate it
-				if (bP_detected)
+				// But only if there was no linear gate or overflow
+				if (bP_detected && !linear_gate && !overflow)
 				{
 					int _t_charge = 0;
 					for (int i = bP_onset_arr.back(); i < 1499 + bP_onset_arr.back(); i++)
@@ -1093,7 +1091,7 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 		infoOut << "Peak width distribution" << std::endl;
-		for (int idx = 0; idx <= 50; idx++)
+		for (int idx = 0; idx < 51; idx++)
 		{
 			infoOut << peak_width_distribution[idx] << " ";
 		}
