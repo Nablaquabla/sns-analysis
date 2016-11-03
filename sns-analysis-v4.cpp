@@ -554,7 +554,7 @@ int main(int argc, char* argv[])
 						if (current_peak_width >= 3)
 						{
 							peaks.push_back(i - current_peak_width);
-							if (!bP_detected && current_peak_width >= 35)
+							if (!bP_detected && current_peak_width >= 35 && !linear_gate && !overflow)
 							{
 								bP_detected = true;
 								bP_onset_arr.push_back(i - current_peak_width);
