@@ -48,8 +48,9 @@ def main(runMissing):
 
     # Choose run to analyze
 #    runDirs = ['Run-15-06-25-12-53-44']
-    runDirs = ['Run-15-06-26-11-23-13']
+#    runDirs = ['Run-15-06-26-11-23-13']
 #    runDirs = ['Run-15-07-31-18-30-14']
+    runDirs = ['Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01']
 #    run = 'Run-15-08-18-14-51-18'
 #    run = 'Run-15-08-31-00-23-36'
 #    run = 'Run-15-09-21-20-58-01'
