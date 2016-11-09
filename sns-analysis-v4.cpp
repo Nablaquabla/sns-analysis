@@ -347,10 +347,10 @@ int main(int argc, char* argv[])
 	int err = 0;
 	int zidx = 0;
 	int fileSize = 0;
-	std::cout << current_zip_file.c_str() << std::endl;
+	//std::cout << current_zip_file.c_str() << std::endl;
 	zip *z = zip_open(current_zip_file.c_str(), 0, &err);
-	std::cout << "Opened zip" << std::endl;
-	std::cout << "Error: " << err << std::endl;
+	//std::cout << "Opened zip" << std::endl;
+	//std::cout << "Error: " << err << std::endl;
 	//Search for the file of given name
 	const char *name = time_name_in_zip.c_str();
 	struct zip_stat st;
@@ -362,17 +362,17 @@ int main(int argc, char* argv[])
 
 	//Read the compressed file
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
-	std::cout << time_name_in_zip.c_str() << std::endl;
-	std::cout << "Reading file" << std::endl;
+	//std::cout << time_name_in_zip.c_str() << std::endl;
+	//std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
-	std::cout << fileSize << std::endl;
+	//std::cout << fileSize << std::endl;
 	zip_fread(f, contents, fileSize);
-	std::cout << "Read chunk" << std::endl;
+	//std::cout << "Read chunk" << std::endl;
 	zip_fclose(f);
-        std::cout << "Closed file" << std::endl;
+	//std::cout << "Closed file" << std::endl;
 	//And close the archive
 	zip_close(z);
-	std::cout << "Zip closed" << std::endl;
+	//std::cout << "Zip closed" << std::endl;
 
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
@@ -385,13 +385,13 @@ int main(int argc, char* argv[])
 	//std::cout << "Created output files" << std::endl;
 
 	int csi_raw[35000] = {};
-	std::cout << err << std::endl;
+	//std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
 		waveformCtr = 0;
 		zidx = 0;
-                std::cout << err << " " << zidx << " " << fileSize << std::endl;
+		//std::cout << err << " " << zidx << " " << fileSize << std::endl;
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
@@ -400,7 +400,7 @@ int main(int argc, char* argv[])
 			{
 				c = contents[zidx++];
 				no_samples = no_samples << 8 | (unsigned char) c;
-			        std::cout << (unsigned char) c << " " << no_samples << std::endl;
+				//std::cout << (unsigned char) c << " " << no_samples << std::endl;
 			}
 			
 			// Read LabView header and get the total number of channels written in next chunk of data (always 2 in our case)
@@ -408,17 +408,17 @@ int main(int argc, char* argv[])
 			{
 				c = contents[zidx++];
 				no_channels = no_channels << 8 | (unsigned char) c;
-				std::cout << (unsigned char) c << " " << no_channels << std::endl;
+				//std::cout << (unsigned char) c << " " << no_channels << std::endl;
 			}
 
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
-				std::cout << "Unexpected number of samples: " << no_samples << " aborting now" << std::endl;
-				std::cout << waveformCtr << " " << zidx << " " << fileSize << " " << no_samples << " " << no_channels << std::endl;
+				//std::cout << "Unexpected number of samples: " << no_samples << " aborting now" << std::endl;
+				//std::cout << waveformCtr << " " << zidx << " " << fileSize << " " << no_samples << " " << no_channels << std::endl;
 				break;
 			}
-		        std::cout << "Checking waveforms now..." << std::endl;
+				//std::cout << "Checking waveforms now..." << std::endl;
 			// ----------------------------------------------------------------
 			//  Process XYZ consecutive waveforms without encountering another
 			// LabView header inbetween
@@ -427,7 +427,7 @@ int main(int argc, char* argv[])
 			{
 				// A new waveform begins
 			 	waveformCtr += 1;
-                                std::cout << waveformCtr << std::endl;
+				//std::cout << waveformCtr << std::endl;
 				// -------------------------------------------------------------
 				//    Reset all major waveform specific variables
 				// -------------------------------------------------------------
@@ -473,7 +473,7 @@ int main(int argc, char* argv[])
 					c = contents[zidx++];
 					c = contents[zidx++];
 					timestamp += zeroPad((int) c, 2);
-					std::cout << (unsigned char) c << std::endl; 
+					//std::cout << (unsigned char) c << std::endl; 
 				}
 
 				// ---------------------------------------------------------------
@@ -566,7 +566,7 @@ int main(int argc, char* argv[])
 							{
 								bP_detected = true;
 								bP_onset_arr.push_back(i - current_peak_width);
-								std::cout << i << " " << current_peak_width << std::endl;
+								//std::cout << i << " " << current_peak_width << std::endl;
 							}
 						}
 						current_peak_width = 0;
@@ -583,9 +583,9 @@ int main(int argc, char* argv[])
 						if (above_pe_threshold >= 3) 
 						{ 
 							peak_width_distribution[(above_pe_threshold < 50) ? above_pe_threshold : 50] += 1;
-							pe_beginnings.push_back(i - above_pe_threshold - 2);
-							std::cout << "PE begin " << i << " " << above_pe_threshold << std::endl;
-							pe_endings.push_back(i + 1);
+							pe_beginnings.push_back((i - above_pe_threshold - 2) >= 0 ? (i - above_pe_threshold - 2) : 0);
+							//std::cout << "PE begin " << i << " " << above_pe_threshold << std::endl;
+							pe_endings.push_back((i + 1) <= 34999 ? (i + 1) : 34999);
 							peak_heights.push_back(peak_amplitude);
 						}
 						peak_amplitude = 0;
