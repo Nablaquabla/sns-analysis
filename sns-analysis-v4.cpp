@@ -410,6 +410,8 @@ int main(int argc, char* argv[])
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
+				std::cout << "Unexpected number of samples: " << no_samples << " aborting now" << std::endl;
+				std::cout << waveformCtr << " " << zidx << " " << fileSize << " " << no_samples << " " << no_channels << std::endl;
 				break;
 			}
 			// ----------------------------------------------------------------
