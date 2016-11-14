@@ -78,9 +78,9 @@ def main(runMissing):
         for psd in possibleSubDirs:
             possibleRuns = os.listdir(mainRunDir + psd)
             if run in possibleRuns:
-            subdirs[run] = psd
+                subdirs[run] = psd
                 days_in[run] = [x for x in os.listdir(mainRunDir + psd + '/' + run) if 'Settings' not in x]
-            break
+                break
         print subdirs
         print days_in
         
