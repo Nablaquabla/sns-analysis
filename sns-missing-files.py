@@ -72,30 +72,18 @@ def main(runMissing):
     
     subdirs = {}
     days_in = {}
-    read_subdirs = False
-    read_days = False
-    with open('runtimes-data.dat','r') as f:
-        for line in f:
-            if 'Start sub-dirs' in line:
-                read_subdirs = True
-                continue
-            if 'End sub-dirs' in line:
-                read_subdirs = False
-                continue
-            if 'Start days' in line:
-                read_days = True
-                continue
-            if 'End days' in line:
-                read_days = False
-                continue
-            
-            if read_subdirs:
-                key,data = line.strip().split(':')
-                subdirs[key] = data.strip()
-            if read_days:
-                key,data = line.strip().split(':')
-                days_in[key] = eval(data) 
-                
+    possibleSubDirs = ['beam_off_data','beam_on_data','sns_data']
+    
+    for run in runDirs:        
+        for psd in possibleSubDirs:
+            possibleRuns = os.listdir(mainRunDir + psd)
+            if run in possibleRuns:
+            subdirs[run] = psd
+                days_in[run] = [x for x in os.listdir(mainRunDir + psd + '/' + run) if 'Settings' not in x]
+            break
+        print subdirs
+        print days_in
+        
     for run in runDirs:           
         for day in days_in[run]:
             print run,day
