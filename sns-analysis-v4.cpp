@@ -347,10 +347,10 @@ int main(int argc, char* argv[])
 	int err = 0;
 	int zidx = 0;
 	int fileSize = 0;
-	std::cout << current_zip_file.c_str() << std::endl;
+	//std::cout << current_zip_file.c_str() << std::endl;
 	zip *z = zip_open(current_zip_file.c_str(), 0, &err);
-	std::cout << "Opened zip" << std::endl;
-	std::cout << "Error: " << err << std::endl;
+	//std::cout << "Opened zip" << std::endl;
+	//std::cout << "Error: " << err << std::endl;
 	//Search for the file of given name
 	const char *name = time_name_in_zip.c_str();
 	struct zip_stat st;
@@ -362,17 +362,17 @@ int main(int argc, char* argv[])
 
 	//Read the compressed file
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
-	std::cout << time_name_in_zip.c_str() << std::endl;
-	std::cout << "Reading file" << std::endl;
+	//std::cout << time_name_in_zip.c_str() << std::endl;
+	//std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
-	std::cout << fileSize << std::endl;
+	//std::cout << fileSize << std::endl;
 	zip_fread(f, contents, fileSize);
-	std::cout << "Read chunk" << std::endl;
+	//std::cout << "Read chunk" << std::endl;
 	zip_fclose(f);
-	std::cout << "Closed file" << std::endl;
+	//std::cout << "Closed file" << std::endl;
 	//And close the archive
 	zip_close(z);
-	std::cout << "Zip closed" << std::endl;
+	//std::cout << "Zip closed" << std::endl;
 
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
@@ -382,16 +382,16 @@ int main(int argc, char* argv[])
 	{
 		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	}
-	std::cout << "Created output files" << std::endl;
+	//std::cout << "Created output files" << std::endl;
 
 	int csi_raw[35000] = {};
-	std::cout << err << std::endl;
+	//std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
 		waveformCtr = 0;
 		zidx = 0;
-		std::cout << err << " " << zidx << " " << fileSize << std::endl;
+		//std::cout << err << " " << zidx << " " << fileSize << std::endl;
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
@@ -414,11 +414,11 @@ int main(int argc, char* argv[])
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
-				std::cout << "Unexpected number of samples: " << no_samples << " aborting now" << std::endl;
-				std::cout << waveformCtr << " " << zidx << " " << fileSize << " " << no_samples << " " << no_channels << std::endl;
+				//std::cout << "Unexpected number of samples: " << no_samples << " aborting now" << std::endl;
+				//std::cout << waveformCtr << " " << zidx << " " << fileSize << " " << no_samples << " " << no_channels << std::endl;
 				break;
 			}
-		        std::cout << "Checking waveforms now..." << std::endl;
+		        //std::cout << "Checking waveforms now..." << std::endl;
 			// ----------------------------------------------------------------
 			//  Process XYZ consecutive waveforms without encountering another
 			// LabView header inbetween
@@ -427,7 +427,7 @@ int main(int argc, char* argv[])
 			{
 				// A new waveform begins
 			 	waveformCtr += 1;
-				std::cout << waveformCtr << std::endl;
+				//std::cout << waveformCtr << std::endl;
 				// -------------------------------------------------------------
 				//    Reset all major waveform specific variables
 				// -------------------------------------------------------------
@@ -584,7 +584,7 @@ int main(int argc, char* argv[])
 						{ 
 							peak_width_distribution[(above_pe_threshold < 50) ? above_pe_threshold : 50] += 1;
 							pe_beginnings.push_back((i - above_pe_threshold - 2) >= 0 ? (i - above_pe_threshold - 2) : 0);
-							std::cout << "PE begin " << i << " " << above_pe_threshold << std::endl;
+							//std::cout << "PE begin " << i << " " << above_pe_threshold << std::endl;
 							pe_endings.push_back((i + 1) <= 34999 ? (i + 1) : 34999);
 							peak_heights.push_back(peak_amplitude);
 						}
@@ -664,16 +664,16 @@ int main(int argc, char* argv[])
 				if (data_set == 1 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
 				if (data_set == 2 && !overflow && !linear_gate) { analyze = true; }
 				if (data_set == 3 && !overflow && !linear_gate) { analyze = true; }
-				std::cout << "Analyzing? " << analyze << " " << pe_beginnings.size() << std::endl;
+				//std::cout << "Analyzing? " << analyze << " " << pe_beginnings.size() << std::endl;
 				if (analyze && pe_beginnings.size() > 0)
 				{
-					std::cout << "Getting spe charge dist" << std::endl;
+					//std::cout << "Getting spe charge dist" << std::endl;
 					// -------------------------------------------------------------
 					// Integrate all SPE found in the PT and histogram their charge
 					// -------------------------------------------------------------
 					for (int idx = 0; idx < pe_beginnings.size(); idx++)
 					{
-						std::cout << "started int idx " << idx << " " << pe_beginnings[idx] << " ";
+						//std::cout << "started int idx " << idx << " " << pe_beginnings[idx] << " ";
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
@@ -681,13 +681,13 @@ int main(int argc, char* argv[])
 							{
 								if (i >= 0){ current_spe_q += csi[i]; }
 							}
-							std::cout << current_spe_q << " ";
+							//std::cout << current_spe_q << " ";
 							//if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[(current_spe_q+50)] += 1; }
 						}
 						else { break; }
-						std::cout << std::endl;
+						//std::cout << std::endl;
 					}
-					std::cout << "Done" << std::endl;
+					//std::cout << "Done" << std::endl;
 					// -------------------------------------------------------------
 					//       Determine number of PE in different regions
 					// -------------------------------------------------------------
@@ -699,22 +699,22 @@ int main(int argc, char* argv[])
 					s_iw_ct = 0;
 					if (peaks.size() > 0)
 					{
-						for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
+						for (std::vector<int>::size_type idx = 0; idx < peaks.size(); idx++)
 						{
-							std::cout << peaks[idx] << " ";
+							//std::cout << peaks[idx] << " ";
 							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
 						}
-						std::cout << std::endl;
+						//std::cout << std::endl;
 						// Distribution of peak onsets
 						if (true)
 						{
 							int sz = peaks.size() / 2;
 							if (sz < 350)
 							{
-								for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
+								for (std::vector<int>::size_type idx = 0; idx < peaks.size(); idx++)
 								{
 									peak_distribution[sz][peaks[idx] / 100] += 1;
 								}
@@ -745,9 +745,9 @@ int main(int argc, char* argv[])
 						}
 					}
 
-					std::cout << bg_pt_ct << " " << bg_roi_ct << " " << bg_iw_ct << std::endl;
-					std::cout << s_pt_ct << " " << s_roi_ct << " " << s_iw_ct << std::endl;
-					std::cout << overflow << " " << linear_gate << " " << muon_veto_flag << std::endl;
+					//std::cout << bg_pt_ct << " " << bg_roi_ct << " " << bg_iw_ct << std::endl;
+					//std::cout << s_pt_ct << " " << s_roi_ct << " " << s_iw_ct << std::endl;
+					//std::cout << overflow << " " << linear_gate << " " << muon_veto_flag << std::endl;
 					// Histogram baseline and peaks in pretrace
 					if (!overflow && !linear_gate && !muon_veto_flag)
 					{
@@ -876,7 +876,7 @@ int main(int argc, char* argv[])
 							// -------------------------------------------------------------
 							//    Write analysis results to file
 							// -------------------------------------------------------------
-							std::cout << timestamp << " " << med_csi << " " << med_mv << std::endl;
+							//std::cout << timestamp << " " << med_csi << " " << med_mv << std::endl;
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
 							bg_out_file << bg_pt_ct << " " << bg_roi_ct << " ";
 							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " " << lnL_real << " " << lnL_flat << " ";
