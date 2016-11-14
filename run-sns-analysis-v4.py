@@ -77,7 +77,7 @@ def main():
     print days_in
         
 #    Iterate through all days in a given run folder, create a condor file and run it.                
-#    for day in days_in[run]:
+    for day in days_in[run]:
 
         # Prepare paths for further processing
         dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
@@ -92,9 +92,9 @@ def main():
         createCondorFile(dataRunDir,outDir,run,day,len(tList))
         #createCondorFile(dataRunDir,outDir,run,day,2)
         cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
-        print cmd
-        #os.system(cmd)
-        #tm.sleep(1)
+        #print cmd
+        os.system(cmd)
+        tm.sleep(1)
  
 if __name__ == '__main__':
     main()
