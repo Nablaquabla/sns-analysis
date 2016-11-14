@@ -62,40 +62,42 @@ def main():
 #    run = 'Run-15-12-14-11-21-45'
 #    run = 'Run-15-12-26-08-30-40'
 #    run = 'Run-16-01-07-12-16-36'
-     
+#    runDirs = ['Run-15-06-25-12-53-44','Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01','Run-15-09-23-21-16-00','Run-15-10-03-09-26-22','Run-15-10-13-13-27-09'] 
+    runDirs = ['Run-15-09-21-20-58-01'] 
     subdirs = {}
     days_in = {}
-    
-    possibleSubDirs = ['beam_off_data','beam_on_data','sns_data']
-    for psd in possibleSubDirs:
-        possibleRuns = os.listdir(mainRunDir + psd)
-        if run in possibleRuns:
-	    subdirs[run] = psd
-            days_in[run] = [x for x in os.listdir(mainRunDir + psd + '/' + run) if 'Settings' not in x]
-	    break
-    print subdirs
-    print days_in
-        
+    for run in runDirs:
+        possibleSubDirs = ['beam_off_data','beam_on_data','sns_data']
+        for psd in possibleSubDirs:
+            possibleRuns = os.listdir(mainRunDir + psd)
+            if run in possibleRuns:
+            subdirs[run] = psd
+                days_in[run] = [x for x in os.listdir(mainRunDir + psd + '/' + run) if 'Settings' not in x]
+            break
+        print subdirs
+        print days_in
+
+    for run in runDirs:
 #    Iterate through all days in a given run folder, create a condor file and run it.                
-    for day in days_in[run]:
+        for day in days_in[run]:
 
-        # Prepare paths for further processing
-        dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
-        outDir = mainOutDir + '%s/%s'%(run,day)
-    
-        # Create output directory if it does not exist
-        if not os.path.exists(outDir):
-            os.makedirs(outDir)    
+            # Prepare paths for further processing
+            dataRunDir = mainRunDir + '%s/%s/%s'%(subdirs[run],run,day)
+            outDir = mainOutDir + '%s/%s'%(run,day)
+        
+            # Create output directory if it does not exist
+            if not os.path.exists(outDir):
+                os.makedirs(outDir)    
 
-        # Get all times within the day folder chosen and prepare condor submit files
-        tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
-        createCondorFile(dataRunDir,outDir,run,day,len(tList))
-        #createCondorFile(dataRunDir,outDir,run,day,2)
-        cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
-        #print cmd
-        os.system(cmd)
-        tm.sleep(1)
- 
+            # Get all times within the day folder chosen and prepare condor submit files
+            tList = [x.split('.')[0] for x in os.listdir(dataRunDir)]
+            createCondorFile(dataRunDir,outDir,run,day,len(tList))
+            #createCondorFile(dataRunDir,outDir,run,day,2)
+            cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(run,day)
+            #print cmd
+            os.system(cmd)
+            tm.sleep(1)
+     
 if __name__ == '__main__':
     main()
 
