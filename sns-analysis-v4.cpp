@@ -427,7 +427,7 @@ int main(int argc, char* argv[])
 			{
 				// A new waveform begins
 			 	waveformCtr += 1;
-				//std::cout << waveformCtr << std::endl;
+				std::cout << waveformCtr << std::endl;
 				// -------------------------------------------------------------
 				//    Reset all major waveform specific variables
 				// -------------------------------------------------------------
@@ -475,7 +475,7 @@ int main(int argc, char* argv[])
 					timestamp += zeroPad((int) c, 2);
 					//std::cout << (unsigned char) c << std::endl; 
 				}
-
+				std::cout << timestamp << std::endl;
 				// ---------------------------------------------------------------
 				// Read the full CsI and muon veto waveforms from the zip-stream
 				// + Apply bit transformation
@@ -664,7 +664,7 @@ int main(int argc, char* argv[])
 				if (data_set == 1 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
 				if (data_set == 2 && !overflow && !linear_gate) { analyze = true; }
 				if (data_set == 3 && !overflow && !linear_gate) { analyze = true; }
-
+				std::cout << analyze << " " << pe_beginnings.size() << std::endl;
 				if (analyze && pe_beginnings.size() > 0)
 				{
 					// -------------------------------------------------------------
@@ -697,12 +697,13 @@ int main(int argc, char* argv[])
 					{
 						for (std::vector<int>::size_type idx = 0; idx != peaks.size(); idx++)
 						{
+							std::cout << peaks[idx] << " ";
 							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
 						}
-
+						std::cout << std::endl;
 						// Distribution of peak onsets
 						if (true)
 						{
@@ -740,6 +741,9 @@ int main(int argc, char* argv[])
 						}
 					}
 
+					std::cout << bg_pt_ct << " " << bg_roi_ct << " " << bg_iw_ct << std::endl;
+					std::cout << s_pt_ct << " " << s_roi_ct << " " << s_iw_ct << std::endl;
+					std::cout << overflow << " " << linear_gate << " " << muon_veto_flag << std::endl;
 					// Histogram baseline and peaks in pretrace
 					if (!overflow && !linear_gate && !muon_veto_flag)
 					{
@@ -760,7 +764,7 @@ int main(int argc, char* argv[])
 					if (bg_pt_ct <= PE_max_PT && bg_roi_ct > 0)
 					{
 						bgAnalysisCtr += 1;
-
+						std::cout << "Analyzing bg window" << std::endl;
 						// Reset window parameters
 						idx_0 = 0;
 						i_peak = 0;
@@ -868,6 +872,7 @@ int main(int argc, char* argv[])
 							// -------------------------------------------------------------
 							//    Write analysis results to file
 							// -------------------------------------------------------------
+							std::cout << timestamp << " " << med_csi << " " << med_mv << std::endl;
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
 							bg_out_file << bg_pt_ct << " " << bg_roi_ct << " ";
 							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " " << lnL_real << " " << lnL_flat << " ";
@@ -1037,6 +1042,7 @@ int main(int argc, char* argv[])
 	}
             
     // Before exiting, make sure that both output files are properly closed to prevent data loss.
+    //std::cout << bg_out_file.is_open() << std::endl;
     if (bg_out_file.is_open()) { bg_out_file.close(); }
     if (s_out_file.is_open()) { s_out_file.close(); }
 

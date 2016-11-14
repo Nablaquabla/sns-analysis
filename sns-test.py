@@ -46,8 +46,8 @@ def main():
     # Choose output directory, i.e. ~/output/Run-15-06-25-xyz/
     mainOutDir = '/var/phy/project/phil/grayson/COHERENT/CsI/bjs-analysis/test/'
     
-    pathToFile = 'beam_on_data/Run-15-08-31-00-23-36/150907'
-    time = '064540'
+    pathToFile = 'beam_on_data/Run-15-09-21-20-58-01/150923/'
+    time = '082901'
 
     dataRunDir = mainRunDir + pathToFile
     createCondorFile(dataRunDir,mainOutDir,time)
