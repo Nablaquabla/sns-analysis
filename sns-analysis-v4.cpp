@@ -517,7 +517,7 @@ int main(int argc, char* argv[])
 				// -----------------------------------------------
 				current_peak_width = 0;
 				peak_amplitude = 0;
-				bp_detected = false;
+				bP_detected = false;
 				for (int i = 0; i < 35000; i++)
 				{
 					// -------------------------------------------
@@ -678,7 +678,7 @@ int main(int argc, char* argv[])
 										charge_distribution[sz][idx / 100] += csi[idx];
 										if (idx >= pe_endings[cpi]) 
 										{ 
-											if ++cpi >= pe_beginnings.size(){ break; }
+											if (++cpi >= pe_beginnings.size()){ break; }
 										}
 										
 									}
@@ -763,7 +763,7 @@ int main(int argc, char* argv[])
 									q_int += csi[idx_w_offset];
 									lnL_real += lnL_pf_real[i] * csi[idx_w_offset];
 									lnL_flat += lnL_pf_flat[i] * csi[idx_w_offset];
-									if (idx_w_offset == pe_endings[i_pe]) {i_pe++}
+									if (idx_w_offset == pe_endings[i_pe]) { i_pe++; }
 								}
 
 								// Keep track of charge integration to determine rise times later
@@ -882,7 +882,7 @@ int main(int argc, char* argv[])
 									q_int += csi[idx_w_offset];
 									lnL_real += lnL_pf_real[i] * csi[idx_w_offset];
 									lnL_flat += lnL_pf_flat[i] * csi[idx_w_offset];
-									if (idx_w_offset == pe_endings[i_pe]) { i_pe++ };
+									if (idx_w_offset == pe_endings[i_pe]) { i_pe++; }
 								}
 
 								// Keep track of charge integration to determine rise times later
