@@ -16,28 +16,28 @@
 
 std::string zeroPad(int num, int size)
 {
-	std::ostringstream ss;
-	ss << std::setw(size) << std::setfill('0') << num;
-	return ss.str();
+   std::ostringstream ss;
+   ss << std::setw(size) << std::setfill('0') << num;
+   return ss.str();
 }
 
 std::string fileName(int num, std::string prefix)
 {
-	std::ostringstream ss;
-	ss << prefix << std::setw(6) << std::setfill('0') << num;
-	return ss.str();
+   std::ostringstream ss;
+   ss << prefix << std::setw(6) << std::setfill('0') << num;
+   return ss.str();
 }
 
 bool timeSort(std::string i, std::string j) 
 { 
-	return atoi(i.c_str())<atoi(j.c_str()); 
+    return atoi(i.c_str())<atoi(j.c_str()); 
 }
 
 int main(int argc, char* argv[])
 {
-	// Single byte to be read from the data files
-	char c;
-
+    // Single byte to be read from the data files
+    char c;
+    
 	// Counters to keep track of cuts
 	unsigned long waveformCtr = 0;
 	unsigned long linearGateCtr = 0;
@@ -46,49 +46,52 @@ int main(int argc, char* argv[])
 	unsigned long bgAnalysisCtr = 0;
 	unsigned long sAnalysisCtr = 0;
 
-	// Variables for the background output files
-	int bg_counter = 0;
-	int bg_file_number = 0;
-	std::ofstream bg_out_file;
+    // File counter
+    unsigned int files_processed = 0;
+    unsigned int max_no_files_processed = std::numeric_limits<unsigned int>::max();
+    
+    // Variables governing the background output files
+    int bg_counter = 0;
+    int bg_file_number = 0;
+    std::ofstream bg_out_file;
 
-	// Variables for the signal output files
-	int s_counter = 0;
-	int s_file_number = 0;
-	std::ofstream s_out_file;
-
+    // Variables governing the signal output files
+    int s_counter = 0;
+    int s_file_number = 0;
+    std::ofstream s_out_file;
+    
 	// Run Info output
 	std::ofstream infoOut;
 
 	// Saved waveforms
 	std::ofstream waveformOut;
 
-	// LabView headers
-	int no_samples = 0;
-	int no_channels = 0;
+    // LabView headers
+    int no_samples = 0;
+    int no_channels = 0;
 
-	// Timestamp of current trigger
-	std::string timestamp;
+    // Timestamp of current trigger
+    std::string timestamp;
+    
+    // Waveform buffers
+    int csi [35000] = {} ;
+    int mv [35000]  = {} ;
 
-	// Waveform buffers
-	int csi [35000] = {} ;
-	int csi_raw[35000] = {} ;
-	int mv [35000]  = {} ;
-
-	// Buffer to store bit shifted samples
-	int _tmpC = 0;
-	
-	// Medians of CsI and muon veto
-	int med_csi = 0;
-	int med_mv = 0;
-
-	// Buffers used for median calculation as well as overflow detection
-	unsigned int med_csi_sum = 0;
-	unsigned int med_mv_sum = 0;
-	unsigned int med_csi_arr [256] = {} ;
-	unsigned int med_mv_arr [256] = {};   
-	bool med_csi_found = false;
-	bool med_mv_found = false;
-	bool overflow = false;
+    // Buffer to store bit shifted samples
+    int _tmpC = 0;
+    
+    // Medians of CsI and muon veto
+    int med_csi = 0;
+    int med_mv = 0;
+    
+    // Buffers used for median calculation as well as overflow detection
+    unsigned int med_csi_sum = 0;
+    unsigned int med_mv_sum = 0;
+    unsigned int med_csi_arr [256] = {} ;
+    unsigned int med_mv_arr [256] = {};   
+    bool med_csi_found = false;
+    bool med_mv_found = false;
+    bool overflow = false;
 
 	// Buffers for SPE integration
 	int spe_charge_dist[300] = {};
@@ -102,65 +105,68 @@ int main(int argc, char* argv[])
 	// Buffer for baseline
 	int baseline_hist[32] = {};
 
-	// Rising and falling threshold crossings used for linear gate detection
-	int _previous_c = 0;
-	int gate_down = 0;
-	int gate_up = 0;
+    // Rising and falling threshold crossings used for linear gate detection
+    int _previous_c = 0;
+    int gate_down = 0;
+    int gate_up = 0;
 
-	// Waveform contains a gate or muon veto fired more than three times
-	bool linear_gate = false;
-	bool muon_veto_flag = false;
-
-	// Photoelectron counter for all interesting regions
-	// pt = pretrace, roi = region of interest, iw = integration window
-	unsigned int s_pt_ct = 0;
-	unsigned int bg_pt_ct = 0;
-	unsigned int s_roi_ct = 0;
-	unsigned int bg_roi_ct = 0;
-	unsigned int s_iw_ct = 0;
-	unsigned int bg_iw_ct = 0;
+    // Waveform contains a gate or muon veto fired more than three times
+    bool linear_gate = false;
+    bool muon_veto_flag = false;
+      
+    // Photoelectron counter for all interesting regions
+    // pt = pretrace, roi = region of interest, iw = integration window
+    unsigned int s_pt_ct = 0;
+    unsigned int bg_pt_ct = 0;
+    unsigned int s_roi_ct = 0;
+    unsigned int bg_roi_ct = 0;
+    unsigned int s_iw_ct = 0;
+    unsigned int bg_iw_ct = 0;
 	unsigned int PE_max_PT = 10;
 
-	// Buffers to store current peak width in CsI and muon veto waveform
+    // Buffers to store current peak width in CsI and muon veto waveform
 	int above_pe_threshold = 0;
 	int current_peak_width = 0;
 	int current_pe_width = 0;
-	int m_peak_width = 0;
+    int m_peak_width = 0;
 
-	// Peak thresholds
-	int peak_height_threshold = 3;
-	int peak_width_threshold = 3;
-
-	// Peak locations in CsI, Muon locations in muon veto
-	std::vector<int> peaks;
+    // PE location in CsI, Muon locations in muon veto
+    std::vector<int> peaks;
 	std::vector<int> peak_heights;
 	int peak_height_dist[100] = {};
 	int peak_amplitude = 0;
+	int max_peak_charge = -1;
+	int max_peak_charge_dist[5000] = {};
+	int max_peak_charge_dist_mv[5000] = {};
 	std::vector<int> pe_beginnings;
 	std::vector<int> pe_endings;
-	std::vector<int> muon_peaks; 
+    std::vector<int> muon_peaks; 
+
 	std::vector<int> muon_onset_arr;
+	// std::vector<int> tmp_waveform;
 
 	// Keep track of all peak/pe locations in the full minute
 	int peak_distribution[350][350] = {};
 	int charge_distribution[350][350] = {};
+	int charge_distribution_mat[350][350] = {};
 	for (int i1 = 0; i1 < 350; i1++)
 	{
 		for (int i2 = 0; i2 < 350; i2++)
 		{
 			peak_distribution[i1][i2] = 0;
 			charge_distribution[i1][i2] = 0;
+			charge_distribution[i1][i2] = 0;
 		}
 	}
 	// Get peak width distribution
 	int peak_width_distribution[51] = {};
 
-	// Charge of PE in PT
-	int current_spe_q = 0;
-
-	// Integration window buffers
-	int s_q_arr [1500] = {};
-	int bg_q_arr [1500] = {};
+    // Charge of PE in PT
+    int current_spe_q = 0;
+    
+    // Integration window buffers
+    int s_q_arr [1500] = {};
+    int bg_q_arr [1500] = {};
 	int running_charge = 0;
 
 	// LogLikelihood prefactors & estimators
@@ -192,24 +198,24 @@ int main(int argc, char* argv[])
 		lnL_pf_flat[i] = log(1.0 / 1500.0);
 	}
 
-	// Threshold buffer and measured rise times
-	double thresholds [3] = {};
-	double bg_rt [3] = {};
-	double s_rt [3] = {};
+    // Threshold buffer and measured rise times
+    double thresholds [3] = {};
+    double bg_rt [3] = {};
+    double s_rt [3] = {};    
 
-	// Buffers used during window analysis
-	int idx_0 = 0;
+    // Buffers used during window analysis
+    int idx_0 = 0;
 	int idx_w_offset = 0;
-	int i_peak = 0;
+    int i_peak = 0;
 	int i_pe = 0;
-	int q_int = 0;
-	double _t1 = 0.0;
-	double _t2 = 0.0;
-
-	std::string main_dir;
+    int q_int = 0;   
+    double _t1 = 0.0;
+    double _t2 = 0.0;
+    
+    std::string main_dir;
 	int current_time;
 	int single_time;
-	std::string out_dir;
+    std::string out_dir;
 	std::string current_zip_file;
 	std::string time_name_in_zip;
 	
@@ -230,19 +236,19 @@ int main(int argc, char* argv[])
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
 	int data_set = 0;
-	if (argc == 6) 
-	{
+    if (argc == 6) 
+    {
 		data_set = atoi(argv[1]);
-		main_dir = std::string(argv[2]); 
+        main_dir = std::string(argv[2]); 
 		current_time = atoi(argv[3]);
-		out_dir = std::string(argv[4]);
+        out_dir = std::string(argv[4]);
 		single_time = atoi(argv[5]);
-	}
-	else
-	{
-		std::cout << "Arguments not matching! Aborting now!" << std::endl;
-		return 1;
-	}
+    }
+    else
+    {
+        std::cout << "Arguments not matching! Aborting now!" << std::endl;
+        return 1;
+    }
 
 	unsigned int BG_PT[2] = {};
 	unsigned int BG_ROI[2] = {};
@@ -281,8 +287,18 @@ int main(int argc, char* argv[])
 			S_ROI[1]  = 30000;
 			PE_max_PT = 20;
 			break;
+	/*case 3: BG_PT[0]  = 0;
+		    BG_PT[1]  = 20000;
+			BG_ROI[0] = 20000;
+			BG_ROI[1] = 25125;
+			S_PT[0]   = 5125;
+			S_PT[1]   = 25125;
+			S_ROI[0]  = 25125;
+			S_ROI[1]  = 30250;
+			PE_max_PT = 20;
+			break;*/
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
-			return 1;
+			 return 1;
 	}
 
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
@@ -325,11 +341,16 @@ int main(int argc, char* argv[])
 		time_name_in_zip = zeroPad(current_time,6);
 	}
 
+	//std::cout << time_name_in_zip << std::endl;
+
 	//Open the ZIP archive
 	int err = 0;
 	int zidx = 0;
 	int fileSize = 0;
+	//std::cout << current_zip_file.c_str() << std::endl;
 	zip *z = zip_open(current_zip_file.c_str(), 0, &err);
+	//std::cout << "Opened zip" << std::endl;
+	//std::cout << "Error: " << err << std::endl;
 	//Search for the file of given name
 	const char *name = time_name_in_zip.c_str();
 	struct zip_stat st;
@@ -339,13 +360,19 @@ int main(int argc, char* argv[])
 	//Alloc memory for its uncompressed contents
 	char *contents = new char[st.size];
 
-	// Unzip the compressed file into memory
+	//Read the compressed file
 	zip_file *f = zip_fopen(z, time_name_in_zip.c_str(), 0);
+	//std::cout << time_name_in_zip.c_str() << std::endl;
+	//std::cout << "Reading file" << std::endl;
 	fileSize = st.size;
+	//std::cout << fileSize << std::endl;
 	zip_fread(f, contents, fileSize);
+	//std::cout << "Read chunk" << std::endl;
 	zip_fclose(f);
+	//std::cout << "Closed file" << std::endl;
 	//And close the archive
 	zip_close(z);
+	//std::cout << "Zip closed" << std::endl;
 
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
@@ -355,12 +382,16 @@ int main(int argc, char* argv[])
 	{
 		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	}
+	//std::cout << "Created output files" << std::endl;
 
+	int csi_raw[35000] = {};
+	//std::cout << err << std::endl;
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
 		waveformCtr = 0;
 		zidx = 0;
+		//std::cout << err << " " << zidx << " " << fileSize << std::endl;
 		// Begin reading byte-stream
 		while (zidx < fileSize)
 		{   
@@ -369,6 +400,7 @@ int main(int argc, char* argv[])
 			{
 				c = contents[zidx++];
 				no_samples = no_samples << 8 | (unsigned char) c;
+				//std::cout << (unsigned char) c << " " << no_samples << std::endl;
 			}
 			
 			// Read LabView header and get the total number of channels written in next chunk of data (always 2 in our case)
@@ -376,14 +408,17 @@ int main(int argc, char* argv[])
 			{
 				c = contents[zidx++];
 				no_channels = no_channels << 8 | (unsigned char) c;
+				//std::cout << (unsigned char) c << " " << no_channels << std::endl;
 			}
 
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
+				//std::cout << "Unexpected number of samples: " << no_samples << " aborting now" << std::endl;
+				//std::cout << waveformCtr << " " << zidx << " " << fileSize << " " << no_samples << " " << no_channels << std::endl;
 				break;
 			}
-
+		        //std::cout << "Checking waveforms now..." << std::endl;
 			// ----------------------------------------------------------------
 			//  Process XYZ consecutive waveforms without encountering another
 			// LabView header inbetween
@@ -392,7 +427,7 @@ int main(int argc, char* argv[])
 			{
 				// A new waveform begins
 			 	waveformCtr += 1;
-
+				//std::cout << waveformCtr << std::endl;
 				// -------------------------------------------------------------
 				//    Reset all major waveform specific variables
 				// -------------------------------------------------------------
@@ -421,12 +456,14 @@ int main(int argc, char* argv[])
 				muon_peaks.clear();
 				spe_integration_ctr = 0;
 				spe_integration_charge = 0;
+				max_peak_charge = -1;
 				passed_cuts_s = false;
 				passed_cuts_bg = false;
 				passed_cut = false;
 				peak_amplitude = 0;
 				bP_detected = false;
 				_t_bP_idx = 0;
+				// tmp_waveform.clear();
 
 				// -------------------------------------------------------------
 				//  Read current timestamp
@@ -436,8 +473,9 @@ int main(int argc, char* argv[])
 					c = contents[zidx++];
 					c = contents[zidx++];
 					timestamp += zeroPad((int) c, 2);
+					//std::cout << (unsigned char) c << std::endl; 
 				}
-
+				//std::cout << timestamp << std::endl;
 				// ---------------------------------------------------------------
 				// Read the full CsI and muon veto waveforms from the zip-stream
 				// + Apply bit transformation
@@ -445,15 +483,13 @@ int main(int argc, char* argv[])
 				// ---------------------------------------------------------------
 				for(int i=0; i<35000; i++)
 				{
-					//--------------
-					//      CsI
-					//--------------
+					// CsI
 					c = contents[zidx++];
-					// bit transformation to get rid of empty bins
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
 					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
 					csi_raw[i] = _tmpC;
+
 					if (i == 0) { _previous_c = _tmpC; }
 
 					// Gate check
@@ -467,10 +503,8 @@ int main(int argc, char* argv[])
 						overflow = true;
 						overflowCtr += 1;
 					}
-
-					//--------------
-					//  Muon Veto
-					//--------------
+					
+					// Muon veto
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					med_mv_arr[_tmpC + 128] += 1;
@@ -498,7 +532,7 @@ int main(int argc, char* argv[])
 						if (med_mv_sum >= 10000)
 						{
 							med_mv = i-128;
-							med_mv_found=true;
+							med_mv_found=true;	
 						}
 					}
 				} 
@@ -511,13 +545,9 @@ int main(int argc, char* argv[])
 					linear_gate = true;
 					linearGateCtr += 1;
 				}
-
 				// -----------------------------------------------
 				//     Find peaks and photoelectrons in waveforms
 				// -----------------------------------------------
-				current_peak_width = 0;
-				peak_amplitude = 0;
-				bp_detected = false;
 				for (int i = 0; i < 35000; i++)
 				{
 					// -------------------------------------------
@@ -526,32 +556,41 @@ int main(int argc, char* argv[])
 					csi[i] = med_csi - csi[i];
 
 					// Simple peak finder using threshold crossing with history
-					if (csi[i] >= peak_height_threshold)
-					{
-						current_peak_width++;
-						peak_amplitude = csi[i] > peak_amplitude ? csi[i] : peak_amplitude;
-					}
+					if (csi[i] >= 3) { current_peak_width++; }
 					else
 					{
-						if (current_peak_width >= peak_width_threshold)
+						if (current_peak_width >= 3)
 						{
 							peaks.push_back(i - current_peak_width);
-							pe_beginnings.push_back((i - current_peak_width - 2) >= 0 ? (i - current_peak_width - 2) : 0);
-							pe_endings.push_back((i + 1) <= 34999 ? (i + 1) : 34999);
-							peak_width_distribution[(current_peak_width < 50) ? current_peak_width : 50] += 1;
-							peak_heights.push_back(peak_amplitude);
-
-							// Check for large energy depositions
 							if (!bP_detected && current_peak_width >= 35 && !linear_gate && !overflow)
 							{
 								bP_detected = true;
 								bP_onset_arr.push_back(i - current_peak_width);
+								//std::cout << i << " " << current_peak_width << std::endl;
 							}
 						}
 						current_peak_width = 0;
-						peak_amplitude = 0;
 					}
 
+					// Determine integration windows for possible photoelectrons (Threshold = 3, Width = 3)
+					if (csi[i] >= 3)
+					{
+						above_pe_threshold += 1;
+						peak_amplitude = csi[i] > peak_amplitude ? csi[i] : peak_amplitude;
+					}
+					else
+					{
+						if (above_pe_threshold >= 3) 
+						{ 
+							peak_width_distribution[(above_pe_threshold < 50) ? above_pe_threshold : 50] += 1;
+							pe_beginnings.push_back((i - above_pe_threshold - 2) >= 0 ? (i - above_pe_threshold - 2) : 0);
+							//std::cout << "PE begin " << i << " " << above_pe_threshold << std::endl;
+							pe_endings.push_back((i + 1) <= 34999 ? (i + 1) : 34999);
+							peak_heights.push_back(peak_amplitude);
+						}
+						peak_amplitude = 0;
+						above_pe_threshold = 0;
+					}
 					
 					// -------------------------------------------
 					//        Analyze muon veto waveform
@@ -575,9 +614,9 @@ int main(int argc, char* argv[])
 				if (bP_detected && !linear_gate && !overflow)
 				{
 					int _t_charge = 0;
-					for (int i = bP_onset_arr.back(); i < (1500 + bP_onset_arr.back()); i++)
+					for (int i = bP_onset_arr.back(); i < 1499 + bP_onset_arr.back(); i++)
 					{
-						_t_charge += (csi[i] >= peak_height_threshold) ? csi[i] : 0;
+						_t_charge += csi[i] >= 3 ? csi[i] : 0;
 					}
 					bP_charge_arr.push_back(_t_charge);
 				}
@@ -594,13 +633,13 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						for (std::vector<int>::size_type idx = 0; idx < muons_found; idx++)
+						for (int idx = 0; idx < muons_found; idx++)
 						{
 							muon_onset_arr.push_back(muon_peaks[idx]);
 						}
 					}
 				}
-				if (muons_found > 3)
+				if (muon_peaks.size() > 3)
 				{
 					muon_veto_flag = true;
 					muonVetoCtr += 1;
@@ -612,7 +651,7 @@ int main(int argc, char* argv[])
 				{
 					for (int idx = 0; idx < peak_heights.size(); idx++)
 					{
-						peak_height_dist[(peak_heights[idx] < 100) ? peak_heights[idx] : 99]++;
+						peak_height_dist[peak_heights[idx] < 100 ? peak_heights[idx] : 99]++;
 					}
 				}
 
@@ -625,25 +664,30 @@ int main(int argc, char* argv[])
 				if (data_set == 1 && !overflow && !linear_gate && !muon_veto_flag) { analyze = true; }
 				if (data_set == 2 && !overflow && !linear_gate) { analyze = true; }
 				if (data_set == 3 && !overflow && !linear_gate) { analyze = true; }
+				//std::cout << "Analyzing? " << analyze << " " << pe_beginnings.size() << std::endl;
 				if (analyze && pe_beginnings.size() > 0)
 				{
+					//std::cout << "Getting spe charge dist" << std::endl;
 					// -------------------------------------------------------------
 					// Integrate all SPE found in the PT and histogram their charge
 					// -------------------------------------------------------------
-					for (std::vector<int>::size_type idx = 0; idx < pe_beginnings.size(); idx++)
+					for (int idx = 0; idx < pe_beginnings.size(); idx++)
 					{
+						//std::cout << "started int idx " << idx << " " << pe_beginnings[idx] << " ";
 						if (pe_beginnings[idx] < BG_PT[1])
 						{
 							current_spe_q = 0;
-							for (int i = pe_beginnings[idx]; i <= pe_endings[idx]; i++)
+							for (int i = pe_beginnings[idx]; i < pe_endings[idx]; i++)
 							{
-								current_spe_q += csi[i];
+								if (i >= 0){ current_spe_q += csi[i]; }
 							}
-							if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[(current_spe_q+50)] += 1; }
+							//std::cout << current_spe_q << " ";
+							//if (current_spe_q >= -50 && current_spe_q < 250) { spe_charge_dist[(current_spe_q+50)] += 1; }
 						}
 						else { break; }
+						//std::cout << std::endl;
 					}
-
+					//std::cout << "Done" << std::endl;
 					// -------------------------------------------------------------
 					//       Determine number of PE in different regions
 					// -------------------------------------------------------------
@@ -657,10 +701,24 @@ int main(int argc, char* argv[])
 					{
 						for (std::vector<int>::size_type idx = 0; idx < peaks.size(); idx++)
 						{
+							//std::cout << peaks[idx] << " ";
 							if (peaks[idx] >= BG_PT[0] && peaks[idx] < BG_PT[1]) { bg_pt_ct += 1; }
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
+						}
+						//std::cout << std::endl;
+						// Distribution of peak onsets
+						if (true)
+						{
+							int sz = peaks.size() / 2;
+							if (sz < 350)
+							{
+								for (std::vector<int>::size_type idx = 0; idx < peaks.size(); idx++)
+								{
+									peak_distribution[sz][peaks[idx] / 100] += 1;
+								}
+							}
 						}
 
 						// Distribution of charge (only add >= 3)
@@ -669,6 +727,10 @@ int main(int argc, char* argv[])
 							int sz = peaks.size() / 2;
 							if (sz < 350)
 							{
+								//for (int idx = 0; idx < 35000; idx++)
+								//{
+								//	charge_distribution[sz][idx / 100] += (csi[idx] >= 3) ? csi[idx] : 0;
+								//}
 								int cpi = 0;
 								for (int idx = 0; idx < 35000; idx++)
 								{
@@ -676,22 +738,20 @@ int main(int argc, char* argv[])
 									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
 									{
 										charge_distribution[sz][idx / 100] += csi[idx];
-										if (idx >= pe_endings[cpi]) 
-										{ 
-											if ++cpi >= pe_beginnings.size(){ break; }
-										}
-										
+										if (idx >= pe_endings[cpi]) { cpi += ((cpi + 1) < pe_beginnings.size()) ? 1 : 0; }
 									}
 								}
 							}
 						}
 					}
 
+					//std::cout << bg_pt_ct << " " << bg_roi_ct << " " << bg_iw_ct << std::endl;
+					//std::cout << s_pt_ct << " " << s_roi_ct << " " << s_iw_ct << std::endl;
+					//std::cout << overflow << " " << linear_gate << " " << muon_veto_flag << std::endl;
 					// Histogram baseline and peaks in pretrace
 					if (!overflow && !linear_gate && !muon_veto_flag)
 					{
-						int _t_med_csi_bin = med_csi - 85;
-						if (_t_med_csi_bin >= 0 && _t_med_csi_bin <=30) { baseline_hist[_t_med_csi_bin]++; }
+						if (med_csi >= 85 && med_csi <= 115) { baseline_hist[med_csi - 85]++; }
 						else { baseline_hist[31]++; }
 
 						if (bg_pt_ct <= 50) { bg_pe_pt[bg_pt_ct]++; }
@@ -708,7 +768,7 @@ int main(int argc, char* argv[])
 					if (bg_pt_ct <= PE_max_PT && bg_roi_ct > 0)
 					{
 						bgAnalysisCtr += 1;
-
+						//std::cout << "Analyzing bg window" << std::endl;
 						// Reset window parameters
 						idx_0 = 0;
 						i_peak = 0;
@@ -732,7 +792,7 @@ int main(int argc, char* argv[])
 								break;
 							}
 						}
-						idx_0 -= 3;
+						idx_0 -= 5;
 
 						// -------------------------------------------------------------
 						// Only analyze if the full integration window is within the ROI
@@ -749,21 +809,28 @@ int main(int argc, char* argv[])
 							}
 
 							// -------------------------------------------------------------
+							// Find first PE within the integration window
+							// -------------------------------------------------------------
+							for (int i = 0; i < pe_beginnings.size(); i++)
+							{
+								if (pe_beginnings[i] >= idx_0) { i_pe = i; break; }
+							}
+
+							// -------------------------------------------------------------
 							//    Integrate over all PE found in the integration window
 							// -------------------------------------------------------------
-							i_pe = i_peak;
 							for (int i = 0; i < 1500; i++)
 							{
 								// Get proper 'real' index that includes the onset offset
 								idx_w_offset = i + idx_0;
 
 								// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-								if (i_pe < pe_beginnings.size() && idx_w_offset >= pe_beginnings[i_pe] && idx_w_offset <= pe_endings[i_pe])
+								if (idx_w_offset >= pe_beginnings[i_pe] && idx_w_offset <= pe_endings[i_pe])
 								{
 									q_int += csi[idx_w_offset];
 									lnL_real += lnL_pf_real[i] * csi[idx_w_offset];
 									lnL_flat += lnL_pf_flat[i] * csi[idx_w_offset];
-									if (idx_w_offset == pe_endings[i_pe]) {i_pe++}
+									if (idx_w_offset == pe_endings[i_pe]) { i_pe += ((i_pe + 1) < pe_beginnings.size()) ? 1 : 0; }
 								}
 
 								// Keep track of charge integration to determine rise times later
@@ -809,6 +876,7 @@ int main(int argc, char* argv[])
 							// -------------------------------------------------------------
 							//    Write analysis results to file
 							// -------------------------------------------------------------
+							//std::cout << timestamp << " " << med_csi << " " << med_mv << std::endl;
 							bg_out_file << timestamp << " " << med_csi << " " << med_mv << " ";
 							bg_out_file << bg_pt_ct << " " << bg_roi_ct << " ";
 							bg_out_file << bg_iw_ct << " " << idx_0 << " " << bg_q_arr[1499] << " " << lnL_real << " " << lnL_flat << " ";
@@ -851,7 +919,7 @@ int main(int argc, char* argv[])
 								break;
 							}
 						}
-						idx_0 -= 3;
+						idx_0 -= 5;
 
 						// -------------------------------------------------------------
 						// Only analyze if the full integration window is within the ROI
@@ -867,7 +935,14 @@ int main(int argc, char* argv[])
 								s_iw_ct += (peaks[i] - idx_0 < 1500) ? 1 : 0;
 							}
 
-							i_pe = i_peak;
+							// -------------------------------------------------------------
+							// Find first PE within the integration window
+							// -------------------------------------------------------------
+							for (int i = 0; i < pe_beginnings.size(); i++)
+							{
+								if (pe_beginnings[i] >= idx_0) { i_pe = i; break; }
+							}
+
 							// -------------------------------------------------------------
 							//    Integrate over all PE found in the integration window
 							// -------------------------------------------------------------
@@ -877,12 +952,12 @@ int main(int argc, char* argv[])
 								idx_w_offset = i + idx_0;
 
 								// Add sample if it is within one of the PE regions identified previously & update loglikelihood estimators
-								if (i_pe < pe_beginnings.size() && idx_w_offset >= pe_beginnings[i_pe] && idx_w_offset <= pe_endings[i_pe])
+								if (idx_w_offset >= pe_beginnings[i_pe] && idx_w_offset <= pe_endings[i_pe])
 								{
 									q_int += csi[idx_w_offset];
 									lnL_real += lnL_pf_real[i] * csi[idx_w_offset];
 									lnL_flat += lnL_pf_flat[i] * csi[idx_w_offset];
-									if (idx_w_offset == pe_endings[i_pe]) { i_pe++ };
+									if (idx_w_offset == pe_endings[i_pe]) { i_pe += ((i_pe + 1) < pe_beginnings.size()) ? 1 : 0; }
 								}
 
 								// Keep track of charge integration to determine rise times later
@@ -942,12 +1017,23 @@ int main(int argc, char* argv[])
 				// -------------------------------------------------------------
 				//  Save waveform if cuts have been passed for either ROI
 				// -------------------------------------------------------------
+				// if (save_waveforms && (passed_cuts_bg || passed_cuts_s))
 				if (save_waveforms && passed_cut)
 				{
 					for (int idx = 0; idx < 35000; idx++)
 					{
 						waveformOut << csi_raw[idx] << " ";
 					}
+					/*for (int idx = 0; idx < 35000; idx++)
+					{
+						waveformOut << tmp_waveform[idx] << " ";
+					}*/
+					/*
+					for (int idx = 0; idx < peaks.size(); idx++)
+					{
+						waveformOut << peaks[idx] << " ";
+					}
+					waveformOut << std::endl;*/
 					waveformOut << gate_up << " " << gate_down << " " << med_csi << " ";
 					for (int idx = 0; idx < pe_beginnings.size(); idx++)
 					{
@@ -956,12 +1042,13 @@ int main(int argc, char* argv[])
 					waveformOut << std::endl;
 				}
 			}
-		}
+		}            
 	}
-
-	// Before exiting, make sure that both output files are properly closed to prevent data loss.
-	if (bg_out_file.is_open()) { bg_out_file.close(); }
-	if (s_out_file.is_open()) { s_out_file.close(); }
+            
+    // Before exiting, make sure that both output files are properly closed to prevent data loss.
+    //std::cout << bg_out_file.is_open() << std::endl;
+    if (bg_out_file.is_open()) { bg_out_file.close(); }
+    if (s_out_file.is_open()) { s_out_file.close(); }
 
 
 	// Write run info
@@ -1053,6 +1140,28 @@ int main(int argc, char* argv[])
 			infoOut << muon_onset_arr[idx] << " ";
 		}
 		infoOut << std::endl;
+		infoOut << "Peak distribution in full waveform" << std::endl;
+		for (int idx_1 = 0; idx_1 < 350; idx_1++)
+		{
+			bool printLine = false;
+			for (int idx_2 = 0; idx_2 < 350; idx_2++)
+			{
+				if (peak_distribution[idx_1][idx_2] > 0)
+				{
+					printLine = true;
+					break;
+				}
+			}
+			if (printLine)
+			{
+				infoOut << idx_1 << " ";
+				for (int idx_2 = 0; idx_2 < 350; idx_2++)
+				{
+					if (peak_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << peak_distribution[idx_1][idx_2] << " "; }
+				}
+				infoOut << std::endl;
+			}
+		}
 		infoOut << "Charge distribution in full waveform" << std::endl;
 		for (int idx_1 = 0; idx_1 < 350; idx_1++)
 		{
@@ -1077,5 +1186,5 @@ int main(int argc, char* argv[])
 		}
 		infoOut.close();
 	}
-	return 0;
+    return 0;
 }
