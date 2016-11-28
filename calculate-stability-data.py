@@ -48,6 +48,7 @@ def main():
 #               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45'] 
     runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14',
                'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45'] 
+               
     for run in runDirs:
         createCondorFile(run)
         cmd = 'condor_submit /home/bjs66/CondorFiles/Stability-%s.condor'%run
