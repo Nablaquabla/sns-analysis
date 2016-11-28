@@ -3,26 +3,28 @@
 import sys
 import h5py
 import numpy as np
+import datetime
 import os
 
 # ============================================================================
 #                       Full timestamp conversion
 # ============================================================================
+t0 = datetime.datetime(2015,06,25,0,0,0)
 def convertTimestamp(x):
-    return datetime.datetime.strptime(str(x), '%y%m%d%H%M%S%f').date()    
-ctv = np.vectorize(convertTimestamp)
+    return (datetime.datetime.strptime(str(x), '%y%m%d%H%M%S%f') - t0).total_seconds()
+ct = np.vectorize(convertTimestamp)
 
 # ============================================================================
 #                       Full timestamp conversion
 # ============================================================================
-def convertTime(number):
-    multiplicators = [0.01,0.1,1.0,10.0,60.0,600.0,3600.0,36000.0]
-    s = 0
-    for i in xrange(8):
-        s += multiplicators[i] * (number % 10)
-        number //= 10
-    return s
-ct = np.vectorize(convertTime)
+#def convertTime(number):
+#    multiplicators = [0.01,0.1,1.0,10.0,60.0,600.0,3600.0,36000.0]
+#    s = 0
+#    for i in xrange(8):
+#        s += multiplicators[i] * (number % 10)
+#        number //= 10
+#    return s
+#ct = np.vectorize(convertTime)
 
 def main(argv):
     mainDir = '/home/bjs66/csi/bjs-analysis'
