@@ -7,7 +7,7 @@ import time as tm
 # -----------------------------------------------------------------------------
 def createCondorFile(run):
     # Condor submission file name convention: run-day-time.condor
-    with open('/home/bjs66/CondorFiles/Convert-%s.condor'%run,'w') as f:
+    with open('/home/bjs66/CondorFiles/Stability-%s.condor'%run,'w') as f:
         
         # Fixed program location'
         f.write('Executable = _calculateStabilityData.py\n') #/home/bjs66/anaconda2/bin/python2.7\n')
@@ -26,9 +26,9 @@ def createCondorFile(run):
         f.write('request_memory = 300\n')
      
         # Output, error and log name convention: run-day-time.log/out/err
-        f.write('log = ../../Logs/Test.log\n')
-        f.write('Output = ../../Outs/Test.out\n')
-        f.write('Error = ../../Errs/Test.err\n')
+        f.write('log = ../../Logs/Stability-%s.log\n'%run)
+        f.write('Output = ../../Outs/Stability-%s.out\n'%run)
+        f.write('Error = ../../Errs/Stability-%s.err\n'%run)
         
         # Do not write any emails
         f.write('notification = never\n')

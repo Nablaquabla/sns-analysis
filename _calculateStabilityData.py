@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/home/bjs66/anaconda2/bin/python
 """
 Created on Mon Feb 01 15:03:56 2016
 
@@ -24,8 +24,8 @@ def main(args):
     run = args[1]
 
     # Create hdf5 file
-    mainDir = '/home/bjs66/csi/bjs-analysis'
-    h5Out = h5py.File(mainDir + '/Processed/Stability/%s.h5'%run,'w')
+    mainDir = '/home/bjs66/csi/bjs-analysis/Processed'
+    h5Out = h5py.File(mainDir + '/Stability/%s.h5'%run,'w')
     
     # Determine day files corresponding to the run
     h5DataFiles = [x for x in os.listdir(mainDir + '/%s'%run) if '.h5' in x]
@@ -91,7 +91,7 @@ def main(args):
     # Read each day file and process the hourly data
     for h5f in h5DataFiles:
         day = h5f.split('.')[0]
-        f = h5py.File('./%s/%s'%(run,h5f),'r')
+        f = h5py.File(mainDir + '/%s/%s'%(run,h5f),'r')
         for time in f['/I/'].keys():
             elapsedTime = np.round((datetime.datetime.strptime(day+time,'%y%m%d%H%M%S') - t0).total_seconds()/60.0)
             dataDict['elapsedTime'] = np.append(dataDict['elapsedTime'],elapsedTime)

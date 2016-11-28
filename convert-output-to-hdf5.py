@@ -23,12 +23,12 @@ def createCondorFile(run):
         f.write('getenv     = true\n')
 
         # Program needs at least 300 MB of free memory to hold unzipped data
-        f.write('request_memory = 300\n')
+        f.write('request_memory = 600\n')
      
         # Output, error and log name convention: run-day-time.log/out/err
-        f.write('log = ../../Logs/Test.log\n')
-        f.write('Output = ../../Outs/Test.out\n')
-        f.write('Error = ../../Errs/Test.err\n')
+        f.write('log = ../../Logs/Convert-%s.log\n'%run)
+        f.write('Output = ../../Outs/Convert-%s.out\n'%run)
+        f.write('Error = ../../Errs/Convert-%s.err\n'%run)
         
         # Do not write any emails
         f.write('notification = never\n')
@@ -42,10 +42,11 @@ def createCondorFile(run):
 # -----------------------------------------------------------------------------
 def main():       
     # Choose run to analyze
-    runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14','Run-15-08-18-14-51-18',
-               'Run-15-08-31-00-23-36','Run-15-09-21-20-58-01','Run-15-09-23-21-16-00','Run-15-10-03-09-26-22',
-               'Run-15-10-13-13-27-09','Run-15-10-21-13-12-27','Run-15-10-29-15-56-36','Run-15-11-09-11-30-13',
-               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45'] 
+    runDirs = ['Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01','Run-15-09-23-21-16-00','Run-15-10-03-09-26-22','Run-15-10-13-13-27-09','Run-15-10-21-13-12-27','Run-15-10-29-15-56-36','Run-15-11-09-11-30-13'] 
+#    runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14','Run-15-08-18-14-51-18',
+#               'Run-15-08-31-00-23-36','Run-15-09-21-20-58-01','Run-15-09-23-21-16-00','Run-15-10-03-09-26-22',
+#               'Run-15-10-13-13-27-09','Run-15-10-21-13-12-27','Run-15-10-29-15-56-36','Run-15-11-09-11-30-13',
+#               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45'] 
     for run in runDirs:
         createCondorFile(run)
         cmd = 'condor_submit /home/bjs66/CondorFiles/Convert-%s.condor'%run
