@@ -11,7 +11,7 @@ import os
 # ============================================================================
 t0 = datetime.datetime(2015,06,25,0,0,0)
 def convertTimestamp(x):
-    return (datetime.datetime.strptime(str(x), '%y%m%d%H%M%S%f') - t0).total_seconds()
+    return (datetime.datetime.strptime(str(int(x)), '%y%m%d%H%M%S%f') - t0).total_seconds()
 ct = np.vectorize(convertTimestamp)
 
 # ============================================================================
