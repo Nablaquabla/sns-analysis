@@ -89,10 +89,10 @@ def main(args):
     t0 = datetime.datetime(2015,06,25,0,0,0)   
     
     # Read each day file and process the hourly data
-    for h5f in h5DataFiles:
+    for h5f in np.sort(h5DataFiles):
         day = h5f.split('.')[0]
         f = h5py.File(mainDir + '/%s/%s'%(run,h5f),'r')
-        for time in f['/I/'].keys():
+        for time in np.sort(f['/I/'].keys()):
             elapsedTime = np.round((datetime.datetime.strptime(day+time,'%y%m%d%H%M%S') - t0).total_seconds()/60.0)
             dataDict['elapsedTime'] = np.append(dataDict['elapsedTime'],elapsedTime)
             

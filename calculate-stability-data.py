@@ -26,9 +26,9 @@ def createCondorFile(run):
         f.write('request_memory = 300\n')
      
         # Output, error and log name convention: run-day-time.log/out/err
-        f.write('log = ../../Logs/Stability-%s.log\n'%run)
-        f.write('Output = ../../Outs/Stability-%s.out\n'%run)
-        f.write('Error = ../../Errs/Stability-%s.err\n'%run)
+        f.write('log = /home/bjs66/Logs/Stability-%s.log\n'%run)
+        f.write('Output = /home/bjs66/Outs/Stability-%s.out\n'%run)
+        f.write('Error = /home/bjs66/Errs/Stability-%s.err\n'%run)
         
         # Do not write any emails
         f.write('notification = never\n')
@@ -48,7 +48,7 @@ def main():
 #               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45'] 
 #    runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14',
 #               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45'] 
-    runDirs = ['Run-15-06-25-12-53-44']
+    runDirs = ['Run-15-06-25-12-53-44','Run-15-09-21-20-58-01']
                
     for run in runDirs:
         createCondorFile(run)
