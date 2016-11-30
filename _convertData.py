@@ -59,7 +59,7 @@ def main(argv):
         f = h5py.File('%s/%s/%s.h5'%(mainDir,run,d),'w')
         
         times = [x.split('-')[1] for x in os.listdir('%s/%s/%s'%(mainDir,run,d)) if 'B-' in x]
-        times = np.asarray(times)
+        times = np.sort(np.asarray(times))
         print '%i files found for day %s'%(len(times),d)
         
         # ==== Process info files ====
