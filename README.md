@@ -8,12 +8,9 @@ Code used for the analysis of CsI[Na] data on the *Duke Condor cluster*. The cod
   * sns-missing-files.py
   * convert-output-to-hdf5.py
   * calculate-stability.py
-3. On Condor invoke 
-  ```
-  python run-sns-analysis.py
-  ```
-to start the analysis. The speed-up is usually on the order of ~40, i.e. one can analyze 40 minutes of data in 1 minute wall time.
-4. On Condor invoke **python sns-missing-files.py 0** to check for any missing files. If any are found run **python sns-missing-files.py 1**. Usually this happens when a job gets held due to other people having a higher priority.
-5. On Condor invoke **python convert-output-to-hdf5.py** to convert all data to easy managable HDF5 data sets.
+3. ``python run-sns-analysis.py``: Start analysis of the runs specified in runDirs. About 40 minutes of data can be analyzed in one minute of wall time.
+4. ``python sns-missing-files.py 0``: Check for any missing files. Usually happens if jobs are held due to other people having higher priority on that node.
+5. ``python sns-missing-files.py 1``: Reanalyze all missing data.
+5. ``python convert-output-to-hdf5.py``: Convert all data to easy managable HDF5 data sets.
 6. Move all HDF5 data to their respective run folder in **/csi/bjs-analysis/Processed/**
-7. On Condor invoke **python calculate-stability-data.py**
+7. ``python calculate-stability-data.py``: Reads the info part of the HDF5 data and creates easy to handle HDF5 tables containing info about the detector stability
