@@ -11,7 +11,7 @@ def createCondorFile(program,outLabel,run):
     with open('/home/bjs66/CondorFiles/%s-%s.condor'%(outLabel,run),'w') as f:
         
         # Fixed program location'
-        f.write('Executable = %s.py\n'%program) #/home/bjs66/anaconda2/bin/python2.7\n')
+        f.write('Executable = %s.py\n'%program)
         
         # Arguments passed to the exe:
         # Set main run directory, e.g. Run-15-10-02-27-32-23/151002
@@ -49,16 +49,12 @@ def main(prog):
                 'stability': '_calculateStabilityData',
                 'reduce': '_reduceDataSet'}
     
-    labelDict = {'convert': '_convertData',
-                 'stability': '_calculateStabilityData',
-                 'reduce': '_reduceDataSet'}
-    
+
     if prog != 'move':
         pyProg = progDict[prog]
-        outLabel = labelDict[prog]
         for run in runDirs:
-            createCondorFile(pyProg,outLabel,run)
-            cmd = 'condor_submit /home/bjs66/CondorFiles/$s-%s.condor'%(outLabel,run)
+            createCondorFile(pyProg,prog,run)
+            cmd = 'condor_submit /home/bjs66/CondorFiles/$s-%s.condor'%(prog,run)
             print cmd
 #            os.system(cmd)
             tm.sleep(1)
