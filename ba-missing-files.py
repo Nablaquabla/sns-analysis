@@ -90,7 +90,10 @@ def main(runMissing):
             
             # Check if there is a file missing in the day folder
             if len(inputList) != len(outputList_B) or len(inputList) != len(outputList_S) or len(inputList) != len(outputList_I):
-                missing = list(set(inputList) - set(outputList_B))
+                missingB = set(inputList) - set(outputList_B)
+                missingI = set(inputList) - set(outputList_I)
+                missingS = set(inputList) - set(outputList_S)
+                missing = list((missingB | missingI) | missingS)
                 if len(missing) > 0: 
                     print len(missing)
                 if runMissing == '1':

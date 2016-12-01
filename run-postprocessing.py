@@ -54,7 +54,7 @@ def main(prog):
         pyProg = progDict[prog]
         for run in runDirs:
             createCondorFile(pyProg,prog,run)
-            cmd = 'condor_submit /home/bjs66/CondorFiles/$s-%s.condor'%(prog,run)
+            cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(prog,run)
             print cmd
 #            os.system(cmd)
             tm.sleep(1)
