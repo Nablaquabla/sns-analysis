@@ -48,11 +48,11 @@ def main(runMissing):
 
     # Choose run to analyze
 #    runDirs = ['Run-15-06-25-12-53-44']
-    runDirs = ['Run-15-06-26-11-23-13','Run-15-07-31-18-30-14','Run-15-10-03-09-26-22']
+#    runDirs = ['Run-15-06-26-11-23-13','Run-15-07-31-18-30-14','Run-15-10-03-09-26-22']
 #    runDirs = ['Run-15-07-31-18-30-14']
 #    runDirs = ['Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01','Run-15-09-23-21-16-00']
 #    runDirs = ['Run-15-10-13-13-27-09','Run-15-10-21-13-12-27','Run-15-10-29-15-56-36','Run-15-11-09-11-30-13']
-#    runDirs = ['Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45']
+    runDirs = ['Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45']
 #    runDirs = ['Run-15-08-18-14-51-18']
 #    run = 'Run-15-08-31-00-23-36'
 #    runDirs = ['Run-15-09-21-20-58-01']
@@ -103,8 +103,10 @@ def main(runMissing):
             
             # Check if there is a file missing in the day folder
             if len(inputList) != len(outputList_B) or len(inputList) != len(outputList_S) or len(inputList) != len(outputList_I):
-                missing = list(set(inputList) - set(outputList_B))
-		print missing
+                missingB = set(inputList) - set(outputList_B)
+		missingI = set(inputList) - set(outputList_I)
+                missingS = set(inputList) - set(outputList_S)
+                missing = list((missingB | missingS) | missingI)
                 if len(missing) > 0: 
                     print len(missing)
                 if runMissing == '1':

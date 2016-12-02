@@ -43,8 +43,8 @@ def createCondorFile(program,outLabel,run):
 # -----------------------------------------------------------------------------
 def main(prog):       
     # Choose run dir to process
-    runDirs = ['Run-15-06-25-12-53-44','Run-15-09-21-20-58-01']
-               
+#    runDirs = ['Run-15-06-25-12-53-44','Run-15-09-21-20-58-01']
+    runDirs = ['Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45']           
     progDict = {'convert': '_convertData',
                 'stability': '_calculateStabilityData',
                 'reduce': '_reduceDataSet'}
@@ -55,19 +55,19 @@ def main(prog):
         for run in runDirs:
             createCondorFile(pyProg,prog,run)
             cmd = 'condor_submit /home/bjs66/CondorFiles/%s-%s.condor'%(prog,run)
-            print cmd
-#            os.system(cmd)
+#            print cmd
+            os.system(cmd)
             tm.sleep(1)
     else:
         for run in runDirs:
             cmd = 'mkdir /home/bjs66/csi/bjs-analysis/Processed/%s'%run
-#            os.system(cmd)
-            print cmd
+            os.system(cmd)
+#            print cmd
             tm.sleep(1)
             
             cmd = 'mv /home/bjs66/csi/bjs-analysis/%s/*.h5 /home/bjs66/csi/bjs-analysis/Processed/%s/'%(run,run)
-#            os.system(cmd)
-            print cmd
+            os.system(cmd)
+#            print cmd
             tm.sleep(1)
             
             
