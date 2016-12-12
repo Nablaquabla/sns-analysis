@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 
 	// Calculate prefactors for loglikelihood analysis
 	// timing and fraction from NIMA paper
-	double r = 041;
+	double r = 0.41;
 	double tf = 527.0;
 	double ts = 5600.0;
 

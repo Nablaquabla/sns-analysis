@@ -44,7 +44,13 @@ def createCondorFile(program,outLabel,run):
 def main(prog):       
     # Choose run dir to process
 #    runDirs = ['Run-15-06-25-12-53-44','Run-15-09-21-20-58-01']
-    runDirs = ['Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45']           
+#    runDirs = ['Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45']           
+#    runDirs = ['Run-16-01-07-12-16-36']
+#    runDirs = ['Run-16-02-15-13-46-34']
+#    runDirs = ['Run-16-02-29-11-54-20']
+#    runDirs = ['Run-16-03-09-13-00-14']
+#    runDirs = ['Run-16-03-22-18-09-33','Run-16-03-30-12-44-57']
+    runDirs = ['Run-16-04-12-11-54-27','Run-16-04-20-11-22-48','Run-16-05-05-14-08-52','Run-16-05-17-14-40-34','Run-16-06-02-12-35-56','Run-16-06-17-12-09-12']
     progDict = {'convert': '_convertData',
                 'stability': '_calculateStabilityData',
                 'reduce': '_reduceDataSet'}
