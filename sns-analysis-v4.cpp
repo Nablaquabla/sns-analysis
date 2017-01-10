@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 
 	// Peak thresholds
 	int peak_height_threshold = 3;
-	int peak_width_threshold = 3;
+	int peak_width_threshold = 4;
 
 	// Peak locations in CsI, Muon locations in muon veto
 	std::vector<int> peaks;
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
 			BG_PT[1]  = 19975;
 			BG_ROI[0] = 19975;
 			BG_ROI[1] = 27475;
-			S_PT[0]   = 7475;
+			S_PT[0]   = 7500;
 			S_PT[1]   = 27475;
 			S_ROI[0]  = 27475;
 			S_ROI[1]  = 34975;

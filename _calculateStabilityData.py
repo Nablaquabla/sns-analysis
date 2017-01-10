@@ -120,12 +120,14 @@ def main(args):
     # Write all distribution data to file
     for dKey in distributionKeys:
         dataDict[dKey] = dataDict[dKey][1:].T
-        dataDict[dKey] = 1.0 * dataDict[dKey][:-1] / np.sum(dataDict[dKey][:-1],axis=0)
+        scaling = np.sum(dataDict[dKey][:-1],axis=0)
+        dataDict[dKey] = 1.0 * dataDict[dKey][:-1] / scaling
         dataExtent = [dataDict['elapsedTime'][0],dataDict['elapsedTime'][-1],distributionLimits[dKey][0],distributionLimits[dKey][1]]
 
         h5Out.create_dataset(dKey,data=dataDict[dKey])
         h5Out[dKey].attrs.create('extent',data=dataExtent)
         h5Out[dKey].attrs.create('maximum',data=np.max(dataDict[dKey]))
+        h5Out[dKey].attrs.create('scaling',data=scaling)
     
     # Write all secondary distribution data to file
     for dKey in ['muonHitDist','bigPulseChargeDist','bigPulseOnsetDist','highNPEChargeDist']:
