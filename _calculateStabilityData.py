@@ -92,29 +92,30 @@ def main(args):
     for h5f in np.sort(h5DataFiles):
         day = h5f.split('.')[0]
         f = h5py.File(mainDir + '/%s/%s'%(run,h5f),'r')
-        for time in np.sort(f['/I/'].keys()):
-            elapsedTime = np.round((datetime.datetime.strptime(day+time,'%y%m%d%H%M%S') - t0).total_seconds()/60.0)
-            dataDict['elapsedTime'] = np.append(dataDict['elapsedTime'],elapsedTime)
+        if 'I' in f.keys():
+            for time in np.sort(f['/I/'].keys()):
+                elapsedTime = np.round((datetime.datetime.strptime(day+time,'%y%m%d%H%M%S') - t0).total_seconds()/60.0)
+                dataDict['elapsedTime'] = np.append(dataDict['elapsedTime'],elapsedTime)
+                
+                # Process scalar data
+                for sKey in scalarKeys:
+                    dataDict[sKey] = np.append(dataDict[sKey],map(scalarFunctions[sKey],[f['/I/%s/%s'%(time,scalarKeyConversion[sKey])]]))
             
-            # Process scalar data
-            for sKey in scalarKeys:
-                dataDict[sKey] = np.append(dataDict[sKey],map(scalarFunctions[sKey],[f['/I/%s/%s'%(time,scalarKeyConversion[sKey])]]))
-        
-            # Process primary distribution data
-            for dKey in distributionKeys:
-                dataDict[dKey] = np.vstack((dataDict[dKey],f['/I/%s/%s'%(time,dKey)]))
-            
-            # Process secondary distribution data
-            dKey = 'muonHitDist'
-            dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,'muonHits')],350,[0,35000])[0]))
-            dKey = 'bigPulseChargeDist'
-            dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,'bigPulseCharge')],1000,[0,100000])[0]))
-            dKey = 'bigPulseOnsetDist'
-            dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,'bigPulseOnset')],350,[0,35000])[0]))
-#            dKey = 'waveformChargeDist'
-#            dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,dKey)],350,[0,35000])[0]))
-            dKey = 'highNPEChargeDist'
-            dataDict[dKey] = np.vstack((dataDict[dKey],np.sum(f['/I/%s/%s'%(time,'chargeDist2d')][35:],axis=0)))
+                # Process primary distribution data
+                for dKey in distributionKeys:
+                    dataDict[dKey] = np.vstack((dataDict[dKey],f['/I/%s/%s'%(time,dKey)]))
+                
+                # Process secondary distribution data
+                dKey = 'muonHitDist'
+                dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,'muonHits')],350,[0,35000])[0]))
+                dKey = 'bigPulseChargeDist'
+                dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,'bigPulseCharge')],1000,[0,100000])[0]))
+                dKey = 'bigPulseOnsetDist'
+                dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,'bigPulseOnset')],350,[0,35000])[0]))
+    #            dKey = 'waveformChargeDist'
+    #            dataDict[dKey] = np.vstack((dataDict[dKey],np.histogram(f['/I/%s/%s'%(time,dKey)],350,[0,35000])[0]))
+                dKey = 'highNPEChargeDist'
+                dataDict[dKey] = np.vstack((dataDict[dKey],np.sum(f['/I/%s/%s'%(time,'chargeDist2d')][35:],axis=0)))
         f.close()
 
     # Write all distribution data to file
