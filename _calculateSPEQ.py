@@ -48,7 +48,7 @@ def pFit3(x,p):
 # ============================================================================
 def main(args):
     run = args[1]
-    h5In = h5py.File('/home/bjs66/csi/Processed/Stability/%s.h5'%run,'r+')
+    h5In = h5py.File('/home/bjs66/csi/bjs-analysis/Processed/Stability/%s.h5'%run,'r+')
     speQDists = h5In['/speChargeDist'][...].T
     scaling = h5In['/speChargeDist'].attrs['scaling']
 
@@ -74,10 +74,18 @@ def main(args):
         polyaFits['Error'].append(pars[0][2])
         polyaFits['Width'].append(pars[1][0])
 
+    if 'fittedSPECharges' in h5In.keys():
+        for _type in ['Best','Error','Width']:
+            if 'gauss' in h5In['/fittedSPECharges'].keys():
+                if '%s' in h5In['fittedSPECharges/gauss'].keys()
+                    del h5In['/fittedSPECharges/gauss/%s'%_type]
+            
+        for _type in ['Best','Error','Width']:
+            if 'polya' in h5In['/fittedSPECharges'].keys():
+                if '%s' in h5In['fittedSPECharges/polya'].keys()
+                    del h5In['/fittedSPECharges/polya/%s'%_type]
+
     for _type in ['Best','Error','Width']:
-        if 'fittedSPECharges' in h5In.keys():
-            del h5In['/fittedSPECharges/gauss/%s'%_type]
-            del h5In['/fittedSPECharges/polya/%s'%_type]
         h5In.create_dataset('/fittedSPECharges/gauss/%s'%_type,data=gaussFits[_type])
         h5In.create_dataset('/fittedSPECharges/polya/%s'%_type,data=polyaFits[_type])
     h5In.close()

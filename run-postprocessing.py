@@ -62,6 +62,8 @@ def main(prog):
                 'stability': '_calculateStabilityData',
                 'speCharge': '_calculateSPEQ',
                 'reduce': '_reduceDataSet'}
+    if prog not in progDict.keys() and prog != 'move':
+        return
 
     if prog != 'move':
         pyProg = progDict[prog]
