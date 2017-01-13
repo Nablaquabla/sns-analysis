@@ -66,24 +66,20 @@ def main(args):
 
         x2,pars,xfit,yfit = ef.arbFit(gFit3,xQ[c],yQ[c],'Poisson',[60.0,5.0,0.85*np.max(yQ),0.1*np.max(yQ),0.05*np.max(yQ),0.1*np.max(yQ),0,5.0,0],lims)
         gaussFits['Best'].append(pars[0][0])
-        gaussFits['Error'].append(pars[0][2])
-        gaussFits['Width'].append(pars[1][0])
+        gaussFits['Error'].append(pars[2][0])
+        gaussFits['Width'].append(pars[0][1])
 
         x2,pars,xfit,yfit = ef.arbFit(pFit3,xQ[c],yQ[c],'Poisson',[60.0,5.0,0.85*np.max(yQ),0.1*np.max(yQ),0.05*np.max(yQ),0.1*np.max(yQ),0,5.0,0],lims)
         polyaFits['Best'].append(pars[0][0])
-        polyaFits['Error'].append(pars[0][2])
-        polyaFits['Width'].append(pars[1][0])
+        polyaFits['Error'].append(pars[2][0])
+        polyaFits['Width'].append(pars[0][1])
 
-    if 'fittedSPECharges' in h5In.keys():
-        for _type in ['Best','Error','Width']:
-            if 'gauss' in h5In['/fittedSPECharges'].keys():
-                if '%s' in h5In['fittedSPECharges/gauss'].keys()
-                    del h5In['/fittedSPECharges/gauss/%s'%_type]
-            
-        for _type in ['Best','Error','Width']:
-            if 'polya' in h5In['/fittedSPECharges'].keys():
-                if '%s' in h5In['fittedSPECharges/polya'].keys()
-                    del h5In['/fittedSPECharges/polya/%s'%_type]
+    
+    for _type in ['Best','Error','Width']:
+        if '/fittedSPECharges/gauss/%s'%_type in h5In:
+            del h5In['/fittedSPECharges/gauss/%s'%_type]
+        if '/fittedSPECharges/polya/%s'%_type in h5In:
+            del h5In['/fittedSPECharges/polya/%s'%_type]
 
     for _type in ['Best','Error','Width']:
         h5In.create_dataset('/fittedSPECharges/gauss/%s'%_type,data=gaussFits[_type])
