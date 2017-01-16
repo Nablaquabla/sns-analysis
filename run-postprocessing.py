@@ -57,7 +57,7 @@ def main(prog):
 #    runDirs = ['Run-16-06-27-17-50-08','Run-16-07-06-18-25-19','Run-16-07-12-11-44-55']
 #    runDirs = ['Run-16-07-18-11-50-24','Run-16-07-21-11-59-39']
 
-#    runDirs = [x for x in os.listdir('/home/bjs66/csi/bjs-analysis/Processed/') if 'Run' in x]
+    runDirs = [x for x in os.listdir('/home/bjs66/csi/bjs-analysis/Processed/') if 'Run' in x]
     progDict = {'convert': '_convertData',
                 'stability': '_calculateStabilityData',
                 'speCharge': '_calculateSPEQ',
