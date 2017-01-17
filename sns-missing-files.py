@@ -98,8 +98,8 @@ def main(runMissing):
                 missing = list((missingB | missingS) | missingI)
                 if len(missing) > 0: 
                     print len(missing)
-                    for m in missing:
-                        print m
+                    #for m in missing:
+                    #    print m
                 if runMissing == '1':
                     for m in missing:
                         createCondorFile(dataRunDir,outDir,run,day,m)

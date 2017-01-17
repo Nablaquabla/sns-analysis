@@ -46,7 +46,7 @@ def main(argv):
     keys = ['timestamp','bl-csi','bl-mv','pe-pt','pe-roi','pe-iw','arrival','charge','ll-real','ll-flat','rt10','rt50','rt90','muon1','muon2','muon3','pe-total']
 
     # What data type is necessary to save the information provided in the csv files. Mainly used to save some storage space
-    datatypes = {'timestamp': np.dtype(np.uint64),
+    datatypes = {'timestamp': np.dtype(np.float),
                  'bl-csi': np.dtype(np.int16),
                  'bl-mv': np.dtype(np.int16),
                  'pe-pt': np.dtype(np.uint16),
