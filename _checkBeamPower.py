@@ -13,7 +13,6 @@ def main(argv):
 
     # Get beam power file and prepare keys for data readout
     bPF = h5py.File('/home/bjs66/csi/bjs-analysis/BeamPowerHistory/BeamPowerHistory.h5','r')
-#    bPF = h5py.File('F:/Work-Data-Storage/BeamPower/BeamPowerHistory.h5','r')
     dayTS = datetime.datetime(2000 + int(d[:2]), int(d[2:4]), int(d[4:6]))
     dayTSArray = [dayTS + datetime.timedelta(days=-1), dayTS, dayTS + datetime.timedelta(days=1)]
     dayKeys = [x.strftime('%Y%m%d') for x in dayTSArray]
@@ -28,16 +27,21 @@ def main(argv):
     # Remove timestamps with zero and almost zero power
     powerCut = (powerData >= 5e-5)
     timeData = timeData[powerCut]
+    beam_was_on = (len(timeData) > 0)
 
     # Create hdf5 file
     mainDir = '/home/bjs66/csi/bjs-analysis/Processed/'
-#    mainDir = 'F:/Work-Data-Storage/CsI/Condor/SNS/Testdata/'
 
     # Open HDF5 file
     f = h5py.File(mainDir + run + '/' + d + '.h5', 'r+')
 
     # For both signal and background window go through all events and tag those that happend during a beam on period
     for wd in ['S','B']:
+
+        # If there has already been a beam power check delete the previous data set and replace it with the new one
+        if '/%s/beamOn'%wd in f:
+            del f['/%s/beamOn'%wd]
+
         # Array to store beam-on flags
         beamOnArray = []
 
@@ -50,21 +54,24 @@ def main(argv):
         idx = 0
         skip = False
         for et in evtTS:
-                while True:
-                    if skip:
-                        beamOnArray.append(False)
-                        break
-                    elif et == timesWithBeam[idx]:
-                        beamOnArray.append(True)
-                        break
-                    elif et > timesWithBeam[idx]:
-                        idx += 1
-                        if idx >= len(timesWithBeam):
-                            skip = True
-                        continue
-                    elif et < timesWithBeam[idx]:
-                        beamOnArray.append(False)
-                        break
+                if beam_was_on:
+                    while True:
+                        if skip:
+                            beamOnArray.append(False)
+                            break
+                        elif et == timesWithBeam[idx]:
+                            beamOnArray.append(True)
+                            break
+                        elif et > timesWithBeam[idx]:
+                            idx += 1
+                            if idx >= len(timesWithBeam):
+                                skip = True
+                            continue
+                        elif et < timesWithBeam[idx]:
+                            beamOnArray.append(False)
+                            break
+                else:
+                    beamOnArray.append(False)
 
         # Write beam on flag to HDF5 file
         f.create_dataset('/%s/beamOn'%wd,data=beamOnArray,dtype=bool)
@@ -75,8 +82,3 @@ def main(argv):
 # ============================================================================
 if __name__ == '__main__':
     main(sys.argv)
-#    main(['','Run-15-06-25-12-53-44','150626'])
-
-
-
-

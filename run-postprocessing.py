@@ -43,7 +43,7 @@ def createCondorFile(program,outLabel,run):
 # -----------------------------------------------------------------------------
 def main(prog):
     # Choose run to analyze
-#    runDirs = ['Run-15-06-25-12-53-44']
+    runDirs = ['Run-15-06-25-12-53-44']
 #    runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14']
 #    runDirs = ['Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01']
 #    runDirs = ['Run-15-09-23-21-16-00','Run-15-10-03-09-26-22','Run-15-10-13-13-27-09']
@@ -57,7 +57,7 @@ def main(prog):
 #    runDirs = ['Run-16-06-27-17-50-08','Run-16-07-06-18-25-19','Run-16-07-12-11-44-55']
 #    runDirs = ['Run-16-07-18-11-50-24','Run-16-07-21-11-59-39','Run-16-07-28-12-49-17']
 
-    runDirs = [x for x in os.listdir('/home/bjs66/csi/bjs-analysis/Processed/') if 'Run' in x]
+#    runDirs = [x for x in os.listdir('/home/bjs66/csi/bjs-analysis/Processed/') if 'Run' in x]
     progDict = {'convert': '_convertData',
                 'stability': '_calculateStabilityData',
                 'speCharge': '_calculateSPEQ',

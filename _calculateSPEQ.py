@@ -50,8 +50,6 @@ def main(args):
     run = args[1]
     h5In = h5py.File('/home/bjs66/csi/bjs-analysis/Processed/Stability/%s.h5'%run,'r+')
     speQDists = h5In['/speChargeDist'][...].T
-    scaling = h5In['/speChargeDist'].attrs['scaling']
-
 
     xQ = np.arange(-50,249)
     gaussFits = {'Best': [], 'Error': [], 'Width': []}
@@ -61,7 +59,7 @@ def main(args):
     for i,speQ in enumerate(speQDists):
         xMin = np.argmax(np.diff(speQ)) - 50 + 10
 
-        yQ = speQ * scaling[i]
+        yQ = speQ
         c = xQ >= xMin
 
         x2,pars,xfit,yfit = ef.arbFit(gFit3,xQ[c],yQ[c],'Poisson',[60.0,5.0,0.85*np.max(yQ),0.1*np.max(yQ),0.05*np.max(yQ),0.1*np.max(yQ),0,5.0,0],lims)
