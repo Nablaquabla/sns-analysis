@@ -18,7 +18,6 @@ def main(argv):
     dayTSArray = [dayTS + datetime.timedelta(days=-1), dayTS, dayTS + datetime.timedelta(days=1)]
     dayKeys = [x.strftime('%Y%m%d') for x in dayTSArray]
 
-    print dayKeys
     # Read power data for current day +/- one day
     timeData = np.array([0])
     powerData = np.array([0])
@@ -39,7 +38,6 @@ def main(argv):
 
     # For both signal and background window go through all events and tag those that happend during a beam on period
     for wd in ['S','B']:
-        print 'Analyzing window ', wd
         # Array to store beam-on flags
         beamOnArray = []
 
