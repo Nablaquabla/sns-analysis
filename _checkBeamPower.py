@@ -12,7 +12,7 @@ def main(argv):
     d = argv[2]
 
     # Get beam power file and prepare keys for data readout
-    bPF = h5py.File('/home/bjs66/csi/bjs-analysis/BeamPowerHistory/beamPowerHistory.h5','r')
+    bPF = h5py.File('/home/bjs66/csi/bjs-analysis/BeamPowerHistory/BeamPowerHistory.h5','r')
 #    bPF = h5py.File('F:/Work-Data-Storage/BeamPower/BeamPowerHistory.h5','r')
     dayTS = datetime.datetime(2000 + int(d[:2]), int(d[2:4]), int(d[4:6]))
     dayTSArray = [dayTS + datetime.timedelta(days=-1), dayTS, dayTS + datetime.timedelta(days=1)]
