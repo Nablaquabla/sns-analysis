@@ -7,10 +7,10 @@ import time as tm
 # -----------------------------------------------------------------------------
 def createCondorFile(run,day):
     # Condor submission file name convention: run-day-time.condor
-    with open('/home/bjs66/CondorFiles/Convert-%s-%s.condor'%(run,day),'w') as f:
+    with open('/home/bjs66/CondorFiles/CheckBP-%s-%s.condor'%(run,day),'w') as f:
 
         # Fixed program location'
-        f.write('Executable = _convertData.py\n') #/home/bjs66/anaconda2/bin/python2.7\n')
+        f.write('Executable = _checkBeamPower.py\n') #/home/bjs66/anaconda2/bin/python2.7\n')
 
         # Arguments passed to the exe:
         # Set main run directory, e.g. Run-15-10-02-27-32-23/151002
@@ -26,9 +26,9 @@ def createCondorFile(run,day):
         f.write('request_memory = 600\n')
 
         # Output, error and log name convention: run-day-time.log/out/err
-        f.write('log = ../../Logs/Convert-%s-%s.log\n'%(run,day))
-        f.write('Output = ../../Outs/Convert-%s-%s.out\n'%(run,day))
-        f.write('Error = ../../Errs/Convert-%s-%s.err\n'%(run,day))
+        f.write('log = ../../Logs/CheckBP-%s-%s.log\n'%(run,day))
+        f.write('Output = ../../Outs/CheckBP-%s-%s.out\n'%(run,day))
+        f.write('Error = ../../Errs/CheckBP-%s-%s.err\n'%(run,day))
 
         # Do not write any emails
         f.write('notification = never\n')
@@ -59,7 +59,7 @@ def main():
         for d in days:
             if True:
                 createCondorFile(run,d)
-                cmd = 'condor_submit /home/bjs66/CondorFiles/Convert-%s-%s.condor'%(run,d)
+                cmd = 'condor_submit /home/bjs66/CondorFiles/CheckBP-%s-%s.condor'%(run,d)
                 os.system(cmd)
                 tm.sleep(1)
 
