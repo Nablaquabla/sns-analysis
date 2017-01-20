@@ -41,14 +41,14 @@ def gFit3(x,p):
     _t1 = p[2] * gauss(x,p[0],p[1],1)
     _t2 = p[3] * gauss(x,p[0],p[1],2)
     _t3 = p[4] * gauss(x,p[0],p[1],3)
-    _tn = p[5] * np.exp(-x/p[7]) + p[8]
+    _tn = p[5] * np.exp(-x/p[6]) + p[7]
     return _t1 + _t2 + _t3 + _tn
 
 def pFit3(x,p):
     _t1 = p[2] * polya(x,p[0],p[1],1)
     _t2 = p[3] * polya(x,p[0],p[1],2)
     _t3 = p[4] * polya(x,p[0],p[1],3)
-    _tn = p[5] * np.exp(-x/p[7]) + p[8]
+    _tn = p[5] * np.exp(-x/p[6]) + p[7]
     return _t1 + _t2 + _t3 + _tn
 
 # ============================================================================
@@ -64,38 +64,38 @@ def main(args):
     # Get all days in given run folder
     daysInRun = [x.split('.')[0] for x in os.listdir(runDir)]
 
-    # Prepare output array
-    speQArr = {'Times': [],
-               'GaussBest': [],
-               'GaussErr': [],
-               'PolyaBest': [],
-               'PolyaErr': []}
-
     # Create dummy pars variables
-    parsG = np.zeros((3,9))
-    parsP = np.zeros((3,9))
+    parsG = np.zeros((3,8))
+    parsP = np.zeros((3,8))
 
     # For each day in the run folder read the HDF5 file and fit SPEQ spectra
     for day in daysInRun:
-        h5In = h5py.File('/home/bjs66/csi/bjs-analysis/Processed/%s.h5'%run,'r+')
+        h5In = h5py.File(runDir + '/' + day + '.h5', 'r+')
+        
+        # Prepare/reset output array
+        speQArr = {'Times': [],
+                   'GaussBest': [],
+                   'GaussErr': [],
+                   'PolyaBest': [],
+                   'PolyaErr': []}
 
         # Perform analysis for each hour in day file
         for time in np.sort(h5In['/I/'].keys()):
 
             # Calculate seconds in epoch based on day and hour
             eTS = eastern.localize(datetime.datetime.strptime(day+time,'%y%m%d%H%M%S'))
-            uTS = utc.localize(eTS)
+            uTS = eTS.astimezone(utc)
             sSE = (uTS - epochBeginning).total_seconds()
 
-            speQArr['Time'].append(sSE)
+            speQArr['Times'].append(sSE)
 
             # Prepare fit data
             xQ = np.arange(-50,249)
-            yQ = h5In['/I/%s/speChargeDist'%time]
+            yQ = h5In['/I/%s/speChargeDist'%time][...]
 
             # In 1 hour of data there are approximately 10^6 spe events. So if there are less than 10^5 use previous data point
             if np.sum(yQ) > 1e5:
-                p0 = [60.0,5.0,0.85*np.max(yQ),0.1*np.max(yQ),0.05*np.max(yQ),0.1*np.max(yQ),0,5.0,0]
+                p0 = [60.0, 5.0, 0.85*np.max(yQ), 0.1*np.max(yQ), 0.05*np.max(yQ), 0.1*np.max(yQ), 10.0, 0]
                 lims = [[2,1,0,0,0],[3,1,0,0,0],[4,1,0,0,0],[5,1,0,0,0]]
 
                 # Find plateau before the SPE peak
