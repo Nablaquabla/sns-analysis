@@ -37,8 +37,8 @@ def main(args):
 
         # Get SPE charge fits for the current day
         speCharges['Time'] = h5In['/SPEQ/Times'][...]
-        speCharges['Gauss'] = h5In['/SPEQ/GaussBest'][...][0]
-        speCharges['Polya'] = h5In['/SPEQ/PolyaBest'][...][0]
+        speCharges['Gauss'] = h5In['/SPEQ/GaussBest'][...][:,0]
+        speCharges['Polya'] = h5In['/SPEQ/PolyaBest'][...][:,0]
 
         # For both signal and background window calculate the number of PE from charge for both gaussian and polya spe dists
         for wd in ['S','B']:
@@ -48,30 +48,29 @@ def main(args):
             times = h5In['/%s/timestamp'%wd][...]
            
             # Variables for getting the correct SPEQ from fits based on the timestamp
-            speQidx = 0
-            speQidxMax = len(speCharges['Time'])
-            notLastQidx = True
-
+            qIdx = 0
+            qSize = len(speCharges['Time']) - 1
+            qIdxUpdate = True
             npe = {'Gauss':[],'Polya':[]}
 
             # For each event get the timestamp and charge. Get the correct SPEQ and convert the charge to NPE
             for q,t in zip(charge,times):
+                if qIdxUpdate:
+                    if t >= speCharges['Time'][qIdx]:
+                        qIdx += 1
+                    if qIdx >= qSize:
+                        qIdxUpdate = False
                 
-                # Check whether the current SPEQ is still valid                
-                if notLastQidx and t >= speCharges['Time'][speQidx + 1]:
-                    speQidx += 1
-                    if speQidx == speQidxMax:
-                        notLastQidx = False
-
+                print qIdx,speCharges['Gauss'][qIdx]
                 # Convert charge to NPE
-                npe['Gauss'].append(q/speCharges['Gauss'][speQidx])
-                npe['Polya'].append(q/speCharges['Polya'][speQidx])
+                npe['Gauss'].append(q/speCharges['Gauss'][qIdx])
+                npe['Polya'].append(q/speCharges['Polya'][qIdx])
                 
             if '/%s/npe-gauss'%wd in h5In:
                 del h5In['/%s/npe-gauss'%wd]
             h5In.create_dataset('/%s/npe-gauss'%wd, data=npe['Gauss'])
 
-             if '/%s/npe-polya'%wd in h5In:
+            if '/%s/npe-polya'%wd in h5In:
                 del h5In['/%s/npe-polya'%wd]
             h5In.create_dataset('/%s/npe-polya'%wd, data=npe['Polya'])
         h5In.close()
