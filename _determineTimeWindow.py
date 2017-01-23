@@ -51,28 +51,29 @@ def main(args):
             qIdx = 0
             qSize = len(speCharges['Time']) - 1
             qIdxUpdate = True
-            npe = {'Gauss':[],'Polya':[]}
-
+            speQIdxArray = []
+            if qSize == 0:
+                qIdxUpdate = False
             # For each event get the timestamp and charge. Get the correct SPEQ and convert the charge to NPE
             for q,t in zip(charge,times):
                 if qIdxUpdate:
-                    if t >= speCharges['Time'][qIdx]:
+                    if t >= speCharges['Time'][qIdx+1]:
                         qIdx += 1
                     if qIdx >= qSize:
                         qIdxUpdate = False
-                
-                print qIdx,speCharges['Gauss'][qIdx]
-                # Convert charge to NPE
-                npe['Gauss'].append(q/speCharges['Gauss'][qIdx])
-                npe['Polya'].append(q/speCharges['Polya'][qIdx])
-                
-            if '/%s/npe-gauss'%wd in h5In:
-                del h5In['/%s/npe-gauss'%wd]
-            h5In.create_dataset('/%s/npe-gauss'%wd, data=npe['Gauss'])
-
+                speQIdxArray.append(qIdx)
+             
             if '/%s/npe-polya'%wd in h5In:
                 del h5In['/%s/npe-polya'%wd]
-            h5In.create_dataset('/%s/npe-polya'%wd, data=npe['Polya'])
+               
+            if '/%s/npe-gauss'%wd in h5In:
+                del h5In['/%s/npe-gauss'%wd]
+
+            if '/%s/speQindex'%wd in h5In:
+                del h5In['/%s/speQindex'%wd]
+
+            h5In.create_dataset('/%s/speQindex'%wd, data=speQIdxArray)
+
         h5In.close()
 
 # ============================================================================
