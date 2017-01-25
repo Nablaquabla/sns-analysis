@@ -57,12 +57,18 @@ def main(args):
 
             # Get and split time windows
             speWindow = {}
-            _t_speWindow = h5In['/%s/speQindex'][...]
+            _t_speWindow = h5In['/%s/speQindex'%wd][...]
             speWindow['BeamOn'] = _t_speWindow[beamPowerStatus]
             speWindow['BeamOff'] = _t_speWindow[np.logical_not(beamPowerStatus)]
 
+             # Get and split time windows
+            evtTime = {}
+            _t_evtTime = h5In['/%s/timestamp'%wd][...]
+            evtTime['BeamOn'] = _t_evtTime[beamPowerStatus]
+            evtTime['BeamOff'] = _t_evtTime[np.logical_not(beamPowerStatus)]
+
             # Maximum number of PE in spectrum
-            nBins = 200
+            nBins = 100
 
             # For each hour
             for i in range(len(speCharges['time'])):
@@ -72,9 +78,17 @@ def main(args):
 
                     # Determine which data actually was taken during beam on/off periods
                     cutTime = (speWindow[bP] == i)
+                    
+                    # Determine time in window:
+                    _tTimes = evtTime[bP][cutTime]
+                    if len(_tTimes) >= 2:
+                        timeInWindow = _tTimes[-1] - _tTimes[0]
+                    else:
+                        timeInWindow = 0
+                    evtsInWindow = len(_tTimes)
 
                     # Select the maximum number of peaks in the pretrace
-                    for pePT in [4,3,2,1,0]:
+                    for pePT in [5,4,3,2,1,0]:
 
                         # And apply the pretrace cut
                         cutPEPT = (peInPT[bP] <= pePT)
@@ -86,8 +100,11 @@ def main(args):
                         spectrumGauss = np.histogram(charge[bP][totalCut]/speCharges['gauss'][i],nBins,[-0.5,nBins-0.5])[0]
                         spectrumPolya = np.histogram(charge[bP][totalCut]/speCharges['polya'][i],nBins,[-0.5,nBins-0.5])[0]
 
-                    h5Out.create_dataset('/%s/PEMax-%s/%s/%s/%s'%(bP,pePT,speCharges['time'][i],wd,'gauss'),data=spectrumGauss)
-                    h5Out.create_dataset('/%s/PEMax-%s/%s/%s/%s'%(bP,pePT,speCharges['time'][i],wd,'polya'),data=spectrumPolya)
+                        h5Out.create_dataset('/%s/%s/%s/PEPTMax-%s/%s'%(speCharges['time'][i],bP,wd,pePT,'gauss'),data=spectrumGauss)
+                        h5Out.create_dataset('/%s/%s/%s/PEPTMax-%s/%s'%(speCharges['time'][i],bP,wd,pePT,'polya'),data=spectrumPolya)
+                    h5Out['/%s/%s/%s'%(speCharges['time'][i],bP,wd)].attrs['timeSpentInWindow'] = timeInWindow
+                    h5Out['/%s/%s/%s'%(speCharges['time'][i],bP,wd)].attrs['eventsInWindow'] = evtsInWindow
+
 
         h5In.close()
     h5Out.close()

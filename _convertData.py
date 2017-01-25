@@ -77,19 +77,42 @@ def main(argv):
     # ==== Process info files ====
     # Determine hour long sub-times for each day. If there are less than
     # half an hour at the end of the day add it to the previous bin
-    i = 0
+    # SNS mode:
+#    i = 0
+#    subTimeArray = []
+#    while True:
+#        if (len(times) - (i+1)*60) >= 30:
+#            _subT = times[i*60:(i+1)*60]
+#            subTimeArray.append(_subT)
+#            if (i+1)*60 > len(times): break
+#            i += 1
+#        else:
+#            _subT = times[i*60:]
+#            subTimeArray.append(_subT)
+#            break
+#    subTimeArray = np.asarray(subTimeArray)
+
     subTimeArray = []
-    while True:
-        if (len(times) - (i+1)*60) >= 30:
-            _subT = times[i*60:(i+1)*60]
-            subTimeArray.append(_subT)
-            if (i+1)*60 > len(times): break
-            i += 1
+    tFirst = datetime.datetime(2015,1,1,int(times[0][:2]),int(times[0][2:4]),int(times[0][4:6]))
+    tLast = datetime.datetime(2015,1,1,int(times[-1][:2]),int(times[-1][2:4]),int(times[-1][4:6]))
+
+    currentHour = tFirst  
+    _tmpSubT = []
+    for tm in times:
+        tCurrent = datetime.datetime(2015,1,1,int(tm[:2]),int(tm[2:4]),int(tm[4:6]))
+        deltaT = (tCurrent - currentHour).total_seconds()
+        if deltaT <= 3600.0:
+            _tmpSubT.append(tm)
         else:
-            _subT = times[i*60:]
-            subTimeArray.append(_subT)
-            break
-    subTimeArray = np.asarray(subTimeArray)
+            if (tLast - tCurrent).total_seconds() <= 5400.0:
+                _tmpSubT.append(tm)
+            else:
+                subTimeArray.append(_tmpSubT)
+                _tmpSubT = [tm]
+                currentHour = tCurrent
+
+    if len(_tmpSubT) > 0:
+        subTimeArray.append(_tmpSubT)
 
     # For each sub-time merge all distribution data and concatenate the
     # important numbers

@@ -99,7 +99,14 @@ def main(args):
                 lims = [[2,1,0,0,0],[3,1,0,0,0],[4,1,0,0,0],[5,1,0,0,0]]
 
                 # Find plateau before the SPE peak
-                xMin = np.argmax(np.diff(yQ)) - 50 + 10
+                # sns data: 
+#                xMin = np.argmax(np.diff(yQ)) - 50 + 10
+                # Ba data:
+                xMin = np.argmax(yQ) - 50
+                if xMin > 50: 
+                    xMin -= 20
+                else:
+                    xMin -= 10
                 c = xQ >= xMin
 
                 # Fit gaussian SPE charge distribution
@@ -119,7 +126,7 @@ def main(args):
                 speQArr['PolyaErr'].append(parsP[2][:])
 
         # Write data to HDF5 file replacing already existing data
-        for key in speQArr:
+        for key in speQArr.keys():
             if '/SPEQ/%s'%key in h5In:
                 del h5In['/SPEQ/%s'%key]
             h5In.create_dataset('/SPEQ/%s'%key,data=speQArr[key])

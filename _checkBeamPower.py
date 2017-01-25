@@ -53,6 +53,8 @@ def main(argv):
         # Get timestamp for each event and see if there was beam
         idx = 0
         skip = False
+        if len(timesWithBeam) == 0:
+            skip = True
         for et in evtTS:
                 if beam_was_on:
                     while True:
