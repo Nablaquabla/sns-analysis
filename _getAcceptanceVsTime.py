@@ -7,7 +7,6 @@ Created on Mon Feb 01 15:03:56 2016
 
 import h5py
 import numpy as np
-import easyfy as ez
 import easyfit as ef
 import datetime
 import pytz
@@ -22,22 +21,22 @@ epochBeginning = utc.localize(datetime.datetime(1970,1,1))
 #                                Run program
 # ============================================================================
 if __name__ == '__main__':
-#    runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14',
-#               'Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01',
-#               'Run-15-09-23-21-16-00','Run-15-10-03-09-26-22','Run-15-10-13-13-27-09',
-#               'Run-15-10-21-13-12-27','Run-15-10-29-15-56-36','Run-15-11-09-11-30-13',
-#               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45',
-#               'Run-15-12-26-08-30-40','Run-16-01-07-12-16-36','Run-16-02-02-16-26-26',
-#               'Run-16-02-15-13-46-34','Run-16-02-29-11-54-20','Run-16-03-09-13-00-14',
-#               'Run-16-03-22-18-09-33','Run-16-03-30-12-44-57','Run-16-04-12-11-54-27',
-#               'Run-16-04-20-11-22-48','Run-16-05-05-14-08-52','Run-16-05-17-14-40-34',
-#               'Run-16-06-02-12-35-56','Run-16-06-17-12-09-12','Run-16-06-27-17-50-08',
-#               'Run-16-07-06-18-25-19','Run-16-07-12-11-44-55','Run-16-07-18-11-50-24',
-#               'Run-16-07-21-11-59-39','Run-16-07-28-12-49-17']
-    runDirs = ['Run-15-06-25-12-53-44']
+    runDirs = ['Run-15-06-25-12-53-44','Run-15-06-26-11-23-13','Run-15-07-31-18-30-14',
+               'Run-15-08-18-14-51-18','Run-15-08-31-00-23-36','Run-15-09-21-20-58-01',
+               'Run-15-09-23-21-16-00','Run-15-10-03-09-26-22','Run-15-10-13-13-27-09',
+               'Run-15-10-21-13-12-27','Run-15-10-29-15-56-36','Run-15-11-09-11-30-13',
+               'Run-15-11-20-11-34-48','Run-15-11-24-15-35-32','Run-15-12-14-11-21-45',
+               'Run-15-12-26-08-30-40','Run-16-01-07-12-16-36','Run-16-02-02-16-26-26',
+               'Run-16-02-15-13-46-34','Run-16-02-29-11-54-20','Run-16-03-09-13-00-14',
+               'Run-16-03-22-18-09-33','Run-16-03-30-12-44-57','Run-16-04-12-11-54-27',
+               'Run-16-04-20-11-22-48','Run-16-05-05-14-08-52','Run-16-05-17-14-40-34',
+               'Run-16-06-02-12-35-56','Run-16-06-17-12-09-12','Run-16-06-27-17-50-08',
+               'Run-16-07-06-18-25-19','Run-16-07-12-11-44-55','Run-16-07-18-11-50-24',
+               'Run-16-07-21-11-59-39','Run-16-07-28-12-49-17']
+#    runDirs = ['Run-15-06-25-12-53-44']
 
     dataDir = '/home/bjs66/csi/bjs-analysis/Processed/'
-    powerDir = '/home/bjs66/csi/bjs-analysis/BeamPowerHistory'
+    powerDir = '/home/bjs66/csi/bjs-analysis/BeamPowerHistory/'
 
     # Read stop times of runs:
     data = np.loadtxt('/home/bjs66/GitHub/sns-analysis/start-stop-times-of-runs.txt',dtype=str)
@@ -50,15 +49,19 @@ if __name__ == '__main__':
 
     # For each run to be analyzed
     for run in runDirs:
-
+        print run
         # Find each day in the run
-        dayNames = os.listdir(dataDir + run)
+        dayNames = np.sort(os.listdir(dataDir + run))
 
         # Get the correct stopping time for the run
         for d in data:
             if run in d:
-                easternEndTS = eastern.localize(datetime.datetime.strptime(d.split(' '),'%y-%m-%d-%H-%M-%S'))
+                easternEndTS = eastern.localize(datetime.datetime.strptime(d[1],'%y-%m-%d-%H-%M-%S'))
                 utcEndTS = (easternEndTS.astimezone(utc) - epochBeginning).total_seconds()
+
+        # Prepare output arrays:
+        dOut = {'time': [], 'sPT': [], 'bPT': [], 'muon': [], 'linGate': [], 'overflow': [], 'power': [], 'duration': [], 'beamOnDuration': [], 'beamOffDuration': []}
+
 
         # For each day in the run
         for dN in dayNames:
@@ -75,7 +78,7 @@ if __name__ == '__main__':
             if easternDayTS.date() == easternEndTS.date():
                 lastTSForThisDay = utcEndTS
             else:
-                lastTSForThisDay = (easternEndTS.astimezone(easternDayTS + datetime.timedelta(days=1)) - epochBeginning).total_seconds()
+                lastTSForThisDay = ((easternDayTS + datetime.timedelta(days=1)).astimezone(utc) - epochBeginning).total_seconds()
 
             # Read power data for current day
             timeData = h5Power['/%s/time'%day][...]
@@ -93,13 +96,14 @@ if __name__ == '__main__':
 
             # For each time in the info file get the data needed to calculate the acceptances for those
             # periods and integrate the power for that timefram
-            for i in len(timeArray):
+            for i in range(len(timeArray)):
                 # Get the time as eastern time string
                 time = timeArray[i]
 
                 # Get the proper start and stop timestamps in utc seconds since epoch
                 tsStart = utcTS[i]
                 tsStop = utcTS[i+1] - 1
+                duration = tsStop - tsStart
 
                 # Read data
                 nWaveforms = np.sum(h5In['/I/%s/waveformsProcessed'%time][...])
@@ -109,8 +113,31 @@ if __name__ == '__main__':
                 linGates = np.sum(h5In['/I/%s/linearGates'%time][...])
                 overflows = np.sum(h5In['/I/%s/overflows'%time][...])
 
-                print time, 1.0*overflows/nWaveforms
+                # Integrate the total power on target between the start and stop time
+                cutPowerTimes = (timeData>=tsStart) * (timeData<=tsStop)
+                beamOnSeconds = np.sum(powerData[cutPowerTimes] >= 5e-5)
+                beamOffSeconds = (tsStop - tsStart + 1) - beamOnSeconds
+                beamPower = np.sum(powerData[cutPowerTimes])/3600.0 # In MWhr
+                
+                dOut['time'].append(tsStart)
+                dOut['sPT'].append(1.0*sPTAccept/nWaveforms)
+                dOut['bPT'].append(1.0*bPTAccept/nWaveforms)
+                dOut['muon'].append(1.0*muonHits/nWaveforms)
+                dOut['linGate'].append(1.0*linGates/nWaveforms)
+                dOut['overflow'].append(1.0*overflows/nWaveforms)
+                dOut['power'].append(beamPower)
+                dOut['duration'].append(duration)
+                dOut['beamOnDuration'].append(beamOnSeconds)
+                dOut['beamOffDuration'].append(beamOffSeconds)
 
+            h5In.close()
+                
+        for key in ['time','sPT','bPT','muon','linGate','overflow','power','duration','beamOnDuration','beamOffDuration']:
+            if '/%s/%s'%(run,key) in h5Out:
+                del h5Out['/%s/%s'%(run,key)]
+            h5Out.create_dataset('/%s/%s'%(run,key),data=dOut[key])
+    h5Out.close()
+    h5Power.close()
 
 
 

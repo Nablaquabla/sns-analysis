@@ -56,14 +56,18 @@ def main(prog):
 #    runDirs = ['Run-16-05-17-14-40-34','Run-16-06-02-12-35-56','Run-16-06-17-12-09-12']
 #    runDirs = ['Run-16-06-27-17-50-08','Run-16-07-06-18-25-19','Run-16-07-12-11-44-55']
 #    runDirs = ['Run-16-07-18-11-50-24','Run-16-07-21-11-59-39','Run-16-07-28-12-49-17']
-
+    runDirs = ['Run-16-08-04-17-23-52','Run-16-08-09-00-29-54','Run-16-08-16-00-22-26']
+#    runDirs = ['Run-16-08-27-11-33-40','Run-16-08-30-11-37-42','Run-16-09-06-15-23-15']
+#    runDirs = ['Run-16-09-15-15-23-58','Run-16-09-26-15-34-10']
+ 
+ 
     # Ba analysis
 #    runDirs = ['Run-15-03-30-13-33-05','Run-15-04-08-11-38-28','Run-15-04-17-16-56-59','Run-15-04-29-16-34-44',
 #               'Run-15-05-05-16-09-12','Run-15-05-11-11-46-30','Run-15-05-19-17-04-44','Run-15-05-27-11-13-46']
 #              'Run-15-05-05-16-09-12','Run-15-05-11-11-46-30','Run-15-05-19-17-04-44','Run-15-05-27-11-13-46']
 #    runDirs = ['Run-15-03-27-12-42-26']
     
-    runDirs = [x for x in os.listdir('/home/bjs66/csi/bjs-analysis/Processed/') if 'Run' in x]
+#    runDirs = [x for x in os.listdir('/home/bjs66/csi/bjs-analysis/Processed/') if 'Run' in x]
     progDict = {'convert': '_convertData',
                 'stability': '_calculateStabilityData',
                 'speCharge': '_calculateSPEQ',

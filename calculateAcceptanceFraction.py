@@ -47,12 +47,12 @@ def main():
 #               'Run-15-04-17-16-56-59','Run-15-04-29-16-34-44','Run-15-05-05-16-09-12',
 #               'Run-15-05-11-11-46-30','Run-15-05-19-17-04-44','Run-15-05-27-11-13-46'] 
 
-    for cherenkov in [4,5,6]:
-        for minPEinPT in [5]:
-            for maxPEinPT in [15,20,30]:
-                for minRT050 in [0,50]:
-                    for maxRT050 in [1250,1500]:
-                        for minRT1090 in [0,125]:
+    for cherenkov in [5,6,7,8]:
+        for minPEinPT in [0]:
+            for maxPEinPT in [15,30]:
+                for minRT050 in [0,100]:
+                    for maxRT050 in [1000,1500]:
+                        for minRT1090 in [0,200]:
                             for maxRT1090 in [1375,1500]:
                                 condorKey = '%d-%d-%d-%d-%d-%d-%d'%(cherenkov,minPEinPT,maxPEinPT,minRT050,maxRT050,minRT1090,maxRT1090) 
                                 createCondorFile(condorKey,cherenkov,minPEinPT,maxPEinPT,minRT050,maxRT050,minRT1090,maxRT1090)

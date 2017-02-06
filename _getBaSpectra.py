@@ -9,7 +9,7 @@ import os
 import numpy as np
 import easyfit as ef
 import sys
-maxPeInPTDict = {0: [20,30],
+maxPeInPTDict = {0: [15,30],
                  5: [15,20,30],
                  10: [15,20],
                  15: [20]}
@@ -73,25 +73,53 @@ def main(args):
                 currentRt1090 = rt1090[cutTime]
                 currentRt050 = rt050[cutTime]
                 
-                for minPEIW in [0,4,5,6]:
+                for minPEIW in [8]:
                     print 'Working on day:', day
                     print 'Window:', wd
                     print 'Cherenkov:', minPEIW
                     cutCherenkov = (currentPeInIW >= minPEIW)
 
-                    for minPEPT in [0,5]:
+                    for minPEPT in [0]:
                         cutMinPEPT = (currentPeInPT >= minPEPT)
 
                         for maxPEPT in maxPeInPTDict[minPEPT]:
                             cutMaxPEPT = (currentPeInPT <= maxPEPT)
 
-                            for minRT050 in [0,50]:
+                            # Get risetime distributions for current cherenkov and PT cut
+                            cutForRTSpectra = cutCherenkov * cutMinPEPT * cutMaxPEPT
+                            hdf5key = '/%d/%s/IW-%i/MinPT-%i/MaxPT-%i/Risetime-Distributions/Full/'%(speCharges['time'][i],wd,minPEIW,minPEPT,maxPEPT)
+                            
+                            nRTBins = 500
+                            n1090,b1090 = np.histogram(currentRt1090[cutForRTSpectra],nRTBins,[-0.5,1499.5])
+                            n050,b050 = np.histogram(currentRt050[cutForRTSpectra],nRTBins,[-0.5,1499.5])
+                            
+                            h5Out.create_dataset(hdf5key + 'rt1090-b',data=b1090)
+                            h5Out.create_dataset(hdf5key + 'rt1090-n',data=n1090)
+                            h5Out.create_dataset(hdf5key + 'rt050-b',data=b050)
+                            h5Out.create_dataset(hdf5key + 'rt050-n',data=n050)
+                            
+ 
+                            cutNPE = (currentNpePolya <= 30)
+                            cutForRTSpectra = cutCherenkov * cutMinPEPT * cutMaxPEPT * cutNPE
+                            hdf5key = '/%d/%s/IW-%i/MinPT-%i/MaxPT-%i/Risetime-Distributions/Low-Energy/'%(speCharges['time'][i],wd,minPEIW,minPEPT,maxPEPT)
+                            
+                            nRTBins = 500
+                            n1090,b1090 = np.histogram(currentRt1090[cutForRTSpectra],nRTBins,[-0.5,1499.5])
+                            n050,b050 = np.histogram(currentRt050[cutForRTSpectra],nRTBins,[-0.5,1499.5])
+                            
+                            h5Out.create_dataset(hdf5key + 'rt1090-b',data=b1090)
+                            h5Out.create_dataset(hdf5key + 'rt1090-n',data=n1090)
+                            h5Out.create_dataset(hdf5key + 'rt050-b',data=b050)
+                            h5Out.create_dataset(hdf5key + 'rt050-n',data=n050)
+                            
+
+                            for minRT050 in [0,100]:
                                 cutMinRT050 = (currentRt050 >= minRT050)
 
-                                for maxRT050 in [1250,1500]:
+                                for maxRT050 in [1000,1500]:
                                     cutMaxRT050 = (currentRt050 <= maxRT050)
 
-                                    for minRT1090 in [0,125]:
+                                    for minRT1090 in [0,200]:
                                         cutMinRT1090 = (currentRt1090 >= minRT1090)
 
                                         for maxRT1090 in [1375,1500]:
