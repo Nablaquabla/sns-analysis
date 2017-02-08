@@ -406,8 +406,8 @@ class waveform
 
 	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
 	{
-		bRegionLimits = bRegions;
-		sRegionLimits = sRegions;
+		bRegionLimits = { bRegions[0], bRegions[1], bRegions[2], bRegions[3] };
+		sRegionLimits = { sRegions[0], sRegions[1], sRegions[2], sRegions[3] };
 
 		cmf_bRegionLimits = { bRegionLimits[0], bRegionLimits[1] - cmfWidth, bRegionLimits[2] - cmfWidth, bRegionLimits[3] - cmfWidth }
 		cmf_sRegionLimits = { sRegionLimits[0], sRegionLimits[1] - cmfWidth, sRegionLimits[2] - cmfWidth, sRegionLimits[3] - cmfWidth }
