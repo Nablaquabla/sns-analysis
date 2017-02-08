@@ -1054,7 +1054,7 @@ int main(int argc, char* argv[])
 						else
 						{
 							_cmfC = m - _fTmpC;
-							cmfQ.push(m)
+							cmfQ.push(m);
 							cmfBL += m;
 							cmfBL -= cmfQ.front();
 						}
