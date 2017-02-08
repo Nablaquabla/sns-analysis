@@ -270,7 +270,7 @@ class waveform
 			}
 		}
 	}
-	void analyzeROIWindow(bool signalRegion)
+	void analyzeROIWindowVanillaStyle(bool signalRegion)
 	{
 		int peaksInROI = bPeakCounts[1];
 		int beginROI = bRegionLimits[2];
@@ -351,6 +351,91 @@ class waveform
 					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
 					{
 						signalRegion ? sRiseTimes[j] : bRiseTimes[j] = i + (thresholds[j] - _t1) / (_t2 - _t1);
+					}
+				}
+			}
+		}
+	}
+	void analyzeROIWindowCMFStyle(bool signalRegion)
+	{
+		int peaksInROI = cmf_bPeakCounts[1];
+		int beginROI = cmf_bRegionLimits[2];
+		int endROI = cmf_bRegionLimits[3];
+
+		// Set correct window parameters:
+		if (signalRegion)
+		{
+			peaksInROI = cmf_sPeakCounts[1];
+			beginROI = cmf_sRegionLimits[2];
+			endROI = cmf_sRegionLimits[3];
+		}
+
+		// Only analyze data if there is at least one PE in the ROI
+		if (peaksInROI > 0)
+		{
+			int arrivalIndex = -1;
+			int peakIndex = -1;
+
+			// Find the first Peak in the ROI
+			for (int i = 0; i < cmf_peakBegin.size(); i++)
+			{
+				if (cmf_peakBegin[i] >= beginROI)
+				{
+					arrivalIndex = cmf_peakBegin[i];
+					peakIndex = i;
+					break;
+				}
+			}
+			signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex = arrivalIndex;
+
+			// Check that the full IW fits in ROI
+			if (arrivalIndex < (endROI - 1500))
+			{
+				// Determine number of peaks in IW
+				for (int i = peakIndex; i < cmf_peakBegin.size(); i++)
+				{
+					signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2] += (cmf_peakBegin[i] - arrivalIndex < 1500) ? 1 : 0;
+				}
+			}
+
+			// Integrate over all peaks in iw
+			int _tPeakIndex = peakIndex;
+			double _tCharge = 0;
+			int wfIndex = 0;
+			for (int i = 0; i < 1500; i++)
+			{
+				// Get proper 'real' index that includes the onset offset
+				wfIndex = i + arrivalIndex;
+
+				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
+				if (_tPeakIndex < cmf_peakBegin.size() && wfIndex >= cmf_peakBegin[_tPeakIndex] && wfIndex <= cmf_peakEnd[_tPeakIndex])
+				{
+					_tCharge += cmf_csi[wfIndex];
+					if (wfIndex == cmf_peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+				}
+				integratedCharge[i] = _tCharge;
+			}
+			signalRegion ? cmf_sChargeIW : cmf_bChargeIW = integratedCharge[1499];
+
+			// Calculate charge thresholds
+			double thresholds[3];
+			thresholds[0] = 0.1*integratedCharge[1499];
+			thresholds[1] = 0.5*integratedCharge[1499];
+			thresholds[2] = 0.9*integratedCharge[1499];
+
+			// Determine threshold crossing times
+			double _t1 = 0;
+			double _t2 = 0;
+			for (int i = 0; i < 1499; i++)
+			{
+				_t1 = integratedCharge[i];
+				_t2 = integratedCharge[i + 1];
+
+				for (int j = 0; j < 3; j++)
+				{
+					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+					{
+						signalRegion ? cmf_sRiseTimes[j] : cmf_bRiseTimes[j] = i + (thresholds[j] - _t1) / (_t2 - _t1);
 					}
 				}
 			}
@@ -850,9 +935,13 @@ int main(int argc, char* argv[])
 				currentWaveForm.updateIntegratedCsIPeaks(cInfoData);
 				currentWaveForm.cmf_updateIntegratedCsIPeaks(cInfoData);
 
-				// Analyze ROIs
-				currentWaveForm.analyzeROIWindow(false); // Background region
-				currentWaveForm.analyzeROIWindow(true); // Signal region
+				// Analyze ROIs Vanilla Style
+				currentWaveForm.analyzeROIWindowVanillaStyle(false); // Background region
+				currentWaveForm.analyzeROIWindowVanillaStyle(true); // Signal region
+
+				// Analyze ROIs CMF Style
+				currentWaveForm.analyzeROIWindowCMFStyle(false); // Background region
+				currentWaveForm.analyzeROIWindowCMFStyle(true); // Signal region
 
 				// Update info data
 				currentWaveForm.updateInfoData(cInfoData);
@@ -866,36 +955,6 @@ int main(int argc, char* argv[])
 	// Before exiting, make sure that both output files are properly closed to prevent data loss.
 	if (bg_out_file.is_open()) { bg_out_file.close(); }
 	if (s_out_file.is_open()) { s_out_file.close(); }
-
-	/*
-	std::array<int, 300> peakCharges = {};
-	std::array<int, 51> peakAmplitudes = {};
-	std::array<int, 51> peakWidths = {};
-	std::array<int, 51> bPeaksInPretrace = {};
-	std::array<int, 51> sPeaksInPretrace = {};
-	std::array<int, 51> bPeaksInROI = {};
-	std::array<int, 51> sPeaksInROI = {};
-	std::array<int, 51> bPeaksInIW = {};
-	std::array<int, 51> sPeaksInIW = {};
-
-	std::array<int, 300> cmf_peakCharges = {};
-	std::array<int, 51> cmf_peakAmplitudes = {};
-	std::array<int, 51> cmf_peakWidths = {};
-	std::array<int, 51> cmf_bPeaksInPretrace = {};
-	std::array<int, 51> cmf_sPeaksInPretrace = {};
-	std::array<int, 51> cmf_bPeaksInROI = {};
-	std::array<int, 51> cmf_sPeaksInROI = {};
-	std::array<int, 51> cmf_bPeaksInIW = {};
-	std::array<int, 51> cmf_sPeaksInIW = {};
-
-	std::vector<int> muonVetoEvents;
-
-	int waveformCounter = 0;
-	int linearGateCounter = 0;
-	int overflowCounter = 0;
-	int muonCounter = 0;
-	int summedBaseline = 0;
-	*/
 
 	// Write run info
 	if (infoOut.is_open())
