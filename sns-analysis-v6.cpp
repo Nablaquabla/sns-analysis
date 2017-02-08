@@ -806,8 +806,9 @@ int main(int argc, char* argv[])
 						{
 							_cmfC = m - _fTmpC;
 							cmfBL += m;
-							cmfBL -= cmfQ.pop();
+							cmfBL -= cmfQ.front();
 						}
+						cmfQ.pop();
 					}
 
 					// Fill waveform object with bin corrected and filtered CsI data
