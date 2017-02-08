@@ -272,18 +272,16 @@ class waveform
 	}
 	void analyzeROIWindow(bool signalRegion)
 	{
+		int peaksInROI = bPeakCounts[1];
+		int beginROI = bRegionLimits[2];
+		int endROI = bRegionLimits[3];
+
 		// Set correct window parameters:
 		if (signalRegion)
 		{
-			int peaksInROI = sPeakCounts[1];
-			int beginROI = sRegionLimits[2];
-			int endROI = sRegionLimits[3];
-		}
-		else
-		{
-			int peaksInROI = bPeakCounts[1];
-			int beginROI = bRegionLimits[2];
-			int endROI = bRegionLimits[3];
+			peaksInROI = sPeakCounts[1];
+			beginROI = sRegionLimits[2];
+			endROI = sRegionLimits[3];
 		}
 
 
@@ -318,6 +316,7 @@ class waveform
 			// Integrate over all peaks in iw
 			int _tPeakIndex = peakIndex;
 			double _tCharge = 0;
+			int wfIndex = 0;
 			for (int i = 0; i < 1500; i++)
 			{
 				// Get proper 'real' index that includes the onset offset
