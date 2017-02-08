@@ -416,10 +416,10 @@ class waveform
 		cmf_bRegionLimits[2] = bRegionLimits[2] - cmfWidth;
 		cmf_bRegionLimits[3] = bRegionLimits[3] - cmfWidth;
 
-		cmf_sRegionLimits = sRegionLimits[0];
-		cmf_sRegionLimits = sRegionLimits[1] - cmfWidth;
-		cmf_sRegionLimits = sRegionLimits[2] - cmfWidth;
-		cmf_sRegionLimits = sRegionLimits[3] - cmfWidth;
+		cmf_sRegionLimits[0] = sRegionLimits[0];
+		cmf_sRegionLimits[1] = sRegionLimits[1] - cmfWidth;
+		cmf_sRegionLimits[2] = sRegionLimits[2] - cmfWidth;
+		cmf_sRegionLimits[3] = sRegionLimits[3] - cmfWidth;
 
 		globalBaselineCsI = 0;
 		globalBaselineMuonVeto = 0;
