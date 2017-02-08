@@ -556,7 +556,6 @@ int main(int argc, char* argv[])
 	std::string timestamp;
 
 	// Conditional mean filter setup
-	std::queue<float> cmfQ;
 	double _cmfC = 0;
 	float cmfBL = 0;
 	float cmfThreshold = 3;
@@ -766,7 +765,8 @@ int main(int argc, char* argv[])
 
 				// Reset conditional mean filter
 				_cmfC = 0;
-				cmfQ = {};
+				std::queue<float> cmfQ;
+				float _fTmpC = 0.0;
 				cmfBL = 0;
 				
 				// Reset linear gate detection
@@ -779,12 +779,13 @@ int main(int argc, char* argv[])
 					// Read CsI value and apply bit correction
 					c = contents[zidx++];
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
+					_fTmpC = float(_tmpC);
 
 					// Preload CMF filter
 					if (i < cmfWidth)
 					{
-						cmfQ.push(_tmpC);
-						cmfBL += _tmpC;
+						cmfQ.push(_fTmpC);
+						cmfBL += _fTmpC;
 					}
 					// CMF filter ready
 					else
@@ -793,17 +794,17 @@ int main(int argc, char* argv[])
 						float m = cmfBL / cmfWidth;
 
 						// No dominant feature present
-						if (fabs(_tmpC - m) < cmfThreshold)
+						if (fabs(_fTmpC - m) < cmfThreshold)
 						{
 							_cmfC = 0;
-							cmfQ.push(_tmpC);
-							cmfBL += _tmpC;
+							cmfQ.push(_fTmpC);
+							cmfBL += _fTmpC;
 						}
 
 						// Feature present
 						else
 						{
-							_cmfC = m - _tmpC;
+							_cmfC = m - _fTmpC;
 							cmfBL += m;
 							cmfBL -= cmfQ.pop();
 						}
