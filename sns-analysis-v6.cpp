@@ -462,7 +462,7 @@ class waveform
 
 		integratedCharge = {};
 	}
-	~waveform();
+	~waveform(){};
 
 	private:
 		std::string timeStamp;
