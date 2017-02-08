@@ -640,8 +640,8 @@ int main(int argc, char* argv[])
 	}
 
 	// Prepare array to be passed to waveform objects
-	std::array<int, 4> bRegions = { BG_PT[0], BG_PT[1], BG_ROI[0], BG_ROI[1] };
-	std::array<int, 4> sRegions = { S_PT[0], S_PT[1], S_ROI[0], S_ROI[1] };
+	std::array<unsigned int, 4> bRegions = { BG_PT[0], BG_PT[1], BG_ROI[0], BG_ROI[1] };
+	std::array<unsigned int, 4> sRegions = { S_PT[0], S_PT[1], S_ROI[0], S_ROI[1] };
 
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
 	if (single_time == 0)
@@ -845,8 +845,8 @@ int main(int argc, char* argv[])
 				currentWaveForm.cmf_countPeaksPerRegion();
 
 				// Get SPE charge distributions
-				currentWaveform.updateIntegratedCsIPeaks(cInfoData);
-				currentWaveform.cmf_updateIntegratedCsIPeaks(cInfoData);
+				currentWaveForm.updateIntegratedCsIPeaks(cInfoData);
+				currentWaveForm.cmf_updateIntegratedCsIPeaks(cInfoData);
 
 				// Analyze ROIs
 				currentWaveForm.analyzeROIWindow(false); // Background region
@@ -1033,7 +1033,7 @@ int main(int argc, char* argv[])
 		infoOut << "All muon onsets - If linear gate present only the first is recorded" << std::endl;
 		for (std::vector<int>::size_type idx = 0; idx < cInfoData.muonVetoEvents.size(); idx++)
 		{
-			infoOut << cInfoData.muonVetoevents[idx] << " ";
+			infoOut << cInfoData.muonVetoEvents[idx] << " ";
 		}
 		infoOut << std::endl;
 	}
