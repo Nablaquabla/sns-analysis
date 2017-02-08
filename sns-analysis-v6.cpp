@@ -543,8 +543,6 @@ int main(int argc, char* argv[])
 	std::ofstream bg_out_file;
 	std::ofstream s_out_file;
 	std::ofstream infoOut;
-	std::ofstream waveformOut;
-	bool saveWaveforms = false;
 
 	// Setup distribution histories
 	infoData cInfoData;
@@ -576,6 +574,26 @@ int main(int argc, char* argv[])
 	unsigned int BG_ROI[2] = {};
 	unsigned int S_PT[2] = {};
 	unsigned int S_ROI[2] = {};
+
+	// Set main run directory, e.g. Run-15-10-02-27-32-23/151002
+	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
+	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
+	int data_set = 0;
+	int PE_max_PT = 100000;
+
+	if (argc == 6)
+	{
+		data_set = atoi(argv[1]);
+		main_dir = std::string(argv[2]);
+		current_time = atoi(argv[3]);
+		out_dir = std::string(argv[4]);
+		single_time = atoi(argv[5]);
+	}
+	else
+	{
+		std::cout << "Arguments not matching! Aborting now!" << std::endl;
+		return 1;
+	}
 
 	switch (data_set)
 	{
@@ -624,24 +642,6 @@ int main(int argc, char* argv[])
 	std::string out_dir;
 	std::string current_zip_file;
 	std::string time_name_in_zip;
-
-	// Set main run directory, e.g. Run-15-10-02-27-32-23/151002
-	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
-	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
-	int data_set = 0;
-	if (argc == 6) 
-	{
-		data_set = atoi(argv[1]);
-		main_dir = std::string(argv[2]); 
-		current_time = atoi(argv[3]);
-		out_dir = std::string(argv[4]);
-		single_time = atoi(argv[5]);
-	}
-	else
-	{
-		std::cout << "Arguments not matching! Aborting now!" << std::endl;
-		return 1;
-	}
 
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
 	if (single_time == 0)
@@ -711,10 +711,6 @@ int main(int argc, char* argv[])
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	s_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "S-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	infoOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "I-")).c_str(), std::ofstream::out | std::ofstream::trunc);
-	if (save_waveforms)
-	{
-		waveformOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
-	}
 
 	// Begin data processing if file has been properly opened
 	if(err == 0)
@@ -797,7 +793,7 @@ int main(int argc, char* argv[])
 						float m = cmfBL / cmfWidth;
 
 						// No dominant feature present
-						if (std::fabs(_tmpC - m) < cmfThreshold)
+						if (fabs(_tmpC - m) < cmfThreshold)
 						{
 							_cmfC = 0;
 							cmfQ.push(_tmpC);
