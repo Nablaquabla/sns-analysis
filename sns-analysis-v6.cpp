@@ -197,7 +197,7 @@ class waveform
 	}
 	void updateIntegratedCsIPeaks(infoData &cInData)
 	{
-		if (peaksBegin.size() > 0)
+		if (peakBegin.size() > 0)
 		{
 			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
 			{
@@ -229,7 +229,7 @@ class waveform
 
 				for (int i = cmf_peakBegin[idx]; i <= cmf_peakEnd[idx]; i++)
 				{
-					peakCharge += csi_cmf[i];
+					peakCharge += cmf_csi[i];
 				}
 				charge = int(round(peakCharge));
 				if (charge >= -50 && charge < 250) { cInData.cmf_peakCharges[(charge + 50)] += 1; }
@@ -273,7 +273,7 @@ class waveform
 	void analyzeROIWindow(bool signalRegion)
 	{
 		// Set correct window parameters:
-		if signalRegion
+		if (signalRegion)
 		{
 			int peaksInROI = sPeakCounts[1];
 			int beginROI = sRegionLimits[2];
