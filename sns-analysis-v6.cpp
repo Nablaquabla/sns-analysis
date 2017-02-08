@@ -323,7 +323,7 @@ class waveform
 				wfIndex = i + arrivalIndex;
 
 				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-				if (_tPeakIndex < peakBegin.size() && wfIndex >= pe_beginnings[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
+				if (_tPeakIndex < peakBegin.size() && wfIndex >=peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
 				{
 					_tCharge += csi[wfIndex];
 					if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
@@ -376,7 +376,7 @@ class waveform
 		// Update counters
 		cInData.linearGateCounter += (linearGateFlag) ? 1 : 0;
 		cInData.overflowCounter += (overflowFlag) ? 1 : 0;
-		cInData.muonVetoCounter += (muonVetoFlag) ? 1 : 0;
+		cInData.muonCounter += (muonVetoFlag) ? 1 : 0;
 
 		// Update muon veto vector in infoData
 		if (muonEvents.size() > 0 && !linearGateFlag)
@@ -395,19 +395,19 @@ class waveform
 		bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
 		bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
-		bOutput << (muonEvents.size() > 0 ? muonEvents[0] : -1;
+		bOutput << muonEvents.size() > 0 ? muonEvents[0] : -1;
 
 		// Write signal data
 		sOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		sOutput << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << " " << sArrivalIndex << " " << sChargeIW << " " << sRiseTimes[0] << " " << sRiseTimes[1] << " " << sRiseTimes[2] << " ";
 		sOutput << cmf_sPeakCounts[0] << " " << cmf_sPeakCounts[1] << " " << cmf_sPeakCounts[2] << " " << cmf_sArrivalIndex << " " << cmf_sChargeIW << " " << cmf_sRiseTimes[0] << " " << cmf_sRiseTimes[1] << " " << cmf_sRiseTimes[2] << " ";
-		sOutput << (muonEvents.size() > 0 ? muonEvents[0] : -1;
+		sOutput << muonEvents.size() > 0 ? muonEvents[0] : -1;
 	}
 
 	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
 	{
-		bRegionLimits = std::copy(std::begin(bRegions), std::end(bRegions), std::begin(bRegionLimits));
-		sRegionLimits = std::copy(std::begin(sRegions), std::end(sRegions), std::begin(sRegionLimits));
+		bRegionLimits = bRegions;
+		sRegionLimits = sRegions;
 
 		cmf_bRegionLimits = { bRegionLimits[0], bRegionLimits[1] - cmfWidth, bRegionLimits[2] - cmfWidth, bRegionLimits[3] - cmfWidth }
 		cmf_sRegionLimits = { sRegionLimits[0], sRegionLimits[1] - cmfWidth, sRegionLimits[2] - cmfWidth, sRegionLimits[3] - cmfWidth }
@@ -416,7 +416,7 @@ class waveform
 		globalBaselineMuonVeto = 0;
 
 		bChargeIW = 0;
-		SChargeIW = 0;
+		sChargeIW = 0;
 		bArrivalIndex = -1;
 		sArrivalIndex = -1;
 
@@ -461,7 +461,7 @@ class waveform
 		int globalBaselineMuonVeto;
 
 		int bChargeIW;
-		int SChargeIW;
+		int sChargeIW;
 		int bArrivalIndex;
 		int sArrivalIndex;
 
