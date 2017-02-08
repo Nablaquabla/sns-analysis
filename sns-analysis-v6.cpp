@@ -988,9 +988,12 @@ int main(int argc, char* argv[])
 			//  Process consecutive waveforms without encountering another LabView header inbetween
 			for (int wf=0; wf < (int) (no_samples/35007); wf++)
 			{
+				
 				// A new waveform begins, update counter and create waveform object
 			 	cInfoData.waveformCounter += 1;
 				waveform currentWaveForm(bRegions, sRegions);
+
+				std::cout << "Current waveform: " << cInfoData.waveformCounter << std::endl;
 
 				// Update timestamp
 				timestamp.clear();
@@ -1001,6 +1004,8 @@ int main(int argc, char* argv[])
 					timestamp += zeroPad((int) c, 2);
 				}
 				currentWaveForm.setTimeStamp(timestamp);
+
+				std::cout << "Current timestamp" << timestamp << std::endl;
 
 				// Bit corrected waveform value
 				_tmpC = 0;
@@ -1018,6 +1023,7 @@ int main(int argc, char* argv[])
 					
 				for(int i=0; i<35000; i++)
 				{
+					std::cout << "Adding sample: " << i << std::endl;
 					// Read CsI value and apply bit correction
 					c = contents[zidx++];
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
