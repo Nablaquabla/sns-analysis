@@ -575,6 +575,14 @@ int main(int argc, char* argv[])
 	unsigned int S_PT[2] = {};
 	unsigned int S_ROI[2] = {};
 
+	// Prepare zip read
+	std::string main_dir;
+	int current_time;
+	int single_time;
+	std::string out_dir;
+	std::string current_zip_file;
+	std::string time_name_in_zip;
+
 	// Set main run directory, e.g. Run-15-10-02-27-32-23/151002
 	// Set current time to be analzyed as index of sorted number of total files in folder, e.g. 0-1439 for a full day
 	// Set output directory, eg Output/ Run-15-10-02-27-32-23/151002
@@ -634,14 +642,6 @@ int main(int argc, char* argv[])
 	// Prepare array to be passed to waveform objects
 	std::array<int, 4> bRegions = { BG_PT[0], BG_PT[1], BG_ROI[0], BG_ROI[1] };
 	std::array<int, 4> sRegions = { S_PT[0], S_PT[1], S_ROI[0], S_ROI[1] };
-
-	// Prepare zip read
-	std::string main_dir;
-	int current_time;
-	int single_time;
-	std::string out_dir;
-	std::string current_zip_file;
-	std::string time_name_in_zip;
 
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
 	if (single_time == 0)
@@ -759,7 +759,7 @@ int main(int argc, char* argv[])
 					c = contents[zidx++];
 					timestamp += zeroPad((int) c, 2);
 				}
-				currentWaveForm.setTimeStamp(timestamp)
+				currentWaveForm.setTimeStamp(timestamp);
 
 				// Bit corrected waveform value
 				_tmpC = 0;
@@ -898,7 +898,7 @@ int main(int argc, char* argv[])
 	// Write run info
 	if (infoOut.is_open())
 	{
-		infoOut << cInfoData.waveformCounter << " " << cInfoData.linearGateCounter << " " << cInfoData.overflowCounter << " " << cInfoData.muonCounter << " " << float(summedBaseline) / float(waveformCounter) << std::endl;
+		infoOut << cInfoData.waveformCounter << " " << cInfoData.linearGateCounter << " " << cInfoData.overflowCounter << " " << cInfoData.muonCounter << " " << float(cInfoData.summedBaseline) / float(cInfoData.waveformCounter) << std::endl;
 
 		// Plain vanilla analysis
 		infoOut << "Peak charge histogram" << std::endl;
@@ -1031,9 +1031,9 @@ int main(int argc, char* argv[])
 
 		// Muon event onsets
 		infoOut << "All muon onsets - If linear gate present only the first is recorded" << std::endl;
-		for (std::vector<int>::size_type idx = 0; idx < muonVetoEvents.size(); idx++)
+		for (std::vector<int>::size_type idx = 0; idx < cInfoData.muonVetoEvents.size(); idx++)
 		{
-			infoOut << muonVetoevents[idx] << " ";
+			infoOut << cInfoData.muonVetoevents[idx] << " ";
 		}
 		infoOut << std::endl;
 	}
