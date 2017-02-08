@@ -24,6 +24,7 @@ const int peakFinderWidthThreshold = 3;
 // Assortment of all distributions that are being tracked throughout the analysis
 struct infoData
 {
+	// Vanilla analysis data
 	std::array<int, 300> peakCharges;
 	std::array<int, 51> peakAmplitudes;
 	std::array<int, 51> peakWidths;
@@ -34,6 +35,7 @@ struct infoData
 	std::array<int, 51> bPeaksInIW;
 	std::array<int, 51> sPeaksInIW;
 
+	// Conditional mean filtered analysis data
 	std::array<int, 300> cmf_peakCharges;
 	std::array<int, 51> cmf_peakAmplitudes;
 	std::array<int, 51> cmf_peakWidths;
@@ -43,6 +45,10 @@ struct infoData
 	std::array<int, 51> cmf_sPeaksInROI;
 	std::array<int, 51> cmf_bPeaksInIW;
 	std::array<int, 51> cmf_sPeaksInIW;
+
+	// Local baseline analysis data
+	std::array<int, 300> lbl_peakCharges;
+	std::array<int, 51> lbl_peakAmplitudes;
 
 	std::vector<int> muonVetoEvents;
 	
@@ -74,6 +80,9 @@ void initializeInfoData(infoData &ID)
 	ID.cmf_sPeaksInROI = {};
 	ID.cmf_bPeaksInIW = {};
 	ID.cmf_sPeaksInIW = {};
+
+	ID.lbl_peakCharges = {};
+	ID.lbl_peakAmplitudes = {};
 
 	ID.muonVetoEvents.clear();
 
@@ -216,6 +225,39 @@ class waveform
 			}
 		}
 	}
+	void lbl_updateIntegratedCsIPeaks(infoData &cInData)
+	{
+		if (peakBegin.size() > 0)
+		{
+			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
+			{
+				double _tCharge = 0.0;
+				double _tAmplitude = -1;
+
+				double localBaseline = 0;
+				int numSamples = 0;
+				for (int i = (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0; i < (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999; i++)
+				{
+					if (fabs(csi[i]) <= 3)
+					{
+						numSamples++;
+						localBaseline += double(csi[i]);
+					}
+				}
+				localBaseline /= double(numSamples);
+
+				for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
+				{
+					_tCharge += csi[i]-localBaseline;
+					if (csi[i]-localBaseline > _tAmplitude){ _tAmplitude = csi[i]-localBaseline; }
+				}
+				int charge = int(round(_tCharge));
+				int amplitude = int(round(_tAmplitude));
+				if (charge >= -50 && charge < 250) { cInData.lbl_peakCharges[(charge + 50)] += 1; }
+				cInData.lbl_peakAmplitudes[(amplitude < 51) ? amplitude : 50] += 1;
+			}
+		}
+	}
 	void cmf_updateIntegratedCsIPeaks(infoData &cInData)
 	{
 		if (cmf_peakBegin.size() > 0)
@@ -223,15 +265,17 @@ class waveform
 			for (std::vector<int>::size_type idx = 0; idx < cmf_peakBegin.size(); idx++)
 			{
 				int charge = 0;
-				double peakCharge = 0.0;
-				int amplitude = -1;
+				int amplitude = 0;
+				double _tCharge = 0.0;
+				double _tAmplitude = -1;
 				int width = cmf_peakEnd[idx] - cmf_peakBegin[idx] + 1;
-
 				for (int i = cmf_peakBegin[idx]; i <= cmf_peakEnd[idx]; i++)
 				{
-					peakCharge += cmf_csi[i];
+					_tCharge += cmf_csi[i];
+					if (cmf_csi[i] > _tAmplitude){ _tAmplitude = cmf_csi[i]; }
 				}
-				charge = int(round(peakCharge));
+				charge = int(round(_tCharge));
+				amplitude = int(round(_tAmplitude));
 				if (charge >= -50 && charge < 250) { cInData.cmf_peakCharges[(charge + 50)] += 1; }
 				cInData.cmf_peakAmplitudes[(amplitude < 51) ? amplitude : 50] += 1;
 				cInData.cmf_peakWidths[(width < 51) ? width : 50] += 1;
@@ -441,6 +485,104 @@ class waveform
 			}
 		}
 	}
+	void analyzeROIWindowLBLStyle(bool signalRegion)
+	{
+		int peaksInROI = bPeakCounts[1];
+		int beginROI = bRegionLimits[2];
+		int endROI = bRegionLimits[3];
+		
+		// Set correct window parameters:
+		if (signalRegion)
+		{
+			peaksInROI = sPeakCounts[1];
+			beginROI = sRegionLimits[2];
+			endROI = sRegionLimits[3];
+		}
+
+		// Only analyze data if there is at least one PE in the ROI
+		if (peaksInROI > 0)
+		{
+			int arrivalIndex = -1;
+			int peakIndex = -1;
+
+			// Find the first Peak in the ROI
+			for (int i = 0; i < peakBegin.size(); i++)
+			{
+				if (peakBegin[i] >= beginROI)
+				{
+					arrivalIndex = peakBegin[i];
+					peakIndex = i;
+					break;
+				}
+			}
+			signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
+
+			// Check that the full IW fits in ROI
+			if (arrivalIndex < (endROI - 1500))
+			{
+				// Determine number of peaks in IW
+				for (int i = peakIndex; i < peakBegin.size(); i++)
+				{
+					signalRegion ? sPeakCounts[2] : bPeakCounts[2] += (peakBegin[i] - arrivalIndex < 1500) ? 1 : 0;
+				}
+			}
+
+			// Estimate local baseline based on wf 1 us before the arrival
+			double localBaseline = 0;
+			int numSamples = 0;
+			for (int i = arrivalIndex - 500; i < arrivalIndex; i++)
+			{
+				if (fabs(csi[i]) <= 3)
+				{
+					localBaseline += double(csi[i]);
+					numSamples++;
+				}
+			}
+			localBaseline /= double(numSamples);
+
+			// Integrate over all peaks in iw
+			int _tPeakIndex = peakIndex;
+			double _tCharge = 0;
+			int wfIndex = 0;
+			for (int i = 0; i < 1500; i++)
+			{
+				// Get proper 'real' index that includes the onset offset
+				wfIndex = i + arrivalIndex;
+
+				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
+				if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
+				{
+					_tCharge += csi[wfIndex] - localBaseline;
+					if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+				}
+				integratedCharge[i] = _tCharge;
+			}
+			signalRegion ? lbl_sChargeIW : lbl_bChargeIW = integratedCharge[1499];
+
+			// Calculate charge thresholds
+			double thresholds[3];
+			thresholds[0] = 0.1*integratedCharge[1499];
+			thresholds[1] = 0.5*integratedCharge[1499];
+			thresholds[2] = 0.9*integratedCharge[1499];
+
+			// Determine threshold crossing times
+			double _t1 = 0;
+			double _t2 = 0;
+			for (int i = 0; i < 1499; i++)
+			{
+				_t1 = integratedCharge[i];
+				_t2 = integratedCharge[i + 1];
+
+				for (int j = 0; j < 3; j++)
+				{
+					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+					{
+						signalRegion ? lbl_sRiseTimes[j] : lbl_bRiseTimes[j] = i + (thresholds[j] - _t1) / (_t2 - _t1);
+					}
+				}
+			}
+		}
+	}
 	void updateInfoData(infoData &cInData)
 	{
 		// Update peaks in PT, ROI and IW histograms
@@ -519,6 +661,11 @@ class waveform
 		cmf_bArrivalIndex = -1;
 		cmf_sArrivalIndex = -1;
 
+		lbl_bChargeIW = 0;
+		lbl_sChargeIW = 0;
+		lbl_bArrivalIndex = -1;
+		lbl_sArrivalIndex = -1;
+
 		overflowFlag = false;
 		muonVetoFlag = false;
 		linearGateFlag = false;
@@ -540,6 +687,9 @@ class waveform
 		bRiseTimes = {};
 		sRiseTimes = {};
 
+		lbl_bRiseTimes = {};
+		lbl_sRiseTimes = {};
+
 		cmf_bPeakCounts = {};
 		cmf_sPeakCounts = {};
 		cmf_bRiseTimes = {};
@@ -558,6 +708,11 @@ class waveform
 		int sChargeIW;
 		int bArrivalIndex;
 		int sArrivalIndex;
+
+		int lbl_bChargeIW;
+		int lbl_sChargeIW;
+		int lbl_bArrivalIndex;
+		int lbl_sArrivalIndex;
 
 		double cmf_bChargeIW;
 		double cmf_sChargeIW;
@@ -586,6 +741,9 @@ class waveform
 		std::array<unsigned int, 3> sPeakCounts;
 		std::array<double, 3> bRiseTimes;
 		std::array<double, 3> sRiseTimes;
+
+		std::array<double, 3> lbl_bRiseTimes;
+		std::array<double, 3> lbl_sRiseTimes;
 
 		std::array<unsigned int, 4> cmf_bRegionLimits;
 		std::array<unsigned int, 4> cmf_sRegionLimits;
@@ -642,8 +800,8 @@ int main(int argc, char* argv[])
 
 	// Conditional mean filter setup
 	double _cmfC = 0;
-	float cmfBL = 0;
-	float cmfThreshold = 3;
+	double cmfBL = 0;
+	double cmfThreshold = 3;
 
 	// Buffer to store bit shifted samples
 	int _tmpC = 0;
@@ -826,9 +984,7 @@ int main(int argc, char* argv[])
 				break;
 			}
 
-			// ---------------------------------------------------------------------------------------
 			//  Process consecutive waveforms without encountering another LabView header inbetween
-			// ---------------------------------------------------------------------------------------
 			for (int wf=0; wf < (int) (no_samples/35007); wf++)
 			{
 				// A new waveform begins, update counter and create waveform object
@@ -850,8 +1006,8 @@ int main(int argc, char* argv[])
 
 				// Reset conditional mean filter
 				_cmfC = 0;
-				std::queue<float> cmfQ;
-				float _fTmpC = 0.0;
+				std::queue<double> cmfQ;
+				double _fTmpC = 0.0;
 				cmfBL = 0;
 				
 				// Reset linear gate detection
@@ -864,7 +1020,7 @@ int main(int argc, char* argv[])
 					// Read CsI value and apply bit correction
 					c = contents[zidx++];
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
-					_fTmpC = float(_tmpC);
+					_fTmpC = double(_tmpC);
 
 					// Preload CMF filter
 					if (i < cmfWidth)
@@ -876,7 +1032,7 @@ int main(int argc, char* argv[])
 					else
 					{
 						// Get average of current prewindow
-						float m = cmfBL / cmfWidth;
+						double m = cmfBL / double(cmfWidth);
 
 						// No dominant feature present
 						if (fabs(_fTmpC - m) < cmfThreshold)
@@ -934,6 +1090,7 @@ int main(int argc, char* argv[])
 				// Get SPE charge distributions
 				currentWaveForm.updateIntegratedCsIPeaks(cInfoData);
 				currentWaveForm.cmf_updateIntegratedCsIPeaks(cInfoData);
+				currentWaveForm.lbl_updateIntegratedCsIPeaks(cInfoData);
 
 				// Analyze ROIs Vanilla Style
 				currentWaveForm.analyzeROIWindowVanillaStyle(false); // Background region
@@ -942,6 +1099,10 @@ int main(int argc, char* argv[])
 				// Analyze ROIs CMF Style
 				currentWaveForm.analyzeROIWindowCMFStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowCMFStyle(true); // Signal region
+
+				// Analyze ROIs LBL Style
+				currentWaveForm.analyzeROIWindowLBLStyle(false); // Background region
+				currentWaveForm.analyzeROIWindowLBLStyle(true); // Signal region
 
 				// Update info data
 				currentWaveForm.updateInfoData(cInfoData);
@@ -959,7 +1120,8 @@ int main(int argc, char* argv[])
 	// Write run info
 	if (infoOut.is_open())
 	{
-		infoOut << cInfoData.waveformCounter << " " << cInfoData.linearGateCounter << " " << cInfoData.overflowCounter << " " << cInfoData.muonCounter << " " << float(cInfoData.summedBaseline) / float(cInfoData.waveformCounter) << std::endl;
+		// Counters and average baseline
+		infoOut << cInfoData.waveformCounter << " " << cInfoData.linearGateCounter << " " << cInfoData.overflowCounter << " " << cInfoData.muonCounter << " " << double(cInfoData.summedBaseline) / double(cInfoData.waveformCounter) << std::endl;
 
 		// Plain vanilla analysis
 		infoOut << "Peak charge histogram" << std::endl;
@@ -1025,6 +1187,20 @@ int main(int argc, char* argv[])
 		}
 		infoOut << std::endl;
 
+		// Local baseline estimation analysis
+		infoOut << "Peak charge histogram" << std::endl;
+		for (int idx = 0; idx < 300; idx++)
+		{
+			infoOut << cInfoData.lbl_peakCharges[idx] << " ";
+		}
+		infoOut << std::endl;
+
+		infoOut << "Peak amplitude histogram" << std::endl;
+		for (int idx = 0; idx < 51; idx++)
+		{
+			infoOut << cInfoData.lbl_peakAmplitudes[idx] << " ";
+		}
+		infoOut << std::endl;
 
 		// Conditional mean filtered analysis
 		infoOut << "Peak charge histogram" << std::endl;
