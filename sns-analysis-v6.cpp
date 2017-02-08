@@ -46,11 +46,11 @@ struct infoData
 
 	std::vector<int> muonVetoEvents;
 	
-	int waveformCounter = 0;
-	int linearGateCounter = 0;
-	int overflowCounter = 0;
-	int muonCounter = 0;
-	int summedBaseline = 0;
+	int waveformCounter;
+	int linearGateCounter;
+	int overflowCounter;
+	int muonCounter;
+	int summedBaseline;
 };
 
 void initializeInfoData(infoData &ID)
