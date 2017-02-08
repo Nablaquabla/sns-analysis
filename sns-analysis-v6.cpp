@@ -107,6 +107,10 @@ class waveform
 		csi[idx] = value;
 		if (idx < 20000){ medianCsI[value + 128] += 1; }
 	}
+	int getCsIValue(int idx)
+	{
+		return csi[idx];
+	}
 	void cmf_setCsIValue(int idx, double value) { cmf_csi[idx] = value; }
 	void setMuonVetoValue(int idx, int value)
 	{
@@ -1076,7 +1080,10 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
-				
+				for (int i = 0; i < 100; i++)
+				{
+					std::cout << currentWaveForm.getCsIValue(i) << std::endl;
+				}
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
