@@ -619,7 +619,7 @@ class waveform
 	void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
 	{
 		// Write background data
-		int muonLocation = muonEvents.size() > 0) ? muonEvents[0] : -1;
+		int muonLocation = (muonEvents.size() > 0) ? muonEvents[0] : -1;
 
 		bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
