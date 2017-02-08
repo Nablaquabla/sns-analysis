@@ -619,16 +619,18 @@ class waveform
 	void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
 	{
 		// Write background data
+		int muonLocation = muonEvents.size() > 0) ? muonEvents[0] : -1;
+
 		bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
 		bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
-		bOutput << muonEvents.size() > 0 ? muonEvents[0] : -1 << std::endl;
+		bOutput << muonLocation << std::endl;
 
 		// Write signal data
 		sOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		sOutput << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << " " << sArrivalIndex << " " << sChargeIW << " " << sRiseTimes[0] << " " << sRiseTimes[1] << " " << sRiseTimes[2] << " ";
 		sOutput << cmf_sPeakCounts[0] << " " << cmf_sPeakCounts[1] << " " << cmf_sPeakCounts[2] << " " << cmf_sArrivalIndex << " " << cmf_sChargeIW << " " << cmf_sRiseTimes[0] << " " << cmf_sRiseTimes[1] << " " << cmf_sRiseTimes[2] << " ";
-		sOutput << muonEvents.size() > 0 ? muonEvents[0] : -1 << std::endl;
+		sOutput << muonLocation << std::endl;
 	}
 
 	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
