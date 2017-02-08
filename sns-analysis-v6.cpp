@@ -147,14 +147,17 @@ class waveform
 	void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
 		int currentPeakWidth = 0;
-		if (muonVeto[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
-		else
+		for (int i = 0; i < 35000; i++)
 		{
-			if (currentPeakWidth >= peakWidthThreshold)
+			if (muonVeto[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
+			else
 			{
-				muonEvents.push_back(i - currentPeakWidth);
+				if (currentPeakWidth >= peakWidthThreshold)
+				{
+					muonEvents.push_back(i - currentPeakWidth);
+				}
+				currentPeakWidth = 0;
 			}
-			currentPeakWidth = 0;
 		}
 		if (muonEvents.size() > 0) { muonVetoFlag = true; }
 	}
