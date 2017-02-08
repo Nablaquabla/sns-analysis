@@ -24,25 +24,25 @@ const int peakFinderWidthThreshold = 3;
 // Assortment of all distributions that are being tracked throughout the analysis
 struct infoData
 {
-	std::array<int, 300> peakCharges = {};
-	std::array<int, 51> peakAmplitudes = {};
-	std::array<int, 51> peakWidths = {};
-	std::array<int, 51> bPeaksInPretrace = {};
-	std::array<int, 51> sPeaksInPretrace = {};
-	std::array<int, 51> bPeaksInROI = {};
-	std::array<int, 51> sPeaksInROI = {};
-	std::array<int, 51> bPeaksInIW = {};
-	std::array<int, 51> sPeaksInIW = {};
+	std::array<int, 300> peakCharges;
+	std::array<int, 51> peakAmplitudes;
+	std::array<int, 51> peakWidths;
+	std::array<int, 51> bPeaksInPretrace;
+	std::array<int, 51> sPeaksInPretrace;
+	std::array<int, 51> bPeaksInROI;
+	std::array<int, 51> sPeaksInROI;
+	std::array<int, 51> bPeaksInIW;
+	std::array<int, 51> sPeaksInIW;
 
-	std::array<int, 300> cmf_peakCharges = {};
-	std::array<int, 51> cmf_peakAmplitudes = {};
-	std::array<int, 51> cmf_peakWidths = {};
-	std::array<int, 51> cmf_bPeaksInPretrace = {};
-	std::array<int, 51> cmf_sPeaksInPretrace = {};
-	std::array<int, 51> cmf_bPeaksInROI = {};
-	std::array<int, 51> cmf_sPeaksInROI = {};
-	std::array<int, 51> cmf_bPeaksInIW = {};
-	std::array<int, 51> cmf_sPeaksInIW = {};
+	std::array<int, 300> cmf_peakCharges;
+	std::array<int, 51> cmf_peakAmplitudes;
+	std::array<int, 51> cmf_peakWidths;
+	std::array<int, 51> cmf_bPeaksInPretrace;
+	std::array<int, 51> cmf_sPeaksInPretrace;
+	std::array<int, 51> cmf_bPeaksInROI;
+	std::array<int, 51> cmf_sPeaksInROI;
+	std::array<int, 51> cmf_bPeaksInIW;
+	std::array<int, 51> cmf_sPeaksInIW;
 
 	std::vector<int> muonVetoEvents;
 	
@@ -52,6 +52,37 @@ struct infoData
 	int muonCounter = 0;
 	int summedBaseline = 0;
 };
+
+void initializeInfoData(infoData &ID)
+{
+	ID.peakCharges = {};
+	ID.peakAmplitudes = {};
+	ID.peakWidths = {};
+	ID.bPeaksInPretrace = {};
+	ID.sPeaksInPretrace = {};
+	ID.bPeaksInROI = {};
+	ID.sPeaksInROI = {};
+	ID.bPeaksInIW = {};
+	ID.sPeaksInIW = {};
+
+	ID.cmf_peakCharges = {};
+	ID.cmf_peakAmplitudes = {};
+	ID.cmf_peakWidths = {};
+	ID.cmf_bPeaksInPretrace = {};
+	ID.cmf_sPeaksInPretrace = {};
+	ID.cmf_bPeaksInROI = {};
+	ID.cmf_sPeaksInROI = {};
+	ID.cmf_bPeaksInIW = {};
+	ID.cmf_sPeaksInIW = {};
+
+	ID.muonVetoEvents.clear();
+
+	ID.waveformCounter = 0;
+	ID.linearGateCounter = 0;
+	ID.overflowCounter = 0;
+	ID.muonCounter = 0;
+	ID.summedBaseline = 0;
+}
 
 // Waveform object that does all the heavy lifting
 class waveform
@@ -378,33 +409,74 @@ class waveform
 
 		cmf_bRegionLimits = { bRegionLimits[0], bRegionLimits[1] - cmfWidth, bRegionLimits[2] - cmfWidth, bRegionLimits[3] - cmfWidth }
 		cmf_sRegionLimits = { sRegionLimits[0], sRegionLimits[1] - cmfWidth, sRegionLimits[2] - cmfWidth, sRegionLimits[3] - cmfWidth }
+
+		globalBaselineCsI = 0;
+		globalBaselineMuonVeto = 0;
+
+		bChargeIW = 0;
+		SChargeIW = 0;
+		bArrivalIndex = -1;
+		sArrivalIndex = -1;
+
+		cmf_bChargeIW = 0;
+		cmf_sChargeIW = 0;
+		cmf_bArrivalIndex = -1;
+		cmf_sArrivalIndex = -1;
+
+		overflowFlag = false;
+		muonVetoFlag = false;
+		linearGateFlag = false;
+
+		csi = {};
+		muonVeto = {};
+		cmf_csi = {};
+		medianCsI = {};
+		medianMuonVeto = {};
+
+		peakBegin.clear();
+		peakEnd.clear();
+		cmf_peakBegin.clear();
+		cmf_peakEnd.clear();
+		muonEvents.clear();
+
+		bPeakCounts = {};
+		sPeakCounts = {};
+		bRiseTimes = {};
+		sRiseTimes = {};
+
+		cmf_bPeakCounts = {};
+		cmf_sPeakCounts = {};
+		cmf_bRiseTimes = {};
+		cmf_sRiseTimes = {};
+
+		integratedCharge = {};
 	}
 	~waveform();
 
 	private:
 		std::string timeStamp;
-		int globalBaselineCsI = 0;
-		int globalBaselineMuonVeto = 0;
+		int globalBaselineCsI;
+		int globalBaselineMuonVeto;
 
-		int bChargeIW = 0;
-		int SChargeIW = 0;
-		int bArrivalIndex = -1;
-		int sArrivalIndex = -1;
+		int bChargeIW;
+		int SChargeIW;
+		int bArrivalIndex;
+		int sArrivalIndex;
 
-		double cmf_bChargeIW = 0;
-		double cmf_sChargeIW = 0;
-		int cmf_bArrivalIndex = -1;
-		int cmf_sArrivalIndex = -1;
+		double cmf_bChargeIW;
+		double cmf_sChargeIW;
+		int cmf_bArrivalIndex;
+		int cmf_sArrivalIndex;
 
-		bool overflowFlag = false;
-		bool muonVetoFlag = false;
-		bool linearGateFlag = false;
+		bool overflowFlag;
+		bool muonVetoFlag;
+		bool linearGateFlag;
 
-		std::array<int, 35000> csi = {};
-		std::array<int, 35000> muonVeto = {};
-		std::array<double, 35000 - cmfWidth> cmf_csi = {};
-		std::array<unsigned int,256> medianCsI = {};
-		std::array<unsigned int,256> medianMuonVeto = {};
+		std::array<int, 35000> csi;
+		std::array<int, 35000> muonVeto;
+		std::array<double, 35000 - cmfWidth> cmf_csi;
+		std::array<unsigned int, 256> medianCsI;
+		std::array<unsigned int, 256> medianMuonVeto;
 
 		std::vector<int> peakBegin;
 		std::vector<int> peakEnd;
@@ -412,21 +484,21 @@ class waveform
 		std::vector<int> cmf_peakEnd;
 		std::vector<int> muonEvents;
 
-		std::array<unsigned int, 4> bRegionLimits = {};
-		std::array<unsigned int, 4> sRegionLimits = {};
-		std::array<unsigned int, 3> bPeakCounts = {};
-		std::array<unsigned int, 3> sPeakCounts = {};
-		std::array<double, 3> bRiseTimes = };
-		std::array<double, 3> sRiseTimes = {};
+		std::array<unsigned int, 4> bRegionLimits;
+		std::array<unsigned int, 4> sRegionLimits;
+		std::array<unsigned int, 3> bPeakCounts;
+		std::array<unsigned int, 3> sPeakCounts;
+		std::array<double, 3> bRiseTimes;
+		std::array<double, 3> sRiseTimes;
 
-		std::array<unsigned int, 4> cmf_bRegionLimits = {};
-		std::array<unsigned int, 4> cmf_sRegionLimits = {};
-		std::array<unsigned int, 3> cmf_bPeakCounts = {};
-		std::array<unsigned int, 3> cmf_sPeakCounts = {};
-		std::array<double, 3> cmf_bRiseTimes = {};
-		std::array<double, 3> cmf_sRiseTimes = {};
+		std::array<unsigned int, 4> cmf_bRegionLimits;
+		std::array<unsigned int, 4> cmf_sRegionLimits;
+		std::array<unsigned int, 3> cmf_bPeakCounts;
+		std::array<unsigned int, 3> cmf_sPeakCounts;
+		std::array<double, 3> cmf_bRiseTimes;
+		std::array<double, 3> cmf_sRiseTimes;
 
-		std::array<double, 1500> integratedCharge = {};
+		std::array<double, 1500> integratedCharge;
 };
 
 std::string zeroPad(int num, int size)
@@ -465,6 +537,7 @@ int main(int argc, char* argv[])
 
 	// Setup distribution histories
 	infoData cInfoData;
+	initializeInfoData(cInfoData);
 
 	// LabView headers
 	int no_samples = 0;
