@@ -70,9 +70,20 @@ int main(int argc, char* argv[])
 	std::string timestamp;
 
 	// Waveform buffers
-	int csi [35000] = {} ;
+	float csi [35000] = {} ;
 	int csi_raw[35000] = {} ;
 	int mv [35000]  = {} ;
+
+	// Conditional mean filter setup
+	// csi_cmf is the baseline subtracted waveform
+	int cmfWidth = 128;
+	std::queue<float> cmfQ;
+	float cmfBL = 0;
+	float cmfThreshold = 3;
+	float csi_cmf[35000 - cmfWidth] = {};
+	std::vector<int> cmf_pe_begin;
+	std::vector<int> cmf_pe_end;
+	int cmf_spe_charge_dist[300] = {};
 
 	// Buffer to store bit shifted samples
 	int _tmpC = 0;
@@ -251,15 +262,15 @@ int main(int argc, char* argv[])
 
 	switch (data_set)
 	{
-	case 1: BG_PT[0]  = 0;
-			BG_PT[1]  = 19975;
-			BG_ROI[0] = 19975;
+	case 1: BG_PT[0]  = cmfWidth;
+			BG_PT[1]  = 19950;
+			BG_ROI[0] = 19950;
 			BG_ROI[1] = 27475;
-			S_PT[0]   = 7500;
+			S_PT[0]   = 7525 + cmfWidth;
 			S_PT[1]   = 27475;
 			S_ROI[0]  = 27475;
-			S_ROI[1]  = 34975;
-			PE_max_PT = 10;
+			S_ROI[1]  = 35000;
+			PE_max_PT = 100000;
 			break;
 	case 2: BG_PT[0]  = 0;
 			BG_PT[1]  = 20000;
@@ -284,6 +295,20 @@ int main(int argc, char* argv[])
 	default: std::cout << "Arguments not matching! Aborting now!" << std::endl;
 			return 1;
 	}
+
+	// Define regions used for CMF filtered waveform
+	unsigned int CMF_BG_PT[2] = {};
+	unsigned int CMF_BG_ROI[2] = {};
+	unsigned int CMF_S_PT[2] = {};
+	unsigned int CMF_S_ROI[2] = {};
+	CMF_BG_PT[0] = 0;
+	CMF_BG_PT[1] = 19950 - cmfWidth;
+	CMF_BG_ROI[0] = 19950 - cmfWidth;
+	CMF_BG_ROI[1] = 27475 - cmfWidth;
+	CMF_S_PT[0] = 7525;
+	CMF_S_PT[1] = 27475 - cmfWidth;
+	CMF_S_ROI[0] = 27475 - cmfWidth;
+	CMF_S_ROI[1] = 35000 - cmfWidth;
 
 	// Full analysis -> Converts $(Process) from condor submit to the current time file
 	if (single_time == 0)
@@ -344,6 +369,7 @@ int main(int argc, char* argv[])
 	fileSize = st.size;
 	zip_fread(f, contents, fileSize);
 	zip_fclose(f);
+
 	//And close the archive
 	zip_close(z);
 
@@ -428,6 +454,10 @@ int main(int argc, char* argv[])
 				bP_detected = false;
 				_t_bP_idx = 0;
 
+				// Reset conditional mean filter
+				cmfQ = {};
+				cmfBL = 0;
+
 				// -------------------------------------------------------------
 				//  Read current timestamp
 				// -------------------------------------------------------------
@@ -453,7 +483,45 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
 					if (i<20000){ med_csi_arr[_tmpC + 128] += 1; }
 					csi[i] = _tmpC;
+
+					// -------------------------------------------------
+					// Apply conditional mean filter to remove baseline
+					// -------------------------------------------------
+					// Preload filter
+					if (i < cmfWidth)
+					{
+						cmfQ.push(_tmpC);
+						cmfBL += _tmpC;
+					}
+					// Filter ready
+					else
+					{
+						// Get average of current prewindow
+						float m = cmfBL / cmfWidth;
+
+						// No dominant feature present
+						if (std::fabs(_tmpC - m) < cmfThreshold)
+						{
+							csi_cmf[i - cmfWidth] = 0;
+							cmfQ.push(_tmpC);
+							cmfBL += _tmpC;
+						}
+
+						// Feature present
+						else
+						{
+							csi_cmf[i - cmfWidth] = m - _tmpC;
+							cmfBL += m;
+							cmfBL -= cmfQ.pop();
+						}
+					}
+
+					//----------------------------------------------------
+					// Save original waveform to array for debug purposes
+					//----------------------------------------------------
 					csi_raw[i] = _tmpC;
+
+					// Preload linear gate detection algorithm
 					if (i == 0) { _previous_c = _tmpC; }
 
 					// Gate check
@@ -616,6 +684,47 @@ int main(int argc, char* argv[])
 					}
 				}
 
+				// ----------------------------------------------------------
+				//   Find peaks and photoelectrons in cm filtered waveform
+				// ----------------------------------------------------------
+				current_peak_width = 0;
+				peak_amplitude = 0;
+				for (int i = 0; i < 35000-cmfWidth; i++)
+				{
+					// Simple peak finder using threshold crossing with history
+					if (csi_cmf[i] >= peak_height_threshold)
+					{
+						current_peak_width++;
+					}
+					else
+					{
+						if (current_peak_width >= peak_width_threshold)
+						{
+							cmf_pe_begin.push_back((i - current_peak_width - 2) >= 0 ? (i - current_peak_width - 2) : 0);
+							cmf_pe_end.push_back((i + 1) <= 34999-cmfWidth ? (i + 1) : 34999-cmfWidth);
+						}
+						current_peak_width = 0;
+						peak_amplitude = 0;
+					}
+				}
+
+				// -------------------------------------------------------------
+				// Integrate all CMF SPE found in the PT and histogram their charge
+				// -------------------------------------------------------------
+				if cmf_pe_begin.size() > 0
+				{
+					for (std::vector<int>::size_type idx = 0; idx < cmf_pe_begin.size(); idx++)
+					{
+						float _tCSQ = 0.0;
+						for (int i = cmf_pe_begin[idx]; i <= cmf_pe_end[idx]; i++)
+						{
+							_tCSQ += csi_cmf[i];
+						}
+						current_spe_q = int(round(_tCSQ));
+						if (current_spe_q >= -50 && current_spe_q < 250) { cmf_spe_charge_dist[(current_spe_q + 50)] += 1; }
+					}
+				}
+
 				// ========================================================================
 				// Check that there is at least one PE in the trace, there is no overflow, 
 				// no linear gate and no muon veto flag, otherwise continue to next
@@ -661,29 +770,6 @@ int main(int argc, char* argv[])
 							if (peaks[idx] >= S_PT[0] && peaks[idx] < S_PT[1]) { s_pt_ct += 1; }
 							if (peaks[idx] >= BG_ROI[0] && peaks[idx] < BG_ROI[1]) { bg_roi_ct += 1; }
 							if (peaks[idx] >= S_ROI[0] && peaks[idx] < S_ROI[1]) { s_roi_ct += 1; }
-						}
-
-						// Distribution of charge (only add >= 3)
-						if (true)
-						{
-							int sz = peaks.size() / 2;
-							if (sz < 350)
-							{
-								int cpi = 0;
-								for (int idx = 0; idx < 35000; idx++)
-								{
-									// Add sample if it is within one of the PE regions identified previously
-									if (idx >= pe_beginnings[cpi] && idx <= pe_endings[cpi])
-									{
-										charge_distribution[sz][idx / 100] += csi[idx];
-										if (idx >= pe_endings[cpi]) 
-										{ 
-											if (++cpi >= pe_beginnings.size()){ break; }
-										}
-										
-									}
-								}
-							}
 						}
 					}
 
@@ -1053,29 +1139,6 @@ int main(int argc, char* argv[])
 			infoOut << muon_onset_arr[idx] << " ";
 		}
 		infoOut << std::endl;
-		infoOut << "Charge distribution in full waveform" << std::endl;
-		for (int idx_1 = 0; idx_1 < 350; idx_1++)
-		{
-			bool printLine = false;
-			for (int idx_2 = 0; idx_2 < 350; idx_2++)
-			{
-				if (charge_distribution[idx_1][idx_2] > 0)
-				{
-					printLine = true;
-					break;
-				}
-			}
-			if (printLine)
-			{
-				infoOut << idx_1 << " ";
-				for (int idx_2 = 0; idx_2 < 350; idx_2++)
-				{
-					if (charge_distribution[idx_1][idx_2] > 0) { infoOut << idx_2 << " " << charge_distribution[idx_1][idx_2] << " "; }
-				}
-				infoOut << std::endl;
-			}
-		}
-		infoOut.close();
 	}
 	return 0;
 }
