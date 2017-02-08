@@ -1023,17 +1023,18 @@ int main(int argc, char* argv[])
 					
 				for(int i=0; i<35000; i++)
 				{
-					std::cout << "Adding sample: " << i << std::endl;
 					// Read CsI value and apply bit correction
 					c = contents[zidx++];
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
 					_fTmpC = double(_tmpC);
 
+					std::cout << "Adding sample: " << i << " Value: " << _tmpC << " " << _fTmpC << std::endl;
 					// Preload CMF filter
 					if (i < cmfWidth)
 					{
 						cmfQ.push(_fTmpC);
 						cmfBL += _fTmpC;
+						std::cout << "Preloading baseline: " << cmfBL << std::endl;
 					}
 					// CMF filter ready
 					else
@@ -1058,10 +1059,14 @@ int main(int argc, char* argv[])
 							cmfBL -= cmfQ.front();
 						}
 						cmfQ.pop();
+						std::cout << "Current queue size: " << cmfQ.size() << std::endl;
 					}
 
+
 					// Fill waveform object with bin corrected and filtered CsI data
+					std::cout << "Trying to add value to csi" << std::endl;
 					currentWaveForm.setCsIValue(i, _tmpC);
+					std::cout << "Trying to add value to cmf_csi" << std::endl;
 					currentWaveForm.cmf_setCsIValue(i, _cmfC);
 
 					// Preload linear gate detection algorithm
@@ -1078,6 +1083,7 @@ int main(int argc, char* argv[])
 					// Read muon veto data and apply correction
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
+					std::cout << "Trying to add value to mv" << std::endl;
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
 				
