@@ -957,6 +957,7 @@ int main(int argc, char* argv[])
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
+		std::cout << "Error: "<< err << std::endl;
 		// Reset waveform counter
 		waveformCtr = 0;
 		zidx = 0;
@@ -977,7 +978,7 @@ int main(int argc, char* argv[])
 				c = contents[zidx++];
 				no_channels = no_channels << 8 | (unsigned char) c;
 			}
-
+			std::cout << "Number of samples: " << no_samples << std::endl;
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
