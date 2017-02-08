@@ -622,13 +622,13 @@ class waveform
 		bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
 		bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
-		bOutput << muonEvents.size() > 0 ? muonEvents[0] : -1;
+		bOutput << muonEvents.size() > 0 ? muonEvents[0] : -1 << std::endl;
 
 		// Write signal data
 		sOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		sOutput << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << " " << sArrivalIndex << " " << sChargeIW << " " << sRiseTimes[0] << " " << sRiseTimes[1] << " " << sRiseTimes[2] << " ";
 		sOutput << cmf_sPeakCounts[0] << " " << cmf_sPeakCounts[1] << " " << cmf_sPeakCounts[2] << " " << cmf_sArrivalIndex << " " << cmf_sChargeIW << " " << cmf_sRiseTimes[0] << " " << cmf_sRiseTimes[1] << " " << cmf_sRiseTimes[2] << " ";
-		sOutput << muonEvents.size() > 0 ? muonEvents[0] : -1;
+		sOutput << muonEvents.size() > 0 ? muonEvents[0] : -1 << std::endl;
 	}
 
 	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
@@ -957,7 +957,6 @@ int main(int argc, char* argv[])
 	// Begin data processing if file has been properly opened
 	if(err == 0)
 	{
-		std::cout << "Error: "<< err << std::endl;
 		// Reset waveform counter
 		waveformCtr = 0;
 		zidx = 0;
@@ -978,7 +977,6 @@ int main(int argc, char* argv[])
 				c = contents[zidx++];
 				no_channels = no_channels << 8 | (unsigned char) c;
 			}
-			std::cout << "Number of samples: " << no_samples << std::endl;
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
@@ -993,8 +991,6 @@ int main(int argc, char* argv[])
 			 	cInfoData.waveformCounter += 1;
 				waveform currentWaveForm(bRegions, sRegions);
 
-				std::cout << "Current waveform: " << cInfoData.waveformCounter << std::endl;
-
 				// Update timestamp
 				timestamp.clear();
 				for(int i=0; i<7; i++)
@@ -1004,8 +1000,6 @@ int main(int argc, char* argv[])
 					timestamp += zeroPad((int) c, 2);
 				}
 				currentWaveForm.setTimeStamp(timestamp);
-
-				std::cout << "Current timestamp" << timestamp << std::endl;
 
 				// Bit corrected waveform value
 				_tmpC = 0;
@@ -1028,13 +1022,11 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
 					_fTmpC = double(_tmpC);
 
-					std::cout << "Adding sample: " << i << " Value: " << _tmpC << " " << _fTmpC << std::endl;
 					// Preload CMF filter
 					if (i < cmfWidth)
 					{
 						cmfQ.push(_fTmpC);
 						cmfBL += _fTmpC;
-						std::cout << "Preloading baseline: " << cmfBL << std::endl;
 					}
 					// CMF filter ready
 					else
@@ -1059,14 +1051,11 @@ int main(int argc, char* argv[])
 							cmfBL -= cmfQ.front();
 						}
 						cmfQ.pop();
-						std::cout << "Current queue size: " << cmfQ.size() << std::endl;
 					}
 
 
 					// Fill waveform object with bin corrected and filtered CsI data
-					std::cout << "Trying to add value to csi" << std::endl;
 					currentWaveForm.setCsIValue(i, _tmpC);
-					std::cout << "Trying to add value to cmf_csi" << std::endl;
 					currentWaveForm.cmf_setCsIValue(i, _cmfC);
 
 					// Preload linear gate detection algorithm
@@ -1083,7 +1072,6 @@ int main(int argc, char* argv[])
 					// Read muon veto data and apply correction
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
-					std::cout << "Trying to add value to mv" << std::endl;
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
 				
