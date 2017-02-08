@@ -406,11 +406,20 @@ class waveform
 
 	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
 	{
-		bRegionLimits = { { bRegions[0], bRegions[1], bRegions[2], bRegions[3] } };
-		sRegionLimits = { sRegions[0], sRegions[1], sRegions[2], sRegions[3] };
+		for (int i = 0; i < 4; i++)
+		{
+			bRegionLimits[i] = bRegions[i];
+			sRegionLimits[i] = sRegions[i];
+		}
+		cmf_bRegionLimits[0] = bRegionLimits[0];
+		cmf_bRegionLimits[1] = bRegionLimits[1] - cmfWidth;
+		cmf_bRegionLimits[2] = bRegionLimits[2] - cmfWidth;
+		cmf_bRegionLimits[3] = bRegionLimits[3] - cmfWidth;
 
-		cmf_bRegionLimits = { bRegionLimits[0], bRegionLimits[1] - cmfWidth, bRegionLimits[2] - cmfWidth, bRegionLimits[3] - cmfWidth }
-		cmf_sRegionLimits = { sRegionLimits[0], sRegionLimits[1] - cmfWidth, sRegionLimits[2] - cmfWidth, sRegionLimits[3] - cmfWidth }
+		cmf_sRegionLimits = sRegionLimits[0];
+		cmf_sRegionLimits = sRegionLimits[1] - cmfWidth;
+		cmf_sRegionLimits = sRegionLimits[2] - cmfWidth;
+		cmf_sRegionLimits = sRegionLimits[3] - cmfWidth;
 
 		globalBaselineCsI = 0;
 		globalBaselineMuonVeto = 0;
