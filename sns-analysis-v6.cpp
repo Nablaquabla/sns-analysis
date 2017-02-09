@@ -155,6 +155,7 @@ class waveform
 		}
 
 		if (globalBaselineCsI < 50) { linearGateFlag = true; }
+		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
 
 	}
 	void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
@@ -1080,10 +1081,13 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
+
+				/*
 				for (int i = 0; i < 100; i++)
 				{
 					std::cout << currentWaveForm.getCsIValue(i) << std::endl;
-				}
+				}*/
+
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
