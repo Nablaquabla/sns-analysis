@@ -446,7 +446,7 @@ class waveform
 					break;
 				}
 			}
-			std::cout << "Arrival index found: " << arrivalindex;
+			std::cout << "Arrival index found: " << arrivalIndex;
 			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
 			std::cout << "Signal CMF arrival index: " << cmf_sArrivalIndex << std::endl;
 			// Check that the full IW fits in ROI
