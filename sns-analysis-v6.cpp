@@ -118,17 +118,9 @@ class waveform
 	void setMuonVetoValue(int idx, int value)
 	{
 		muonVeto[idx] = value;
-		//if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
+		if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
 	}
-	void printMedianBaselineHists()
-	{
-		std::cout << " Median Baseline Hist CsI: ";
-		for (int i = 0; i < 256; i++)
-		{
-			std::cout << medianBaselineHistCsI[i] << " ";
-		}
-		std::cout << std::endl;
-	}
+
 	void applyBaselineCorrection()
 	{
 		bool csiBaselineFound = false;
@@ -159,8 +151,6 @@ class waveform
 				}
 			}
 		}
-		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
-
 		for (int i = 0; i < 35000; i++)
 		{
 			csi[i] = globalBaselineCsI - csi[i];
@@ -169,6 +159,7 @@ class waveform
 
 		if (globalBaselineCsI < 50) { linearGateFlag = true; }
 	}
+
 	void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
 		int currentPeakWidth = 0;
@@ -1008,7 +999,6 @@ int main(int argc, char* argv[])
 				// A new waveform begins, update counter and create waveform object
 			 	cInfoData.waveformCounter += 1;
 				waveform currentWaveForm(bRegions, sRegions);
-				currentWaveForm.printMedianBaselineHists();
 
 				// Update timestamp
 				timestamp.clear();
@@ -1019,8 +1009,6 @@ int main(int argc, char* argv[])
 					timestamp += zeroPad((int) c, 2);
 				}
 				currentWaveForm.setTimeStamp(timestamp);
-
-				currentWaveForm.printMedianBaselineHists();
 
 				// Bit corrected waveform value
 				_tmpC = 0;
