@@ -120,6 +120,20 @@ class waveform
 
 	void applyBaselineCorrection()
 	{
+		std::cout << "CsI waveform: ";
+		for (int i = 0; i < 20; i++)
+		{
+			std::cout << csi[i] << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "MV waveform: ";
+		for (int i = 0; i < 20; i++)
+		{
+			std::cout << csi[i] << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
+
 		bool csiBaselineFound = false;
 		int csiBaselineCounter = 0;
 
@@ -155,20 +169,6 @@ class waveform
 		}
 
 		if (globalBaselineCsI < 50) { linearGateFlag = true; }
-		std::cout << "CsI waveform: ";
-		for (int i = 0; i < 20; i++)
-		{
-			std::cout << csi[i] << " ";
-		}
-		std::cout << std::endl;
-		std::cout << "MV waveform: ";
-		for (int i = 0; i < 20; i++)
-		{
-			std::cout << csi[i] << " ";
-		}
-		std::cout << std::endl;
-		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
-
 	}
 	void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
