@@ -105,7 +105,7 @@ class waveform
 	void setCsIValue(int idx, int value)
 	{
 		csi[idx] = value;
-		if (idx < 20000){ medianCsI[value + 128] += 1; }
+		// if (idx < 20000){ medianCsI[value + 128] += 1; }
 	}
 	int getCsIValue(int idx)
 	{
@@ -700,8 +700,7 @@ class waveform
 		csi = {};
 		muonVeto = {};
 		cmf_csi = {};
-		for (int i = 0; i < 256; i++){ medianCsI[i] = 0; }
-		
+		medianCsI[i] = {};
 		medianMuonVeto = {};
 
 		peakBegin.clear();
