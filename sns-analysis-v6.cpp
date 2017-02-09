@@ -231,15 +231,10 @@ class waveform
 	}
 	void lbl_updateIntegratedCsIPeaks(infoData &cInData)
 	{
-		//std::cout << "Begin lbl peak integration" << std::endl;
 		if (peakBegin.size() > 0)
 		{
-			//std::cout << "Found at least one peak" << std::endl;
 			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
 			{
-				//std::cout << "Integrating peak number " << idx << std::endl;
-				//std::cout << "Peak regions: " << peakBegin[idx] << " to " << peakEnd[idx] << std::endl;
-				
 				double _tCharge = 0.0;
 				double _tAmplitude = -1;
 
@@ -248,11 +243,8 @@ class waveform
 				int iMin = (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0;
 				int iMax = (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999;
 
-				//std::cout << "Integration region: " << iMin << " to " << iMax << std::endl;
-
 				for (int i = iMin; i < iMax; i++)
 				{
-					//std::cout << "Integrating idx " << i << std::endl;
 					if (fabs(csi[i]) <= 3)
 					{
 						numSamples += 1;
@@ -260,7 +252,6 @@ class waveform
 					}
 				}
 				localBaseline /= double(numSamples);
-				//std::cout << "local baseline is" << localBaseline << std::endl;
 
 				for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
 				{
@@ -359,15 +350,10 @@ class waveform
 					break;
 				}
 			}
-			if (signalRegion)
-			{
-				sArrivalIndex = arrivalIndex;
-			}
-			else
-			{
-				bArrivalIndex = arrivalIndex;
-			}
-			//signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
+			//if (signalRegion){ sArrivalIndex = arrivalIndex; }
+			//else{ bArrivalIndex = arrivalIndex; }
+			(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
+
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
@@ -434,8 +420,6 @@ class waveform
 			beginROI = cmf_sRegionLimits[2];
 			endROI = cmf_sRegionLimits[3];
 		}
-		//std::cout << "Signal Region: " << int(signalRegion) << "   End ROI: " << endROI << std::endl;
-		//std::cout << "Signal Region: " << int(signalRegion);
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -452,17 +436,9 @@ class waveform
 					break;
 				}
 			}
-			if (signalRegion)
-			{
-				cmf_sArrivalIndex = arrivalIndex;
-			}
-			else
-			{
-				cmf_bArrivalIndex = arrivalIndex;
-			}
-			//std::cout << "Arrival index found: " << arrivalIndex;
-			//(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
-			//std::cout << "Signal CMF arrival index: " << cmf_sArrivalIndex << std::endl;
+			//if (signalRegion) { cmf_sArrivalIndex = arrivalIndex; }
+			//else { cmf_bArrivalIndex = arrivalIndex; }
+			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
@@ -546,7 +522,6 @@ class waveform
 					break;
 				}
 			}
-			//(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
 
 			// Check that the full IW fits in ROI
 			//if (arrivalIndex < (endROI - 1500))
