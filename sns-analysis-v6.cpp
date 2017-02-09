@@ -176,6 +176,7 @@ class waveform
 	}
 	void findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
+		std::cout << timeStamp << " Found peaks: ";
 		int currentPeakWidth = 0;
 		for (int i = 0; i < 35000; i++)
 		{
@@ -184,12 +185,14 @@ class waveform
 			{
 				if (currentPeakWidth >= peakWidthThreshold)
 				{
+					std::cout << "idx: " << i << " width: " << currentPeakWidth << " ";
 					peakBegin.push_back(((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0));
 					peakEnd.push_back(((i + 1) <= 34999 ? (i + 1) : 34999));
 				}
 				currentPeakWidth = 0;
 			}
 		}
+		std::cout << std::endl;
 	}
 	void cmf_findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
