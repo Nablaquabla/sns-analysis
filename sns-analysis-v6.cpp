@@ -18,6 +18,7 @@
 
 // Global constants
 const unsigned int cmfWidth = 128;
+const double cmfThreshold = 2.0;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
 
@@ -810,7 +811,6 @@ int main(int argc, char* argv[])
 	// Conditional mean filter setup
 	double _cmfC = 0;
 	double cmfBL = 0;
-	double cmfThreshold = 3;
 
 	// Buffer to store bit shifted samples
 	int _tmpC = 0;
