@@ -370,10 +370,13 @@ class waveform
 			if (arrivalIndex < (endROI - 1500))
 			{
 				// Determine number of peaks in IW
+				std::cout << "Peaks at: ";
 				for (int i = peakIndex; i < peakBegin.size(); i++)
 				{
-					signalRegion ? sPeakCounts[2] : bPeakCounts[2] += (peakBegin[i] - arrivalIndex < 1500) ? 1 : 0;
+					std::cout << peakBegin[i] << " ";
+					signalRegion ? sPeakCounts[2] : bPeakCounts[2] += int(peakBegin[i] - arrivalIndex < 1500);
 				}
+				std::cout << std::endl;
 			}
 
 			// Integrate over all peaks in iw
