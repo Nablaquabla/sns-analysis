@@ -105,7 +105,7 @@ class waveform
 	void setCsIValue(int idx, int value)
 	{
 		csi[idx] = value;
-		//if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
+		if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
 	}
 	int getCsIValue(int idx)
 	{
