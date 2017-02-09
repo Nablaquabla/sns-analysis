@@ -184,8 +184,8 @@ class waveform
 			{
 				if (currentPeakWidth >= peakWidthThreshold)
 				{
-					peakBegin.push_back((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0);
-					peakEnd.push_back((i + 1) <= 34999 ? (i + 1) : 34999);
+					peakBegin.push_back(((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0));
+					peakEnd.push_back(((i + 1) <= 34999 ? (i + 1) : 34999));
 				}
 				currentPeakWidth = 0;
 			}
