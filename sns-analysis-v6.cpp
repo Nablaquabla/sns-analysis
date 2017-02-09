@@ -707,8 +707,14 @@ class waveform
 		csi = {};
 		muonVeto = {};
 		cmf_csi = {};
-		medianCsI = {};
-		medianMuonVeto = {};
+		//medianCsI = {};
+		//medianMuonVeto = {};
+
+		for (int i = 0; i < 256; i++)
+		{
+			medianCsI[i] = 0;
+			medianMuonVeto[i] = 0;
+		}
 
 		peakBegin.clear();
 		peakEnd.clear();
@@ -760,8 +766,8 @@ class waveform
 		std::array<int, 35000> csi;
 		std::array<int, 35000> muonVeto;
 		std::array<double, 35000 - cmfWidth> cmf_csi;
-		std::array<int, 256> medianCsI;
-		std::array<int, 256> medianMuonVeto;
+		std::array<unsigned int, 256> medianCsI;
+		std::array<unsigned int, 256> medianMuonVeto;
 
 		std::vector<int> peakBegin;
 		std::vector<int> peakEnd;
@@ -1118,7 +1124,7 @@ int main(int argc, char* argv[])
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
-				currentWaveForm.setMedianValuesToZero();
+				// currentWaveForm.setMedianValuesToZero();
 				// Apply global baseline correction 
 				currentWaveForm.applyBaselineCorrection();
 
