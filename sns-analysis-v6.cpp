@@ -1060,7 +1060,7 @@ int main(int argc, char* argv[])
 				{
 					// Read CsI value and apply bit correction
 					c = contents[zidx++];
-					/*_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
+					/_tmpC = (int) c - (int) floor(((double) c + 5.0)/11.0);
 					_fTmpC = double(_tmpC);
 
 					// Preload CMF filter
@@ -1095,8 +1095,8 @@ int main(int argc, char* argv[])
 					}
 
 					// Fill waveform object with bin corrected and filtered CsI data
-					currentWaveForm.setCsIValue(i, _tmpC);
-					currentWaveForm.cmf_setCsIValue(i, _cmfC);
+					//currentWaveForm.setCsIValue(i, _tmpC);
+					//currentWaveForm.cmf_setCsIValue(i, _cmfC);
 
 					// Preload linear gate detection algorithm
 					if (i == 0) { _previous_c = _tmpC; }
@@ -1109,9 +1109,9 @@ int main(int argc, char* argv[])
 					// Overflow check
 					if (c >= 127 || c == -128) { currentWaveForm.setOverflowFlag(true); }
 
-					// Read muon veto data and apply correction*/
+					// Read muon veto data and apply correction
 					c = contents[zidx++];
-					//_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
+					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					//currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
 
