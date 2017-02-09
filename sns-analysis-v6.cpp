@@ -145,7 +145,7 @@ class waveform
 		bool muonVetoBaselineFound = false;
 		int muonVetoBaselineCounter = 0;
 
-		for (int i = 0; i < 256; i++)
+		/*for (int i = 0; i < 256; i++)
 		{
 			if (!csiBaselineFound)
 			{
@@ -166,7 +166,7 @@ class waveform
 					muonVetoBaselineFound = true;
 				}
 			}
-		}
+		}*/
 		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
 
 		for (int i = 0; i < 35000; i++)
