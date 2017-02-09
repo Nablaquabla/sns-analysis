@@ -97,6 +97,15 @@ void initializeInfoData(infoData &ID)
 class waveform
 {
 	public:
+	void printCMFCsI()
+	{
+		std::cout << "CMF CSI" << std::endl;
+		for (int i = 0; i < 35000 - cmfWidth; i++)
+		{
+			std::cout << cmf_csi[i] << " ";
+		}
+		std::cout << std::endl;
+	}
 	void setTimeStamp(std::string TS){ timeStamp = TS; }
 	void setOverflowFlag(bool flag) { overflowFlag = flag; }
 	void setLinearGateFlag(bool flag) { linearGateFlag = flag; }
@@ -106,10 +115,6 @@ class waveform
 	{
 		csi[idx] = value;
 		if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
-	}
-	int getCsIValue(int idx)
-	{
-		return csi[idx];
 	}
 	void cmf_setCsIValue(int idx, double value) 
 	{ 
@@ -365,22 +370,15 @@ class waveform
 				}
 			}
 			signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
-			std::cout << "Arrival Index: " << arrivalIndex << std::endl;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
 				// Determine number of peaks in IW
-				std::cout << "Peaks at: ";
 				for (int i = peakIndex; i < peakBegin.size(); i++)
 				{
-					std::cout << peakBegin[i] << " ";
-					//if (signalRegion) { sPeakCounts[2] += int((peakBegin[i] - arrivalIndex) < 1500); }
-					//else { bPeakCounts[2] += int((peakBegin[i] - arrivalIndex) < 1500); } 
 					(signalRegion ? sPeakCounts[2] : bPeakCounts[2]) = (signalRegion ? sPeakCounts[2] : bPeakCounts[2]) + int((peakBegin[i] - arrivalIndex) < 1500);
 				}
-				std::cout << std::endl;
 			}
-			std::cout << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << std::endl;
 
 			// Integrate over all peaks in iw
 			int _tPeakIndex = peakIndex;
@@ -399,7 +397,7 @@ class waveform
 				}
 				integratedCharge[i] = _tCharge;
 			}
-			signalRegion ? sChargeIW : bChargeIW = int(round(integratedCharge[1499]));
+			(signalRegion ? sChargeIW : bChargeIW) = int(round(integratedCharge[1499]));
 
 			// Calculate charge thresholds
 			double thresholds[3];
@@ -419,7 +417,7 @@ class waveform
 				{
 					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
 					{
-						signalRegion ? sRiseTimes[j] : bRiseTimes[j] = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						(signalRegion ? sRiseTimes[j] : bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
 					}
 				}
 			}
@@ -463,7 +461,7 @@ class waveform
 				// Determine number of peaks in IW
 				for (int i = peakIndex; i < cmf_peakBegin.size(); i++)
 				{
-					signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2] += (cmf_peakBegin[i] - arrivalIndex < 1500) ? 1 : 0;
+					(signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2]) = (signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2]) + int(cmf_peakBegin[i] - arrivalIndex < 1500);
 				}
 			}
 
@@ -484,7 +482,7 @@ class waveform
 				}
 				integratedCharge[i] = _tCharge;
 			}
-			signalRegion ? cmf_sChargeIW : cmf_bChargeIW = integratedCharge[1499];
+			(signalRegion ? cmf_sChargeIW : cmf_bChargeIW) = integratedCharge[1499];
 
 			// Calculate charge thresholds
 			double thresholds[3];
@@ -504,7 +502,7 @@ class waveform
 				{
 					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
 					{
-						signalRegion ? cmf_sRiseTimes[j] : cmf_bRiseTimes[j] = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						(signalRegion ? cmf_sRiseTimes[j] : cmf_bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
 					}
 				}
 			}
@@ -540,7 +538,7 @@ class waveform
 					break;
 				}
 			}
-			signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
+			(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
 
 			// Check that the full IW fits in ROI
 			//if (arrivalIndex < (endROI - 1500))
@@ -575,7 +573,7 @@ class waveform
 				}
 				integratedCharge[i] = _tCharge;
 			}
-			signalRegion ? lbl_sChargeIW : lbl_bChargeIW = integratedCharge[1499];
+			(signalRegion ? lbl_sChargeIW : lbl_bChargeIW) = integratedCharge[1499];
 
 			// Calculate charge thresholds
 			double thresholds[3];
@@ -595,7 +593,7 @@ class waveform
 				{
 					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
 					{
-						signalRegion ? lbl_sRiseTimes[j] : lbl_bRiseTimes[j] = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						(signalRegion ? lbl_sRiseTimes[j] : lbl_bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
 					}
 				}
 			}
@@ -1076,7 +1074,7 @@ int main(int argc, char* argv[])
 					// Fill waveform object with bin corrected and filtered CsI data
 					currentWaveForm.setCsIValue(i, _tmpC);
 					if (i >= cmfWidth) { currentWaveForm.cmf_setCsIValue(i - cmfWidth, _cmfC); }
-
+					
 					// Preload linear gate detection algorithm
 					if (i == 0) { _previous_c = _tmpC; }
 
@@ -1093,7 +1091,7 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
-
+				currentWaveForm.printCMFCsI();
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
