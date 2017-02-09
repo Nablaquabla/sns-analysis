@@ -537,14 +537,7 @@ class waveform
 			signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
 
 			// Check that the full IW fits in ROI
-			if (arrivalIndex < (endROI - 1500))
-			{
-				// Determine number of peaks in IW
-				for (int i = peakIndex; i < peakBegin.size(); i++)
-				{
-					signalRegion ? sPeakCounts[2] : bPeakCounts[2] += (peakBegin[i] - arrivalIndex < 1500) ? 1 : 0;
-				}
-			}
+			//if (arrivalIndex < (endROI - 1500))
 
 			// Estimate local baseline based on wf 1 us before the arrival
 			double localBaseline = 0;
