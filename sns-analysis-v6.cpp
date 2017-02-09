@@ -374,10 +374,11 @@ class waveform
 				for (int i = peakIndex; i < peakBegin.size(); i++)
 				{
 					std::cout << peakBegin[i] << " ";
-					signalRegion ? sPeakCounts[2] : bPeakCounts[2] += int(peakBegin[i] - arrivalIndex < 1500);
+					signalRegion ? sPeakCounts[2] : bPeakCounts[2] += int((peakBegin[i] - arrivalIndex) < 1500);
 				}
 				std::cout << std::endl;
 			}
+			std::cout << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << std::endl;
 
 			// Integrate over all peaks in iw
 			int _tPeakIndex = peakIndex;
