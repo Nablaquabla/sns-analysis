@@ -143,7 +143,7 @@ class waveform
 		std::cout << "Median bins: ";
 		for (int i = 0; i < 256; i++)
 		{
-			std::cout << medianCsI[i] << " ";
+			std::cout << medianCsI2[i] << " ";
 		}
 		std::cout << std::endl;
 
@@ -707,8 +707,8 @@ class waveform
 		csi = {};
 		muonVeto = {};
 		cmf_csi = {};
-		//medianCsI = {};
-		//medianMuonVeto = {};
+		medianCsI2 = {};
+		medianMuonVeto2 = {};
 
 		for (int i = 0; i < 256; i++)
 		{
@@ -768,6 +768,9 @@ class waveform
 		std::array<double, 35000 - cmfWidth> cmf_csi;
 		std::array<unsigned int, 256> medianCsI;
 		std::array<unsigned int, 256> medianMuonVeto;
+
+		std::array<unsigned int, 256> medianCsI2;
+		std::array<unsigned int, 256> medianMuonVeto2;
 
 		std::vector<int> peakBegin;
 		std::vector<int> peakEnd;
