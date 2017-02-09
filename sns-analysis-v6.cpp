@@ -105,7 +105,7 @@ class waveform
 	void setCsIValue(int idx, int value)
 	{
 		csi[idx] = value;
-		if (idx < 20000){ medianCsI2[value + 128] += 1; }
+		if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
 	}
 	int getCsIValue(int idx)
 	{
@@ -115,15 +115,7 @@ class waveform
 	void setMuonVetoValue(int idx, int value)
 	{
 		muonVeto[idx] = value;
-		if (idx < 20000){ medianMuonVeto[value + 128] += 1; }
-	}
-	void setMedianValuesToZero()
-	{
-		for (int i = 0; i < 256; i++)
-		{
-			medianCsI[i] = 0;
-			medianMuonVeto[i] = 0;
-		}
+		if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
 	}
 	void applyBaselineCorrection()
 	{
@@ -143,7 +135,7 @@ class waveform
 		std::cout << "Median bins: ";
 		for (int i = 0; i < 256; i++)
 		{
-			std::cout << medianCsI2[i] << " ";
+			std::cout << medianBaselineHistCsI[i] << " ";
 		}
 		std::cout << std::endl;
 
@@ -157,7 +149,7 @@ class waveform
 		{
 			if (!csiBaselineFound)
 			{
-				csiBaselineCounter += medianCsI[i];
+				csiBaselineCounter += medianBaselineHistCsI[i];
 				if (csiBaselineCounter >= 10000)
 				{
 					globalBaselineCsI = i - 128;
@@ -167,7 +159,7 @@ class waveform
 
 			if (!muonVetoBaselineFound)
 			{
-				muonVetoBaselineCounter += medianMuonVeto[i];
+				muonVetoBaselineCounter += medianBaselineHistMuonVeto[i];
 				if (muonVetoBaselineCounter >= 10000)
 				{
 					globalBaselineMuonVeto = i - 128;
@@ -707,14 +699,8 @@ class waveform
 		csi = {};
 		muonVeto = {};
 		cmf_csi = {};
-		medianCsI2 = {};
-		medianMuonVeto2 = {};
-
-		for (int i = 0; i < 256; i++)
-		{
-			medianCsI[i] = 0;
-			medianMuonVeto[i] = 0;
-		}
+		medianBaselineHistCsI = {};
+		medianBaselineHistMuonVeto = {};
 
 		peakBegin.clear();
 		peakEnd.clear();
@@ -766,11 +752,8 @@ class waveform
 		std::array<int, 35000> csi;
 		std::array<int, 35000> muonVeto;
 		std::array<double, 35000 - cmfWidth> cmf_csi;
-		std::array<unsigned int, 256> medianCsI;
-		std::array<unsigned int, 256> medianMuonVeto;
-
-		std::array<unsigned int, 256> medianCsI2;
-		std::array<unsigned int, 256> medianMuonVeto2;
+		std::array<unsigned int, 256> medianBaselineHistCsI;
+		std::array<unsigned int, 256> medianBaselineHistMuonVeto;
 
 		std::vector<int> peakBegin;
 		std::vector<int> peakEnd;
