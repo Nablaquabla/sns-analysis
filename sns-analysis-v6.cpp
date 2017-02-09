@@ -18,7 +18,7 @@
 
 // Global constants
 const unsigned int cmfWidth = 128;
-const double cmfThreshold = 2.0;
+const double cmfThreshold = 3.0;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
 
@@ -429,6 +429,7 @@ class waveform
 			endROI = cmf_sRegionLimits[3];
 		}
 
+		std::cout << "Signal Region: " << int(signalRegion);
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -445,8 +446,9 @@ class waveform
 					break;
 				}
 			}
-			signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex = arrivalIndex;
-
+			std::cout << "Arrival index found: " << arrivalindex;
+			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
+			std::cout << "Signal CMF arrival index: " << cmf_sArrivalIndex << std::endl;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
@@ -632,12 +634,14 @@ class waveform
 		bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
 		bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
+		bOutput << lbl_bChargeIW << " " << lbl_bRiseTimes[0] << " " << lbl_bRiseTimes[1] << " " << lbl_bRiseTimes[2] << " ";
 		bOutput << muonLocation << std::endl;
 
 		// Write signal data
 		sOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
 		sOutput << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << " " << sArrivalIndex << " " << sChargeIW << " " << sRiseTimes[0] << " " << sRiseTimes[1] << " " << sRiseTimes[2] << " ";
 		sOutput << cmf_sPeakCounts[0] << " " << cmf_sPeakCounts[1] << " " << cmf_sPeakCounts[2] << " " << cmf_sArrivalIndex << " " << cmf_sChargeIW << " " << cmf_sRiseTimes[0] << " " << cmf_sRiseTimes[1] << " " << cmf_sRiseTimes[2] << " ";
+		sOutput << lbl_sChargeIW << " " << lbl_sRiseTimes[0] << " " << lbl_sRiseTimes[1] << " " << lbl_sRiseTimes[2] << " ";
 		sOutput << muonLocation << std::endl;
 	}
 
