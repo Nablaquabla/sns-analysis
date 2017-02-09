@@ -343,8 +343,6 @@ class waveform
 			beginROI = sRegionLimits[2];
 			endROI = sRegionLimits[3];
 		}
-
-		std::cout << "Signal Region: " << int(signalRegion) << "   End ROI: " << endROI << std::endl;
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -428,8 +426,8 @@ class waveform
 			beginROI = cmf_sRegionLimits[2];
 			endROI = cmf_sRegionLimits[3];
 		}
-
-		std::cout << "Signal Region: " << int(signalRegion);
+		//std::cout << "Signal Region: " << int(signalRegion) << "   End ROI: " << endROI << std::endl;
+		//std::cout << "Signal Region: " << int(signalRegion);
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -446,9 +444,9 @@ class waveform
 					break;
 				}
 			}
-			std::cout << "Arrival index found: " << arrivalIndex;
+			//std::cout << "Arrival index found: " << arrivalIndex;
 			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
-			std::cout << "Signal CMF arrival index: " << cmf_sArrivalIndex << std::endl;
+			//std::cout << "Signal CMF arrival index: " << cmf_sArrivalIndex << std::endl;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
@@ -625,6 +623,10 @@ class waveform
 		cInData.summedBaseline += globalBaselineCsI;
 
 
+	}
+	void printArrivalIdx()
+	{
+		std::cout << bArrivalIndex << " " cmf_bArrivalIndex << " " << sArrivalIndex << " " << cmf_sArrivalIndex << std::endl;
 	}
 	void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
 	{
@@ -1117,24 +1119,27 @@ int main(int argc, char* argv[])
 
 				// Analyze ROIs Vanilla Style
 				//std::cout << "Analyze vanilla" << std::endl;
+				currentWaveForm.printArrivalIdx();
 				currentWaveForm.analyzeROIWindowVanillaStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowVanillaStyle(true); // Signal region
-
+				currentWaveForm.printArrivalIdx();
 				// Analyze ROIs CMF Style
 				//std::cout << "Analyze cmf" << std::endl;
 				currentWaveForm.analyzeROIWindowCMFStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowCMFStyle(true); // Signal region
-
+				currentWaveForm.printArrivalIdx();
 				// Analyze ROIs LBL Style
 				//std::cout << "Analyze lbl" << std::endl;
 				currentWaveForm.analyzeROIWindowLBLStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowLBLStyle(true); // Signal region
-
+				currentWaveForm.printArrivalIdx();
 				// Update info data
 				currentWaveForm.updateInfoData(cInfoData);
-
+				currentWaveForm.printArrivalIdx();
 				// Write analysis results to file
 				currentWaveForm.writeEventData(bg_out_file, s_out_file);
+				currentWaveForm.printArrivalIdx();
+				std::cout << "New Waveform" << std::endl;
 			}
 		}
 	}
