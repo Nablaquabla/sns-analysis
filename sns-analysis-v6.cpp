@@ -700,7 +700,8 @@ class waveform
 		csi = {};
 		muonVeto = {};
 		cmf_csi = {};
-		medianCsI = {};
+		for (int i = 0; i < 256; i++){ medianCsI[i] = 0; }
+		
 		medianMuonVeto = {};
 
 		peakBegin.clear();
