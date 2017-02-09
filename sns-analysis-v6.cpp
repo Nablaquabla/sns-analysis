@@ -359,7 +359,15 @@ class waveform
 					break;
 				}
 			}
-			signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
+			if (signalRegion)
+			{
+				sArrivalIndex = arrivalIndex;
+			}
+			else
+			{
+				bArrivalIndex = arrivalIndex;
+			}
+			//signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
@@ -444,8 +452,16 @@ class waveform
 					break;
 				}
 			}
+			if (signalRegion)
+			{
+				cmf_sArrivalIndex = arrivalIndex;
+			}
+			else
+			{
+				cmf_bArrivalIndex = arrivalIndex;
+			}
 			//std::cout << "Arrival index found: " << arrivalIndex;
-			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
+			//(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
 			//std::cout << "Signal CMF arrival index: " << cmf_sArrivalIndex << std::endl;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
@@ -530,7 +546,7 @@ class waveform
 					break;
 				}
 			}
-			(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
+			//(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
 
 			// Check that the full IW fits in ROI
 			//if (arrivalIndex < (endROI - 1500))
