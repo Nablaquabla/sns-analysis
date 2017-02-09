@@ -155,6 +155,12 @@ class waveform
 		}
 
 		if (globalBaselineCsI < 50) { linearGateFlag = true; }
+		std::cout << "CsI waveform: ";
+		for (int i = 0; i < 35000; i++)
+		{
+			std::cout << csi[i] << " ";
+		}
+		std::cout << std::endl;
 		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
 
 	}
@@ -1059,7 +1065,6 @@ int main(int argc, char* argv[])
 						}
 						cmfQ.pop();
 					}
-
 
 					// Fill waveform object with bin corrected and filtered CsI data
 					currentWaveForm.setCsIValue(i, _tmpC);
