@@ -752,8 +752,8 @@ class waveform
 		std::array<int, 35000> csi;
 		std::array<int, 35000> muonVeto;
 		std::array<double, 35000 - cmfWidth> cmf_csi;
-		std::array<unsigned int, 256> medianBaselineHistCsI;
-		std::array<unsigned int, 256> medianBaselineHistMuonVeto;
+		std::array<unsigned int, 257> medianBaselineHistCsI;
+		std::array<unsigned int, 257> medianBaselineHistMuonVeto;
 
 		std::vector<int> peakBegin;
 		std::vector<int> peakEnd;
