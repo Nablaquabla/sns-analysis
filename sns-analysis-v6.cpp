@@ -97,15 +97,6 @@ void initializeInfoData(infoData &ID)
 class waveform
 {
 	public:
-	void printCMFCsI()
-	{
-		std::cout << "CMF CSI" << std::endl;
-		for (int i = 0; i < 5000; i++)
-		{
-			std::cout << cmf_csi[i] << " ";
-		}
-		std::cout << std::endl;
-	}
 	void setTimeStamp(std::string TS){ timeStamp = TS; }
 	void setOverflowFlag(bool flag) { overflowFlag = flag; }
 	void setLinearGateFlag(bool flag) { linearGateFlag = flag; }
@@ -1032,25 +1023,6 @@ int main(int argc, char* argv[])
 				_previous_c = 128;
 				gate_down = 0;
 				gate_up = 0;
-					
-				/*for i in range(35000) :
-					c = wf[i]
-					csi[i] = c
-
-					if i < fw :
-						Q.put(c)
-						summedBL += c
-					else:
-				m = summedBL / fw
-					if np.abs(c - m) < threshold :
-						csiF[i - fw] = 0
-						Q.put(c)
-						summedBL += c
-					else:
-				csiF[i - fw] = m - c
-					Q.put(m)
-					summedBL += m
-					summedBL -= Q.get()*/
 
 				for(int i=0; i<35000; i++)
 				{
@@ -1110,7 +1082,7 @@ int main(int argc, char* argv[])
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
-				currentWaveForm.printCMFCsI();
+
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
@@ -1121,6 +1093,7 @@ int main(int argc, char* argv[])
 				// Find all peaks in CsI and Muon Veto data
 				//std::cout << "Finding csi peaks" << std::endl;
 				currentWaveForm.findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
+				currentWaveForm.cmf_findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
 				//std::cout << "Finding mv peaks" << std::endl;
 				currentWaveForm.findMuonVetoPeaks(10, 3);
 
