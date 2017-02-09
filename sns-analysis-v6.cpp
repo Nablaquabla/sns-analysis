@@ -1103,19 +1103,25 @@ int main(int argc, char* argv[])
 				currentWaveForm.cmf_countPeaksPerRegion();
 
 				// Get SPE charge distributions
+				std::cout << "Integrated vanilla peaks" << std::endl;
 				currentWaveForm.updateIntegratedCsIPeaks(cInfoData);
+				std::cout << "Integrated cmfpeaks" << std::endl;
 				currentWaveForm.cmf_updateIntegratedCsIPeaks(cInfoData);
+				std::cout << "Integrated lbl peaks" << std::endl;
 				currentWaveForm.lbl_updateIntegratedCsIPeaks(cInfoData);
 
 				// Analyze ROIs Vanilla Style
+				std::cout << "Analyze vanilla" << std::endl;
 				currentWaveForm.analyzeROIWindowVanillaStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowVanillaStyle(true); // Signal region
 
 				// Analyze ROIs CMF Style
+				std::cout << "Analyze cmf" << std::endl;
 				currentWaveForm.analyzeROIWindowCMFStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowCMFStyle(true); // Signal region
 
 				// Analyze ROIs LBL Style
+				std::cout << "Analyze lbl" << std::endl;
 				currentWaveForm.analyzeROIWindowLBLStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowLBLStyle(true); // Signal region
 
