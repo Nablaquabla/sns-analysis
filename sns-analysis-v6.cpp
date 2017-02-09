@@ -156,7 +156,13 @@ class waveform
 
 		if (globalBaselineCsI < 50) { linearGateFlag = true; }
 		std::cout << "CsI waveform: ";
-		for (int i = 0; i < 35000; i++)
+		for (int i = 0; i < 20; i++)
+		{
+			std::cout << csi[i] << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "MV waveform: ";
+		for (int i = 0; i < 20; i++)
 		{
 			std::cout << csi[i] << " ";
 		}
@@ -1067,6 +1073,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Fill waveform object with bin corrected and filtered CsI data
+					if (i < 20) { std::cout << _tmpC << " "; }
 					currentWaveForm.setCsIValue(i, _tmpC);
 					currentWaveForm.cmf_setCsIValue(i, _cmfC);
 
@@ -1087,12 +1094,12 @@ int main(int argc, char* argv[])
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
 
-				/*
-				for (int i = 0; i < 100; i++)
+				std::cout << std::endl;
+				for (int i = 0; i < 20; i++)
 				{
-					std::cout << currentWaveForm.getCsIValue(i) << std::endl;
-				}*/
-
+					std::cout << currentWaveForm.getCsIValue(i) << " ";
+				}
+				std::cout << std::endl;
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
