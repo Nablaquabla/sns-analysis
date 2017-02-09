@@ -661,15 +661,13 @@ class waveform
 		bArrivalIndex = -1;
 		sArrivalIndex = -1;
 
-		cmf_bChargeIW = 0;
-		cmf_sChargeIW = 0;
+		cmf_bChargeIW = 0.0;
+		cmf_sChargeIW = 0.0;
 		cmf_bArrivalIndex = -1;
 		cmf_sArrivalIndex = -1;
 
-		lbl_bChargeIW = 0;
-		lbl_sChargeIW = 0;
-		lbl_bArrivalIndex = -1;
-		lbl_sArrivalIndex = -1;
+		lbl_bChargeIW = 0.0;
+		lbl_sChargeIW = 0.0;
 
 		overflowFlag = false;
 		muonVetoFlag = false;
