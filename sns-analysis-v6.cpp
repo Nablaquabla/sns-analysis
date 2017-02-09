@@ -626,7 +626,7 @@ class waveform
 	}
 	void printArrivalIdx()
 	{
-		std::cout << bArrivalIndex << " " cmf_bArrivalIndex << " " << sArrivalIndex << " " << cmf_sArrivalIndex << std::endl;
+		std::cout << bArrivalIndex << " " << cmf_bArrivalIndex << " " << sArrivalIndex << " " << cmf_sArrivalIndex << std::endl;
 	}
 	void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
 	{
