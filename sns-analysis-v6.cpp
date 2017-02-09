@@ -631,7 +631,10 @@ class waveform
 		bOutput << lbl_bChargeIW << " " << lbl_bRiseTimes[0] << " " << lbl_bRiseTimes[1] << " " << lbl_bRiseTimes[2] << " ";
 		if (bPeakCounts[0] + bPeakCounts[1] + bPeakCounts[2] == 4)
 		{
-			bOutput << peakBegin[0] << " " << peakBegin[1] << " " << peakBegin[2] << " " << peakBegin[3] << " " << cmf_peakBegin[0] << " " << cmf_peakBegin[1] << " " << cmf_peakBegin[2] << " " << cmf_peakBegin[3] << " ";
+			for (int i = 0; i < peakBegin.size(); i++)
+			{
+				bOutput << peakBegin[i] << " " << cmf_peakBegin[i] << " ";
+			}
 		}
 		bOutput << muonLocation << std::endl;
 
