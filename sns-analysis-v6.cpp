@@ -131,33 +131,13 @@ class waveform
 	}
 	void applyBaselineCorrection()
 	{
-		std::cout << "CsI waveform: ";
-		for (int i = 0; i < 20; i++)
-		{
-			std::cout << csi[i] << " ";
-		}
-		std::cout << std::endl;
-		std::cout << "MV waveform: ";
-		for (int i = 0; i < 20; i++)
-		{
-			std::cout << muonVeto[i] << " ";
-		}
-		std::cout << std::endl;
-		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
-		std::cout << "Median bins: ";
-		for (int i = 0; i < 256; i++)
-		{
-			std::cout << medianBaselineHistCsI[i] << " ";
-		}
-		std::cout << std::endl;
-
 		bool csiBaselineFound = false;
 		int csiBaselineCounter = 0;
 
 		bool muonVetoBaselineFound = false;
 		int muonVetoBaselineCounter = 0;
 
-		/*for (int i = 0; i < 256; i++)
+		for (int i = 0; i < 256; i++)
 		{
 			if (!csiBaselineFound)
 			{
@@ -178,7 +158,7 @@ class waveform
 					muonVetoBaselineFound = true;
 				}
 			}
-		}*/
+		}
 		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
 
 		for (int i = 0; i < 35000; i++)
@@ -1112,10 +1092,8 @@ int main(int argc, char* argv[])
 					// Read muon veto data and apply correction
 					c = contents[zidx++];
 					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
-					//currentWaveForm.setMuonVetoValue(i, _tmpC);
+					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
-
-				currentWaveForm.printMedianBaselineHists();
 
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
