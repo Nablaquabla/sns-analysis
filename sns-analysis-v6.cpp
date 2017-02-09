@@ -242,13 +242,18 @@ class waveform
 			{
 				std::cout << "Integrating peak number " << idx << std::endl;
 				std::cout << "Peak regions: " << peakBegin[idx] << " to " << peakEnd[idx] << std::endl;
-				std::cout << "Integration region: " << (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0 << " to " << (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999 << std::endl;
+				
 				double _tCharge = 0.0;
 				double _tAmplitude = -1;
 
 				double localBaseline = 0;
 				int numSamples = 0;
-				for (int i = (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0; i < (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999; i++)
+				int iMin = (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0;
+				int iMax = (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999;
+
+				std::cout << "Integration region: " << iMin << " to " << iMax << std::endl;
+
+				for (int i = iMin; i < iMax; i++)
 				{
 					std::cout << "Integrating idx " << i << std::endl;
 					if (fabs(csi[i]) <= 3)
