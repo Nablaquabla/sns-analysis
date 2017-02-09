@@ -117,7 +117,14 @@ class waveform
 		muonVeto[idx] = value;
 		if (idx < 20000){ medianMuonVeto[value + 128] += 1; }
 	}
-
+	void setMedianValuesToZero()
+	{
+		for (int i = 0; i < 256; i++)
+		{
+			medianCsI[i] = 0;
+			medianMuonVeto[i] = 0;
+		}
+	}
 	void applyBaselineCorrection()
 	{
 		std::cout << "CsI waveform: ";
@@ -1111,6 +1118,7 @@ int main(int argc, char* argv[])
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
+				currentWaveForm.setMedianValuesToZero();
 				// Apply global baseline correction 
 				currentWaveForm.applyBaselineCorrection();
 
