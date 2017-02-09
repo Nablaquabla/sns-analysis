@@ -129,7 +129,7 @@ class waveform
 		std::cout << "MV waveform: ";
 		for (int i = 0; i < 20; i++)
 		{
-			std::cout << csi[i] << " ";
+			std::cout << muonVeto[i] << " ";
 		}
 		std::cout << std::endl;
 		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
@@ -753,8 +753,8 @@ class waveform
 		std::array<int, 35000> csi;
 		std::array<int, 35000> muonVeto;
 		std::array<double, 35000 - cmfWidth> cmf_csi;
-		std::array<unsigned int, 256> medianCsI;
-		std::array<unsigned int, 256> medianMuonVeto;
+		std::array<int, 256> medianCsI;
+		std::array<int, 256> medianMuonVeto;
 
 		std::vector<int> peakBegin;
 		std::vector<int> peakEnd;
