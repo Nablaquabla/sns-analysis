@@ -117,7 +117,6 @@ class waveform
 		muonVeto[idx] = value;
 		if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
 	}
-
 	void applyBaselineCorrection()
 	{
 		bool csiBaselineFound = false;
@@ -156,7 +155,6 @@ class waveform
 
 		if (globalBaselineCsI < 50) { linearGateFlag = true; }
 	}
-
 	void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
 		int currentPeakWidth = 0;
@@ -176,7 +174,6 @@ class waveform
 	}
 	void findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
-		std::cout << timeStamp << " Found peaks: ";
 		int currentPeakWidth = 0;
 		for (int i = 0; i < 35000; i++)
 		{
@@ -185,14 +182,12 @@ class waveform
 			{
 				if (currentPeakWidth >= peakWidthThreshold)
 				{
-					std::cout << "idx: " << i << " width: " << currentPeakWidth << " ";
 					peakBegin.push_back(((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0));
 					peakEnd.push_back(((i + 1) <= 34999 ? (i + 1) : 34999));
 				}
 				currentPeakWidth = 0;
 			}
 		}
-		std::cout << std::endl;
 	}
 	void cmf_findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
 	{
@@ -582,7 +577,6 @@ class waveform
 			}
 		}
 	}
-
 	void updateInfoData(infoData &cInData)
 	{
 		// Update peaks in PT, ROI and IW histograms
@@ -616,10 +610,6 @@ class waveform
 
 
 	}
-	void printArrivalIdx()
-	{
-		std::cout << bArrivalIndex << " " << cmf_bArrivalIndex << " " << sArrivalIndex << " " << cmf_sArrivalIndex << std::endl;
-	}
 	void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
 	{
 		// Write background data
@@ -629,13 +619,6 @@ class waveform
 		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
 		bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
 		bOutput << lbl_bChargeIW << " " << lbl_bRiseTimes[0] << " " << lbl_bRiseTimes[1] << " " << lbl_bRiseTimes[2] << " ";
-		if (bPeakCounts[0] + bPeakCounts[1] + bPeakCounts[2] == 4)
-		{
-			for (int i = 0; i < peakBegin.size(); i++)
-			{
-				bOutput << peakBegin[i] << " " << cmf_peakBegin[i] << " ";
-			}
-		}
 		bOutput << muonLocation << std::endl;
 
 		// Write signal data
@@ -645,7 +628,46 @@ class waveform
 		sOutput << lbl_sChargeIW << " " << lbl_sRiseTimes[0] << " " << lbl_sRiseTimes[1] << " " << lbl_sRiseTimes[2] << " ";
 		sOutput << muonLocation << std::endl;
 	}
+	void writeWaveformToFile(std::ofstream &wOutput)
+	{
+		for (int i = 0; i < 35000; i++)
+		{
+			wOutput << csi[i] << " ";
+		}
+		wOutput << std::endl;
 
+		for (int i = 0; i < 35000; i++)
+		{
+			wOutput << cmf_csi[i] << " ";
+		}
+		wOutput << std::endl;
+		wOutput << globalBaselineCsI << std::endl;
+		if (peakBegin.size() > 0)
+		{
+			for (int i = 0; i < peakBegin.size(); i++)
+			{
+				wOutput << peakBegin[i] << " ";
+			}
+		}
+		else
+		{
+			wOutput << -1;
+		}
+		wOutput << std::endl;
+
+		if (cmf_peakBegin.size() > 0)
+		{
+			for (int i = 0; i < cmf_peakBegin.size(); i++)
+			{
+				wOutput << cmf_peakBegin[i] << " ";
+			}
+		}
+		else
+		{
+			wOutput << -1;
+		}
+		wOutput << std::endl;
+	}
 	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
 	{
 		for (int i = 0; i < 4; i++)
@@ -655,17 +677,6 @@ class waveform
 			cmf_bRegionLimits[i] = bRegions[i];
 			cmf_sRegionLimits[i] = sRegions[i];
 		}
-		/*
-		cmf_bRegionLimits[0] = bRegionLimits[0];
-		cmf_bRegionLimits[1] = bRegionLimits[1] - cmfWidth;
-		cmf_bRegionLimits[2] = bRegionLimits[2] - cmfWidth;
-		cmf_bRegionLimits[3] = bRegionLimits[3] - cmfWidth;
-
-		cmf_sRegionLimits[0] = sRegionLimits[0];
-		cmf_sRegionLimits[1] = sRegionLimits[1] - cmfWidth;
-		cmf_sRegionLimits[2] = sRegionLimits[2] - cmfWidth;
-		cmf_sRegionLimits[3] = sRegionLimits[3] - cmfWidth;
-		*/
 
 		globalBaselineCsI = 0;
 		globalBaselineMuonVeto = 0;
@@ -800,6 +811,7 @@ int main(int argc, char* argv[])
 	// Output streams
 	std::ofstream bg_out_file;
 	std::ofstream s_out_file;
+	std::ofstream w_out_file;
 	std::ofstream infoOut;
 
 	// Setup distribution histories
@@ -966,6 +978,7 @@ int main(int argc, char* argv[])
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	s_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "S-")).c_str(), std::ofstream::out | std::ofstream::trunc);
+	w_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	infoOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "I-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 
 	// Begin data processing if file has been properly opened
@@ -1096,49 +1109,41 @@ int main(int argc, char* argv[])
 
 				
 				// Find all peaks in CsI and Muon Veto data
-				//std::cout << "Finding csi peaks" << std::endl;
 				currentWaveForm.findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
 				currentWaveForm.cmf_findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
-				//std::cout << "Finding mv peaks" << std::endl;
 				currentWaveForm.findMuonVetoPeaks(10, 3);
 
 				// Determine peaks per PT/ROI region
-				//std::cout << "Counting vanilla peaks" << std::endl;
 				currentWaveForm.countPeaksPerRegion();
-				//std::cout << "Counting cmf peaks" << std::endl;
 				currentWaveForm.cmf_countPeaksPerRegion();
 
 				// Get SPE charge distributions
-				//std::cout << "Integrated vanilla peaks" << std::endl;
 				currentWaveForm.updateIntegratedCsIPeaks(cInfoData);
-				//std::cout << "Integrated cmfpeaks" << std::endl;
 				currentWaveForm.cmf_updateIntegratedCsIPeaks(cInfoData);
-				//std::cout << "Integrated lbl peaks" << std::endl;
 				currentWaveForm.lbl_updateIntegratedCsIPeaks(cInfoData);
 
 				// Analyze ROIs Vanilla Style
-				//std::cout << "Analyze vanilla" << std::endl;
-				currentWaveForm.printArrivalIdx();
 				currentWaveForm.analyzeROIWindowVanillaStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowVanillaStyle(true); // Signal region
-				currentWaveForm.printArrivalIdx();
+
 				// Analyze ROIs CMF Style
-				//std::cout << "Analyze cmf" << std::endl;
 				currentWaveForm.analyzeROIWindowCMFStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowCMFStyle(true); // Signal region
-				currentWaveForm.printArrivalIdx();
+
 				// Analyze ROIs LBL Style
-				//std::cout << "Analyze lbl" << std::endl;
 				currentWaveForm.analyzeROIWindowLBLStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowLBLStyle(true); // Signal region
-				currentWaveForm.printArrivalIdx();
+
 				// Update info data
 				currentWaveForm.updateInfoData(cInfoData);
-				currentWaveForm.printArrivalIdx();
+
 				// Write analysis results to file
 				currentWaveForm.writeEventData(bg_out_file, s_out_file);
-				currentWaveForm.printArrivalIdx();
-				std::cout << "New Waveform" << std::endl;
+
+				if (cInfoData.waveformCounter <= 10)
+				{
+					currentWaveForm.writeWaveformToFile(w_out_file);
+				}
 			}
 		}
 	}
@@ -1146,6 +1151,7 @@ int main(int argc, char* argv[])
 	// Before exiting, make sure that both output files are properly closed to prevent data loss.
 	if (bg_out_file.is_open()) { bg_out_file.close(); }
 	if (s_out_file.is_open()) { s_out_file.close(); }
+	if (w_out_file.is_open()) { w_out_file.close(); }
 
 	// Write run info
 	if (infoOut.is_open())
