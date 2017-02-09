@@ -117,6 +117,15 @@ class waveform
 		muonVeto[idx] = value;
 		if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
 	}
+	void printMedianBaselineHists()
+	{
+		std::cout << " Median Baseline Hist CsI: ";
+		for (int = 0; i < 256; i++)
+		{
+			std::cout << medianBaselineHistCsI[i] << " ";
+		}
+		std::cout << std::endl;
+	}
 	void applyBaselineCorrection()
 	{
 		std::cout << "CsI waveform: ";
@@ -1016,7 +1025,7 @@ int main(int argc, char* argv[])
 				// A new waveform begins, update counter and create waveform object
 			 	cInfoData.waveformCounter += 1;
 				waveform currentWaveForm(bRegions, sRegions);
-
+				currentWaveForm.printMedianBaselineHists();
 				// Update timestamp
 				timestamp.clear();
 				for(int i=0; i<7; i++)
