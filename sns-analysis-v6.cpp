@@ -18,7 +18,7 @@
 
 // Global constants
 const unsigned int cmfWidth = 500;
-const double cmfThreshold = 1.5;
+const double cmfThreshold = 2.5;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
 
