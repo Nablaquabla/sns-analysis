@@ -1089,12 +1089,17 @@ int main(int argc, char* argv[])
 				// Apply global baseline correction 
 				currentWaveForm.applyBaselineCorrection();
 
+				
 				// Find all peaks in CsI and Muon Veto data
+				std::cout << "Finding csi peaks" << std::endl;
 				currentWaveForm.findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
+				std::cout << "Finding mv peaks" << std::endl;
 				currentWaveForm.findMuonVetoPeaks(10, 3);
 
 				// Determine peaks per PT/ROI region
+				std::cout << "Counting vanilla peaks" << std::endl;
 				currentWaveForm.countPeaksPerRegion();
+				std::cout << "Counting cmf peaks" << std::endl;
 				currentWaveForm.cmf_countPeaksPerRegion();
 
 				// Get SPE charge distributions
