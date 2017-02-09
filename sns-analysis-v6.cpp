@@ -350,8 +350,6 @@ class waveform
 					break;
 				}
 			}
-			//if (signalRegion){ sArrivalIndex = arrivalIndex; }
-			//else{ bArrivalIndex = arrivalIndex; }
 			(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
 
 			// Check that the full IW fits in ROI
@@ -436,9 +434,8 @@ class waveform
 					break;
 				}
 			}
-			//if (signalRegion) { cmf_sArrivalIndex = arrivalIndex; }
-			//else { cmf_bArrivalIndex = arrivalIndex; }
 			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
+
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
@@ -551,7 +548,7 @@ class waveform
 				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
 				if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
 				{
-					_tCharge += csi[wfIndex] - localBaseline;
+					_tCharge += (csi[wfIndex] - localBaseline);
 					if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
 				}
 				integratedCharge[i] = _tCharge;
@@ -582,6 +579,7 @@ class waveform
 			}
 		}
 	}
+
 	void updateInfoData(infoData &cInData)
 	{
 		// Update peaks in PT, ROI and IW histograms
@@ -716,10 +714,8 @@ class waveform
 		int bArrivalIndex;
 		int sArrivalIndex;
 
-		int lbl_bChargeIW;
-		int lbl_sChargeIW;
-		int lbl_bArrivalIndex;
-		int lbl_sArrivalIndex;
+		double lbl_bChargeIW;
+		double lbl_sChargeIW;
 
 		double cmf_bChargeIW;
 		double cmf_sChargeIW;
