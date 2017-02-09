@@ -642,7 +642,10 @@ class waveform
 		{
 			bRegionLimits[i] = bRegions[i];
 			sRegionLimits[i] = sRegions[i];
+			cmf_bRegionLimits[i] = bRegions[i];
+			cmf_sRegionLimits[i] = sRegions[i];
 		}
+		/*
 		cmf_bRegionLimits[0] = bRegionLimits[0];
 		cmf_bRegionLimits[1] = bRegionLimits[1] - cmfWidth;
 		cmf_bRegionLimits[2] = bRegionLimits[2] - cmfWidth;
@@ -652,6 +655,7 @@ class waveform
 		cmf_sRegionLimits[1] = sRegionLimits[1] - cmfWidth;
 		cmf_sRegionLimits[2] = sRegionLimits[2] - cmfWidth;
 		cmf_sRegionLimits[3] = sRegionLimits[3] - cmfWidth;
+		*/
 
 		globalBaselineCsI = 0;
 		globalBaselineMuonVeto = 0;
@@ -726,7 +730,7 @@ class waveform
 
 		std::array<int, 35000> csi;
 		std::array<int, 35000> muonVeto;
-		std::array<double, 35000 - cmfWidth> cmf_csi;
+		std::array<double, 35000> cmf_csi;
 		std::array<unsigned int, 257> medianBaselineHistCsI;
 		std::array<unsigned int, 257> medianBaselineHistMuonVeto;
 
@@ -1055,7 +1059,7 @@ int main(int argc, char* argv[])
 
 					// Fill waveform object with bin corrected and filtered CsI data
 					currentWaveForm.setCsIValue(i, _tmpC);
-					if (i >= cmfWidth) { currentWaveForm.cmf_setCsIValue(i - cmfWidth, _cmfC); }
+					if (i >= cmfWidth) { currentWaveForm.cmf_setCsIValue(i, _cmfC); }
 					
 					// Preload linear gate detection algorithm
 					if (i == 0) { _previous_c = _tmpC; }
