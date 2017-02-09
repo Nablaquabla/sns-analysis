@@ -1026,6 +1026,7 @@ int main(int argc, char* argv[])
 			 	cInfoData.waveformCounter += 1;
 				waveform currentWaveForm(bRegions, sRegions);
 				currentWaveForm.printMedianBaselineHists();
+
 				// Update timestamp
 				timestamp.clear();
 				for(int i=0; i<7; i++)
@@ -1035,6 +1036,8 @@ int main(int argc, char* argv[])
 					timestamp += zeroPad((int) c, 2);
 				}
 				currentWaveForm.setTimeStamp(timestamp);
+
+				currentWaveForm.printMedianBaselineHists();
 
 				// Bit corrected waveform value
 				_tmpC = 0;
@@ -1110,16 +1113,11 @@ int main(int argc, char* argv[])
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
 
-				std::cout << std::endl;
-				for (int i = 0; i < 20; i++)
-				{
-					std::cout << currentWaveForm.getCsIValue(i) << " ";
-				}
-				std::cout << std::endl;
+				currentWaveForm.printMedianBaselineHists();
+
 				// Set linear gate flag if gated
 				if (gate_down != gate_up) { currentWaveForm.setLinearGateFlag(true); }
 
-				// currentWaveForm.setMedianValuesToZero();
 				// Apply global baseline correction 
 				currentWaveForm.applyBaselineCorrection();
 
