@@ -120,7 +120,7 @@ class waveform
 	void printMedianBaselineHists()
 	{
 		std::cout << " Median Baseline Hist CsI: ";
-		for (int = 0; i < 256; i++)
+		for (int i = 0; i < 256; i++)
 		{
 			std::cout << medianBaselineHistCsI[i] << " ";
 		}
