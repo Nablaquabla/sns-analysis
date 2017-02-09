@@ -1095,7 +1095,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Fill waveform object with bin corrected and filtered CsI data
-					//currentWaveForm.setCsIValue(i, _tmpC);
+					currentWaveForm.setCsIValue(i, _tmpC);
 					//currentWaveForm.cmf_setCsIValue(i, _cmfC);
 
 					// Preload linear gate detection algorithm
