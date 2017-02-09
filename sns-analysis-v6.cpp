@@ -100,7 +100,7 @@ class waveform
 	void printCMFCsI()
 	{
 		std::cout << "CMF CSI" << std::endl;
-		for (int i = 0; i < 35000 - cmfWidth; i++)
+		for (int i = 0; i < 5000; i++)
 		{
 			std::cout << cmf_csi[i] << " ";
 		}
@@ -1033,6 +1033,25 @@ int main(int argc, char* argv[])
 				gate_down = 0;
 				gate_up = 0;
 					
+				/*for i in range(35000) :
+					c = wf[i]
+					csi[i] = c
+
+					if i < fw :
+						Q.put(c)
+						summedBL += c
+					else:
+				m = summedBL / fw
+					if np.abs(c - m) < threshold :
+						csiF[i - fw] = 0
+						Q.put(c)
+						summedBL += c
+					else:
+				csiF[i - fw] = m - c
+					Q.put(m)
+					summedBL += m
+					summedBL -= Q.get()*/
+
 				for(int i=0; i<35000; i++)
 				{
 					// Read CsI value and apply bit correction
@@ -1066,8 +1085,8 @@ int main(int argc, char* argv[])
 							_cmfC = m - _fTmpC;
 							cmfQ.push(m);
 							cmfBL += m;
-							cmfBL -= cmfQ.front();
 						}
+						cmfBL -= cmfQ.front();
 						cmfQ.pop();
 					}
 
