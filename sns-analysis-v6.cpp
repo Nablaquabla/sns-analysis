@@ -133,9 +133,18 @@ class waveform
 		}
 		std::cout << std::endl;
 		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
+		std::cout << "Median bins: ";
+		for (int i = 0; i < 256; i++)
+		{
+			std::cout << medianCsI[i] << " ";
+		}
+		std::cout << std::endl;
 
 		bool csiBaselineFound = false;
 		int csiBaselineCounter = 0;
+
+		bool muonVetoBaselineFound = false;
+		int muonVetoBaselineCounter = 0;
 
 		for (int i = 0; i < 256; i++)
 		{
@@ -149,8 +158,6 @@ class waveform
 				}
 			}
 
-			bool muonVetoBaselineFound = false;
-			int muonVetoBaselineCounter = 0;
 			if (!muonVetoBaselineFound)
 			{
 				muonVetoBaselineCounter += medianMuonVeto[i];
@@ -161,6 +168,7 @@ class waveform
 				}
 			}
 		}
+		std::cout << "Global CsI baseline: " << globalBaselineCsI << "Global MV baseline: " << globalBaselineMuonVeto << std::endl;
 
 		for (int i = 0; i < 35000; i++)
 		{
