@@ -234,14 +234,14 @@ class waveform
 	}
 	void lbl_updateIntegratedCsIPeaks(infoData &cInData)
 	{
-		std::cout << "Begin lbl peak integration" << std::endl;
+		//std::cout << "Begin lbl peak integration" << std::endl;
 		if (peakBegin.size() > 0)
 		{
-			std::cout << "Found at least one peak" << std::endl;
+			//std::cout << "Found at least one peak" << std::endl;
 			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
 			{
-				std::cout << "Integrating peak number " << idx << std::endl;
-				std::cout << "Peak regions: " << peakBegin[idx] << " to " << peakEnd[idx] << std::endl;
+				//std::cout << "Integrating peak number " << idx << std::endl;
+				//std::cout << "Peak regions: " << peakBegin[idx] << " to " << peakEnd[idx] << std::endl;
 				
 				double _tCharge = 0.0;
 				double _tAmplitude = -1;
@@ -251,11 +251,11 @@ class waveform
 				int iMin = (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0;
 				int iMax = (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999;
 
-				std::cout << "Integration region: " << iMin << " to " << iMax << std::endl;
+				//std::cout << "Integration region: " << iMin << " to " << iMax << std::endl;
 
 				for (int i = iMin; i < iMax; i++)
 				{
-					std::cout << "Integrating idx " << i << std::endl;
+					//std::cout << "Integrating idx " << i << std::endl;
 					if (fabs(csi[i]) <= 3)
 					{
 						numSamples += 1;
@@ -263,7 +263,7 @@ class waveform
 					}
 				}
 				localBaseline /= double(numSamples);
-				std::cout << "local baseline is" << localBaseline << std::endl;
+				//std::cout << "local baseline is" << localBaseline << std::endl;
 
 				for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
 				{
@@ -347,7 +347,7 @@ class waveform
 			endROI = sRegionLimits[3];
 		}
 
-
+		std::cout << endROI << std::endl;
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -1096,37 +1096,37 @@ int main(int argc, char* argv[])
 
 				
 				// Find all peaks in CsI and Muon Veto data
-				std::cout << "Finding csi peaks" << std::endl;
+				//std::cout << "Finding csi peaks" << std::endl;
 				currentWaveForm.findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
-				std::cout << "Finding mv peaks" << std::endl;
+				//std::cout << "Finding mv peaks" << std::endl;
 				currentWaveForm.findMuonVetoPeaks(10, 3);
 
 				// Determine peaks per PT/ROI region
-				std::cout << "Counting vanilla peaks" << std::endl;
+				//std::cout << "Counting vanilla peaks" << std::endl;
 				currentWaveForm.countPeaksPerRegion();
-				std::cout << "Counting cmf peaks" << std::endl;
+				//std::cout << "Counting cmf peaks" << std::endl;
 				currentWaveForm.cmf_countPeaksPerRegion();
 
 				// Get SPE charge distributions
-				std::cout << "Integrated vanilla peaks" << std::endl;
+				//std::cout << "Integrated vanilla peaks" << std::endl;
 				currentWaveForm.updateIntegratedCsIPeaks(cInfoData);
-				std::cout << "Integrated cmfpeaks" << std::endl;
+				//std::cout << "Integrated cmfpeaks" << std::endl;
 				currentWaveForm.cmf_updateIntegratedCsIPeaks(cInfoData);
-				std::cout << "Integrated lbl peaks" << std::endl;
+				//std::cout << "Integrated lbl peaks" << std::endl;
 				currentWaveForm.lbl_updateIntegratedCsIPeaks(cInfoData);
 
 				// Analyze ROIs Vanilla Style
-				std::cout << "Analyze vanilla" << std::endl;
+				//std::cout << "Analyze vanilla" << std::endl;
 				currentWaveForm.analyzeROIWindowVanillaStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowVanillaStyle(true); // Signal region
 
 				// Analyze ROIs CMF Style
-				std::cout << "Analyze cmf" << std::endl;
+				//std::cout << "Analyze cmf" << std::endl;
 				currentWaveForm.analyzeROIWindowCMFStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowCMFStyle(true); // Signal region
 
 				// Analyze ROIs LBL Style
-				std::cout << "Analyze lbl" << std::endl;
+				//std::cout << "Analyze lbl" << std::endl;
 				currentWaveForm.analyzeROIWindowLBLStyle(false); // Background region
 				currentWaveForm.analyzeROIWindowLBLStyle(true); // Signal region
 
