@@ -347,7 +347,7 @@ class waveform
 			endROI = sRegionLimits[3];
 		}
 
-		std::cout << endROI << std::endl;
+		std::cout << "Signal Region: " << int(signalRegion) << "   End ROI: " << endROI << std::endl;
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -365,7 +365,7 @@ class waveform
 				}
 			}
 			signalRegion ? sArrivalIndex : bArrivalIndex = arrivalIndex;
-
+			std::cout << "Arrival Index: " << arrivalIndex << std::endl;
 			// Check that the full IW fits in ROI
 			if (arrivalIndex < (endROI - 1500))
 			{
