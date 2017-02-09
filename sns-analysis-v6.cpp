@@ -105,17 +105,20 @@ class waveform
 	void setCsIValue(int idx, int value)
 	{
 		csi[idx] = value;
-		if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
+		//if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
 	}
 	int getCsIValue(int idx)
 	{
 		return csi[idx];
 	}
-	void cmf_setCsIValue(int idx, double value) { cmf_csi[idx] = value; }
+	void cmf_setCsIValue(int idx, double value) 
+	{ 
+		cmf_csi[idx] = value; 
+	}
 	void setMuonVetoValue(int idx, int value)
 	{
 		muonVeto[idx] = value;
-		if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
+		//if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
 	}
 	void printMedianBaselineHists()
 	{
@@ -1092,7 +1095,6 @@ int main(int argc, char* argv[])
 					}
 
 					// Fill waveform object with bin corrected and filtered CsI data
-					if (i < 20) { std::cout << _tmpC << " "; }
 					currentWaveForm.setCsIValue(i, _tmpC);
 					currentWaveForm.cmf_setCsIValue(i, _cmfC);
 
