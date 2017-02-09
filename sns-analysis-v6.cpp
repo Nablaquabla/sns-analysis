@@ -234,10 +234,14 @@ class waveform
 	}
 	void lbl_updateIntegratedCsIPeaks(infoData &cInData)
 	{
+		std::cout << "Begin lbl peak integration" << std::endl;
 		if (peakBegin.size() > 0)
 		{
+			std::cout << "Found at least one peak" << std::endl;
 			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
 			{
+				std::cout << "Integrating peak number " << idx << std::endl;
+				std::cout << "Peak regions: " << peakBegin[idx] << " to " << peakEnd[idx] << std::endl;
 				double _tCharge = 0.0;
 				double _tAmplitude = -1;
 
@@ -252,6 +256,7 @@ class waveform
 					}
 				}
 				localBaseline /= double(numSamples);
+				std::cout << "local baseline is" << localBaseline << std::endl;
 
 				for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
 				{
