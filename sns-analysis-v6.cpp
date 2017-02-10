@@ -1201,8 +1201,9 @@ int main(int argc, char* argv[])
 				currentWaveForm.writeEventData(bg_out_file, s_out_file);
 
 				// Write first 10 waveforms to file if desired
+				if (saveWaveFormsToFile){ currentWaveForm.writeWaveformToFile(w_out_file); }
 				// if (saveWaveFormsToFile && cInfoData.waveformCounter <= 10){ currentWaveForm.writeWaveformToFile(w_out_file); }
-				if (saveWaveFormsToFile && currentWaveForm.getLinearGateFlag()){ currentWaveForm.writeWaveformToFile(w_out_file); }
+				// if (saveWaveFormsToFile && currentWaveForm.getLinearGateFlag()){ currentWaveForm.writeWaveformToFile(w_out_file); }
 			}
 		}
 	}
