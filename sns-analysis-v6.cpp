@@ -17,10 +17,11 @@
 #include <numeric>
 
 // Global constants
-const unsigned int cmfWidth = 500;
+const unsigned int cmfWidth = 250;
 const double cmfThreshold = 2.5;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
+const bool saveWaveFormsToFile = false;
 
 // Assortment of all distributions that are being tracked throughout the analysis
 struct infoData
@@ -93,648 +94,692 @@ void initializeInfoData(infoData &ID)
 	ID.muonCounter = 0;
 	ID.summedBaseline = 0;
 }
-
+// =========================================================================================================================
 // Waveform object that does all the heavy lifting
+// ===============================================
+// Current analysis available:
+// ---------------------------
+// 1. Vanilla: No changes to old (v4) analysis
+// 2. LBL - Local baseline: Peak detection as in vanilla anlysis. Peak integration uses a local baseline estimate.
+// 3. CMF - Conditional mean filter: Baseline is estimated using a conditional mean filter. This heavily suppresses noise.
+// =========================================================================================================================
 class waveform
 {
 	public:
-	void setTimeStamp(std::string TS){ timeStamp = TS; }
-	void setOverflowFlag(bool flag) { overflowFlag = flag; }
-	void setLinearGateFlag(bool flag) { linearGateFlag = flag; }
+		// Set timestamp and flags (all determined when waveform is read in main())
+		void setTimeStamp(std::string TS){ timeStamp = TS; }
+		void setOverflowFlag(bool flag) { overflowFlag = flag; }
+		void setLinearGateFlag(bool flag) { linearGateFlag = flag; }
 
-	// Fill data arrays
-	void setCsIValue(int idx, int value)
-	{
-		csi[idx] = value;
-		if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
-	}
-	void cmf_setCsIValue(int idx, double value) 
-	{ 
-		cmf_csi[idx] = value; 
-	}
-	void setMuonVetoValue(int idx, int value)
-	{
-		muonVeto[idx] = value;
-		if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
-	}
-	void applyBaselineCorrection()
-	{
-		bool csiBaselineFound = false;
-		int csiBaselineCounter = 0;
-
-		bool muonVetoBaselineFound = false;
-		int muonVetoBaselineCounter = 0;
-
-		for (int i = 0; i < 256; i++)
+		// Fill data arrays with samples. Bin correction applied in main(). Also fills median histograms
+		void setCsIValue(int idx, int value)
 		{
-			if (!csiBaselineFound)
-			{
-				csiBaselineCounter += medianBaselineHistCsI[i];
-				if (csiBaselineCounter >= 10000)
-				{
-					globalBaselineCsI = i - 128;
-					csiBaselineFound = true;
-				}
-			}
-
-			if (!muonVetoBaselineFound)
-			{
-				muonVetoBaselineCounter += medianBaselineHistMuonVeto[i];
-				if (muonVetoBaselineCounter >= 10000)
-				{
-					globalBaselineMuonVeto = i - 128;
-					muonVetoBaselineFound = true;
-				}
-			}
+			csi[idx] = value;
+			if (idx < 20000){ medianBaselineHistCsI[value + 128] += 1; }
 		}
-		for (int i = 0; i < 35000; i++)
+		void setMuonVetoValue(int idx, int value)
 		{
-			csi[i] = globalBaselineCsI - csi[i];
-			muonVeto[i] = globalBaselineMuonVeto - muonVeto[i];
+			muonVeto[idx] = value;
+			if (idx < 20000){ medianBaselineHistMuonVeto[value + 128] += 1; }
+		}
+		void cmf_setCsIValue(int idx, double value)
+		{
+			cmf_csi[idx] = value;
 		}
 
-		if (globalBaselineCsI < 50) { linearGateFlag = true; }
-	}
-	void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
-	{
-		int currentPeakWidth = 0;
-		for (int i = 0; i < 35000; i++)
+		// Determine and subtract baseline for both CsI and Muon Veto. Only for Vanilla and LBL analysis
+		void applyBaselineCorrection()
 		{
-			if (muonVeto[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
-			else
-			{
-				if (currentPeakWidth >= peakWidthThreshold)
-				{
-					muonEvents.push_back(i - currentPeakWidth);
-				}
-				currentPeakWidth = 0;
-			}
-		}
-		if (muonEvents.size() > 0) { muonVetoFlag = true; }
-	}
-	void findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
-	{
-		int currentPeakWidth = 0;
-		for (int i = 0; i < 35000; i++)
-		{
-			if (csi[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
-			else
-			{
-				if (currentPeakWidth >= peakWidthThreshold)
-				{
-					peakBegin.push_back(((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0));
-					peakEnd.push_back(((i + 1) <= 34999 ? (i + 1) : 34999));
-				}
-				currentPeakWidth = 0;
-			}
-		}
-	}
-	void cmf_findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
-	{
-		int currentPeakWidth = 0;
-		for (int i = 0; i < 35000 - cmfWidth; i++)
-		{
-			if (cmf_csi[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
-			else
-			{
-				if (currentPeakWidth >= peakWidthThreshold)
-				{
-					cmf_peakBegin.push_back((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0);
-					cmf_peakEnd.push_back((i + 1) <= 34999 - cmfWidth ? (i + 1) : 34999 - cmfWidth);
-				}
-				currentPeakWidth = 0;
-			}
-		}
-	}
-	void updateIntegratedCsIPeaks(infoData &cInData)
-	{
-		if (peakBegin.size() > 0)
-		{
-			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
-			{
-				int charge = 0;
-				int amplitude = -1;
-				int width = peakEnd[idx] - peakBegin[idx] + 1;
+			bool csiBaselineFound = false;
+			int csiBaselineCounter = 0;
 
-				for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
-				{
-					charge += csi[i];
-					if (csi[i] > amplitude){ amplitude = csi[i]; }
-				}
-				if (charge >= -50 && charge < 250) { cInData.peakCharges[(charge + 50)] += 1; }
-				cInData.peakAmplitudes[(amplitude < 51) ? amplitude : 50] += 1;
-				cInData.peakWidths[(width < 51) ? width : 50] += 1;
-			}
-		}
-	}
-	void lbl_updateIntegratedCsIPeaks(infoData &cInData)
-	{
-		if (peakBegin.size() > 0)
-		{
-			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
+			bool muonVetoBaselineFound = false;
+			int muonVetoBaselineCounter = 0;
+
+			for (int i = 0; i < 256; i++)
 			{
-				double _tCharge = 0.0;
-				double _tAmplitude = -1;
-
-				double localBaseline = 0;
-				int numSamples = 0;
-				int iMin = (peakBegin[idx] - 50 >= 0) ? peakBegin[idx] - 50 : 0;
-				int iMax = (peakEnd[idx] + 50 < 35000) ? peakEnd[idx] + 50 : 34999;
-
-				for (int i = iMin; i < iMax; i++)
+				if (!csiBaselineFound)
 				{
-					if (fabs(csi[i]) <= 3)
+					csiBaselineCounter += medianBaselineHistCsI[i];
+					if (csiBaselineCounter >= 10000)
 					{
-						numSamples += 1;
-						localBaseline += double(csi[i]);
+						globalBaselineCsI = i - 128;
+						csiBaselineFound = true;
 					}
 				}
-				localBaseline /= double(numSamples);
 
-				for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
+				if (!muonVetoBaselineFound)
 				{
-					_tCharge += csi[i]-localBaseline;
-					if (csi[i]-localBaseline > _tAmplitude){ _tAmplitude = csi[i]-localBaseline; }
-				}
-				int charge = int(round(_tCharge));
-				int amplitude = int(round(_tAmplitude));
-				if (charge >= -50 && charge < 250) { cInData.lbl_peakCharges[(charge + 50)] += 1; }
-				cInData.lbl_peakAmplitudes[(amplitude < 51) ? amplitude : 50] += 1;
-			}
-		}
-	}
-	void cmf_updateIntegratedCsIPeaks(infoData &cInData)
-	{
-		if (cmf_peakBegin.size() > 0)
-		{
-			for (std::vector<int>::size_type idx = 0; idx < cmf_peakBegin.size(); idx++)
-			{
-				int charge = 0;
-				int amplitude = 0;
-				double _tCharge = 0.0;
-				double _tAmplitude = -1;
-				int width = cmf_peakEnd[idx] - cmf_peakBegin[idx] + 1;
-				for (int i = cmf_peakBegin[idx]; i <= cmf_peakEnd[idx]; i++)
-				{
-					_tCharge += cmf_csi[i];
-					if (cmf_csi[i] > _tAmplitude){ _tAmplitude = cmf_csi[i]; }
-				}
-				charge = int(round(_tCharge));
-				amplitude = int(round(_tAmplitude));
-				if (charge >= -50 && charge < 250) { cInData.cmf_peakCharges[(charge + 50)] += 1; }
-				cInData.cmf_peakAmplitudes[(amplitude < 51) ? amplitude : 50] += 1;
-				cInData.cmf_peakWidths[(width < 51) ? width : 50] += 1;
-			}
-		}
-	}
-	void countPeaksPerRegion()
-	{
-		if (peakBegin.size() > 0)
-		{
-			for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
-			{
-				int onset = peakBegin[idx] + 2;
-
-				if (onset >= bRegionLimits[0] && onset < bRegionLimits[1]) { bPeakCounts[0] += 1; }
-				if (onset >= bRegionLimits[2] && onset < bRegionLimits[3]) { bPeakCounts[1] += 1; }
-
-				if (onset >= sRegionLimits[0] && onset < sRegionLimits[1]) { sPeakCounts[0] += 1; }
-				if (onset >= sRegionLimits[2] && onset < sRegionLimits[3]) { sPeakCounts[1] += 1; }
-			}
-		}
-	}
-	void cmf_countPeaksPerRegion()
-	{
-		if (cmf_peakBegin.size() > 0)
-		{
-			for (std::vector<int>::size_type idx = 0; idx < cmf_peakBegin.size(); idx++)
-			{
-				int onset = cmf_peakBegin[idx] + 2;
-
-				if (onset >= cmf_bRegionLimits[0] && onset < cmf_bRegionLimits[1]) { cmf_bPeakCounts[0] += 1; }
-				if (onset >= cmf_bRegionLimits[2] && onset < cmf_bRegionLimits[3]) { cmf_bPeakCounts[1] += 1; }
-
-				if (onset >= cmf_sRegionLimits[0] && onset < cmf_sRegionLimits[1]) { cmf_sPeakCounts[0] += 1; }
-				if (onset >= cmf_sRegionLimits[2] && onset < cmf_sRegionLimits[3]) { cmf_sPeakCounts[1] += 1; }
-			}
-		}
-	}
-	void analyzeROIWindowVanillaStyle(bool signalRegion)
-	{
-		// Set correct window parameters based on signal/background region
-		int peaksInROI = (signalRegion ? sPeakCounts[1] : bPeakCounts[1]);
-		int beginROI = (signalRegion ? sRegionLimits[2] : bRegionLimits[2]);
-		int endROI = (signalRegion ? sRegionLimits[3] : bRegionLimits[3]);
-		/*if (signalRegion)
-		{
-			peaksInROI = sPeakCounts[1];
-			beginROI = sRegionLimits[2];
-			endROI = sRegionLimits[3];
-		}*/
-		// Only analyze data if there is at least one PE in the ROI
-		if (peaksInROI > 0)
-		{
-			int arrivalIndex = -1;
-			int peakIndex = -1;
-
-			// Find the first Peak in the ROI
-			for (int i = 0; i < peakBegin.size(); i++)
-			{
-				if (peakBegin[i] >= beginROI)
-				{
-					arrivalIndex = peakBegin[i];
-					peakIndex = i;
-					break;
-				}
-			}
-			(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
-
-			// Check that the full IW fits in ROI
-			if (arrivalIndex < (endROI - 1500))
-			{
-				// Determine number of peaks in IW
-				for (int i = peakIndex; i < peakBegin.size(); i++)
-				{
-					(signalRegion ? sPeakCounts[2] : bPeakCounts[2]) = (signalRegion ? sPeakCounts[2] : bPeakCounts[2]) + int((peakBegin[i] - arrivalIndex) < 1500);
-				}
-
-				// Integrate over all peaks in iw
-				int _tPeakIndex = peakIndex;
-				double _tCharge = 0;
-				int wfIndex = 0;
-				for (int i = 0; i < 1500; i++)
-				{
-					// Get proper 'real' index that includes the onset offset
-					wfIndex = i + arrivalIndex;
-
-					// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-					if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
+					muonVetoBaselineCounter += medianBaselineHistMuonVeto[i];
+					if (muonVetoBaselineCounter >= 10000)
 					{
-						_tCharge += csi[wfIndex];
-						if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+						globalBaselineMuonVeto = i - 128;
+						muonVetoBaselineFound = true;
 					}
-					integratedCharge[i] = _tCharge;
 				}
-				(signalRegion ? sChargeIW : bChargeIW) = int(round(integratedCharge[1499]));
+			}
+			for (int i = 0; i < 35000; i++)
+			{
+				csi[i] = globalBaselineCsI - csi[i];
+				muonVeto[i] = globalBaselineMuonVeto - muonVeto[i];
+			}
 
-				// Calculate charge thresholds
-				double thresholds[3];
-				thresholds[0] = 0.1*integratedCharge[1499];
-				thresholds[1] = 0.5*integratedCharge[1499];
-				thresholds[2] = 0.9*integratedCharge[1499];
+			if (globalBaselineCsI < 50) { linearGateFlag = true; }
+		}
 
-				// Determine threshold crossing times
-				double _t1 = 0;
-				double _t2 = 0;
-				for (int i = 0; i < 1499; i++)
+		// Find muon veto events in Muon Veto trace
+		void findMuonVetoPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
+		{
+			int currentPeakWidth = 0;
+
+			// Cycle through full Muon Veto trace
+			for (int i = 0; i < 35000; i++)
+			{
+				if (muonVeto[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
+				else
 				{
-					_t1 = integratedCharge[i];
-					_t2 = integratedCharge[i + 1];
-
-					for (int j = 0; j < 3; j++)
+					if (currentPeakWidth >= peakWidthThreshold)
 					{
-						if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+						muonEvents.push_back(i - currentPeakWidth);
+					}
+					currentPeakWidth = 0;
+				}
+			}
+			// Set muon veto flag if a muon has been identified
+			if (muonEvents.size() > 0) { muonVetoFlag = true; }
+		}
+
+		// Find peaks in CsI trace (Both vanilla and CMF versions - Could be merged by passing an integration window offset and a pointer to the traces)
+		void findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
+		{
+			int currentPeakWidth = 0;
+			for (int i = 0; i < 35000; i++)
+			{
+				if (csi[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
+				else
+				{
+					if (currentPeakWidth >= peakWidthThreshold)
+					{
+						// Begin of peak integration window is 2 samples before pos. threshold crossing
+						peakBegin.push_back( ((i - currentPeakWidth - 2) >= 0 ? (i - currentPeakWidth - 2) : 0) );
+
+						// End of peak integration window is 2 samples after neg. threshold crossing
+						peakEnd.push_back( ((i + 1) <= 34999 ? (i + 1) : 34999) );
+					}
+					currentPeakWidth = 0;
+				}
+			}
+		}
+		void cmf_findCsIPeaks(int peakAmplitudeThreshold, int peakWidthThreshold)
+		{
+			int currentPeakWidth = 0;
+			for (int i = 0; i < 35000 - cmfWidth; i++)
+			{
+				if (cmf_csi[i] >= peakAmplitudeThreshold) { currentPeakWidth++; }
+				else
+				{
+					if (currentPeakWidth >= peakWidthThreshold)
+					{
+						// Begin of peak integration window is 3 samples before pos. threshold crossing
+						cmf_peakBegin.push_back( ((i - currentPeakWidth - 3) >= 0 ? (i - currentPeakWidth - 3) : 0) );
+
+						// End of peak integration window is 3 samples after neg. threshold crossing
+						cmf_peakEnd.push_back( ((i + 2) <= 34999 - cmfWidth ? (i + 2) : 34999 - cmfWidth) );
+					}
+					currentPeakWidth = 0;
+				}
+			}
+		}
+
+		// Integrate each peak found and add charge to peakCharges histogram in infoData - Different for Vanilla, CMF, LBL
+		void updateIntegratedCsIPeaks(infoData &cInData)
+		{
+			// Only analyze if there has been a peak identified in the trace
+			if (peakBegin.size() > 0)
+			{
+				// Go through all peaks
+				for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
+				{
+					int charge = 0;
+					int amplitude = -1;
+					int width = peakEnd[idx] - peakBegin[idx] + 1;
+
+					// Integrate samples within peak window
+					for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
+					{
+						charge += csi[i];
+						if (csi[i] > amplitude){ amplitude = csi[i]; }
+					}
+
+					// Add peak properties to infoData
+					if (charge >= -50 && charge < 250) { cInData.peakCharges[(charge + 50)] += 1; }
+					cInData.peakAmplitudes[( (amplitude < 51) ? amplitude : 50 )] += 1;
+					cInData.peakWidths[( (width < 51) ? width : 50 )] += 1;
+				}
+			}
+		}
+		void lbl_updateIntegratedCsIPeaks(infoData &cInData)
+		{
+			// Only analyze if there has been a peak identified in the trace
+			if (peakBegin.size() > 0)
+			{
+				// Go through all peaks
+				for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
+				{
+					double _tCharge = 0.0;
+					double _tAmplitude = -1;
+
+
+					// Estimate local baseline
+					double localBaseline = 0;
+					int numSamples = 0;
+					int iMin = ( (peakBegin[idx] - 75 >= 0) ? peakBegin[idx] - 75 : 0 );
+					int iMax = ( (peakEnd[idx] + 75 < 35000) ? peakEnd[idx] + 75 : 34999 );
+					for (int i = iMin; i < iMax; i++)
+					{
+						if (fabs(csi[i]) <= 3)
 						{
-							(signalRegion ? sRiseTimes[j] : bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+							numSamples += 1;
+							localBaseline += double(csi[i]);
+						}
+					}
+					localBaseline /= double(numSamples);
+
+					// Integrate samples within peak window
+					for (int i = peakBegin[idx]; i <= peakEnd[idx]; i++)
+					{
+						_tCharge += csi[i]-localBaseline;
+						if (csi[i]-localBaseline > _tAmplitude){ _tAmplitude = csi[i]-localBaseline; }
+					}
+
+					// Add peak properties to infoData - As local baseline type is double cast data to int first
+					int charge = int(round(_tCharge));
+					int amplitude = int(round(_tAmplitude));
+					if (charge >= -50 && charge < 250) { cInData.lbl_peakCharges[(charge + 50)] += 1; }
+					cInData.lbl_peakAmplitudes[( (amplitude < 51) ? amplitude : 50 )] += 1;
+				}
+			}
+		}
+		void cmf_updateIntegratedCsIPeaks(infoData &cInData)
+		{
+			// Only analyze if there has been a peak identified in the trace
+			if (cmf_peakBegin.size() > 0)
+			{
+				// Go through all peaks
+				for (std::vector<int>::size_type idx = 0; idx < cmf_peakBegin.size(); idx++)
+				{
+					double _tCharge = 0.0;
+					double _tAmplitude = -1;
+					int width = cmf_peakEnd[idx] - cmf_peakBegin[idx] + 1;
+
+					// Integrate samples within peak window
+					for (int i = cmf_peakBegin[idx]; i <= cmf_peakEnd[idx]; i++)
+					{
+						_tCharge += cmf_csi[i];
+						if (cmf_csi[i] > _tAmplitude){ _tAmplitude = cmf_csi[i]; }
+					}
+
+					// Add peak properties to infoData - As local baseline type is double cast data to int first
+					int charge = int(round(_tCharge));
+					int amplitude = int(round(_tAmplitude));
+					if (charge >= -50 && charge < 250) { cInData.cmf_peakCharges[(charge + 50)] += 1; }
+					cInData.cmf_peakAmplitudes[( (amplitude < 51) ? amplitude : 50 )] += 1;
+					cInData.cmf_peakWidths[( (width < 51) ? width : 50 )] += 1;
+				}
+			}
+		}
+
+		// Determine number of peaks in different regions of the trace, i.e. B-PT, B-ROI, S-PT, S-ROI (# of peaks in IW is determined later)
+		void countPeaksPerRegion()
+		{
+			// Check that there is indeed at least one peak present in the trace
+			if (peakBegin.size() > 0)
+			{
+				// For each peak check in which region its onset is actually located
+				for (std::vector<int>::size_type idx = 0; idx < peakBegin.size(); idx++)
+				{
+					// Integration window onset has to be shifted by 2 samples to get pos. threshold crossing
+					int onset = peakBegin[idx] + 2;
+
+					if (onset >= bRegionLimits[0] && onset < bRegionLimits[1]) { bPeakCounts[0] += 1; }
+					if (onset >= bRegionLimits[2] && onset < bRegionLimits[3]) { bPeakCounts[1] += 1; }
+
+					if (onset >= sRegionLimits[0] && onset < sRegionLimits[1]) { sPeakCounts[0] += 1; }
+					if (onset >= sRegionLimits[2] && onset < sRegionLimits[3]) { sPeakCounts[1] += 1; }
+				}
+			}
+		}
+		void cmf_countPeaksPerRegion()
+		{
+			// Check that there is indeed at least one peak present in the trace
+			if (cmf_peakBegin.size() > 0)
+			{
+				// For each peak check in which region its onset is actually located
+				for (std::vector<int>::size_type idx = 0; idx < cmf_peakBegin.size(); idx++)
+				{
+					// Integration window onset has to be shifted by 3 samples to get pos. threshold crossing
+					int onset = cmf_peakBegin[idx] + 3;
+
+					if (onset >= cmf_bRegionLimits[0] && onset < cmf_bRegionLimits[1]) { cmf_bPeakCounts[0] += 1; }
+					if (onset >= cmf_bRegionLimits[2] && onset < cmf_bRegionLimits[3]) { cmf_bPeakCounts[1] += 1; }
+
+					if (onset >= cmf_sRegionLimits[0] && onset < cmf_sRegionLimits[1]) { cmf_sPeakCounts[0] += 1; }
+					if (onset >= cmf_sRegionLimits[2] && onset < cmf_sRegionLimits[3]) { cmf_sPeakCounts[1] += 1; }
+				}
+			}
+		}
+
+		// Analyze region of interest for all different analysis types.
+		void analyzeROIWindowVanillaStyle(bool signalRegion)
+		{
+			// Set correct window parameters based on signal/background region
+			int peaksInROI = (signalRegion ? sPeakCounts[1] : bPeakCounts[1]);
+			int beginROI = (signalRegion ? sRegionLimits[2] : bRegionLimits[2]);
+			int endROI = (signalRegion ? sRegionLimits[3] : bRegionLimits[3]);
+
+			// Only analyze data if there is at least one PE in the ROI
+			if (peaksInROI > 0)
+			{
+				int arrivalIndex = -1;
+				int peakIndex = -1;
+
+				// Find the first Peak in the ROI
+				for (int i = 0; i < peakBegin.size(); i++)
+				{
+					if (peakBegin[i] >= beginROI)
+					{
+						arrivalIndex = peakBegin[i];
+						peakIndex = i;
+						break;
+					}
+				}
+				(signalRegion ? sArrivalIndex : bArrivalIndex) = arrivalIndex;
+
+				// Check that the full IW fits in ROI (i.e. onset happens in the first 6000 samples of ROI)
+				if (arrivalIndex < (endROI - 1500))
+				{
+					// Determine number of peaks in IW
+					for (int i = peakIndex; i < peakBegin.size(); i++)
+					{
+						// Add a shift of 2 to the integration window beginning to get proper peak onset
+						(signalRegion ? sPeakCounts[2] : bPeakCounts[2]) = (signalRegion ? sPeakCounts[2] : bPeakCounts[2]) + int((peakBegin[i] + 2 - arrivalIndex) < 1500);
+					}
+
+					// Integrate over all peaks in IW
+					int _tPeakIndex = peakIndex;
+					double _tCharge = 0;
+					int wfIndex = 0;
+					for (int i = 0; i < 1500; i++)
+					{
+						// Get proper index in 'waveform space'
+						wfIndex = i + arrivalIndex;
+
+						// Add sample if it is within one of the PE regions identified previously
+						if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
+						{
+							_tCharge += csi[wfIndex];
+
+							// If end of current peak integration window has been reached go to next peak
+							if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+						}
+						integratedCharge[i] = _tCharge;
+					}
+
+					// Save total charge in IW
+					(signalRegion ? sChargeIW : bChargeIW) = int(round(integratedCharge[1499]));
+
+					// Calculate charge thresholds for risetime analysis
+					double thresholds[3];
+					thresholds[0] = 0.1*integratedCharge[1499];
+					thresholds[1] = 0.5*integratedCharge[1499];
+					thresholds[2] = 0.9*integratedCharge[1499];
+
+					// Determine risetimes
+					double _t1 = 0;
+					double _t2 = 0;
+					for (int i = 0; i < 1499; i++)
+					{
+						_t1 = integratedCharge[i];
+						_t2 = integratedCharge[i + 1];
+
+						for (int j = 0; j < 3; j++)
+						{
+							if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+							{
+								// Linear extrapolation between bins
+								(signalRegion ? sRiseTimes[j] : bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+							}
 						}
 					}
 				}
 			}
 		}
-	}
-	void analyzeROIWindowCMFStyle(bool signalRegion)
-	{
-		// Set correct window parameters based on signal/background region
-		int peaksInROI = (signalRegion ? cmf_sPeakCounts[1] : cmf_bPeakCounts[1]);
-		int beginROI = (signalRegion ? cmf_sRegionLimits[2] : cmf_bRegionLimits[2]);
-		int endROI = (signalRegion ? cmf_sRegionLimits[3] : cmf_bRegionLimits[3]);
-		/*
-		int peaksInROI = cmf_bPeakCounts[1];
-		int beginROI = cmf_bRegionLimits[2];
-		int endROI = cmf_bRegionLimits[3];
-
-		// Set correct window parameters:
-		if (signalRegion)
+		void analyzeROIWindowCMFStyle(bool signalRegion)
 		{
-			peaksInROI = cmf_sPeakCounts[1];
-			beginROI = cmf_sRegionLimits[2];
-			endROI = cmf_sRegionLimits[3];
-		}*/
-		// Only analyze data if there is at least one PE in the ROI
-		if (peaksInROI > 0)
-		{
-			int arrivalIndex = -1;
-			int peakIndex = -1;
+			// Set correct window parameters based on signal/background region
+			int peaksInROI = (signalRegion ? cmf_sPeakCounts[1] : cmf_bPeakCounts[1]);
+			int beginROI = (signalRegion ? cmf_sRegionLimits[2] : cmf_bRegionLimits[2]);
+			int endROI = (signalRegion ? cmf_sRegionLimits[3] : cmf_bRegionLimits[3]);
 
-			// Find the first Peak in the ROI
-			for (int i = 0; i < cmf_peakBegin.size(); i++)
+			// Only analyze data if there is at least one PE in the ROI
+			if (peaksInROI > 0)
 			{
-				if (cmf_peakBegin[i] >= beginROI)
+				int arrivalIndex = -1;
+				int peakIndex = -1;
+
+				// Find the first Peak in the ROI
+				for (int i = 0; i < cmf_peakBegin.size(); i++)
 				{
-					arrivalIndex = cmf_peakBegin[i];
-					peakIndex = i;
-					break;
-				}
-			}
-			(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
-
-			// Check that the full IW fits in ROI
-			if (arrivalIndex < (endROI - 1500))
-			{
-				// Determine number of peaks in IW
-				for (int i = peakIndex; i < cmf_peakBegin.size(); i++)
-				{
-					(signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2]) = (signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2]) + int(cmf_peakBegin[i] - arrivalIndex < 1500);
-				}
-			}
-
-			// Integrate over all peaks in iw
-			int _tPeakIndex = peakIndex;
-			double _tCharge = 0;
-			int wfIndex = 0;
-			for (int i = 0; i < 1500; i++)
-			{
-				// Get proper 'real' index that includes the onset offset
-				wfIndex = i + arrivalIndex;
-
-				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-				if (_tPeakIndex < cmf_peakBegin.size() && wfIndex >= cmf_peakBegin[_tPeakIndex] && wfIndex <= cmf_peakEnd[_tPeakIndex])
-				{
-					_tCharge += cmf_csi[wfIndex];
-					if (wfIndex == cmf_peakEnd[_tPeakIndex]) { _tPeakIndex++; }
-				}
-				integratedCharge[i] = _tCharge;
-			}
-			(signalRegion ? cmf_sChargeIW : cmf_bChargeIW) = integratedCharge[1499];
-
-			// Calculate charge thresholds
-			double thresholds[3];
-			thresholds[0] = 0.1*integratedCharge[1499];
-			thresholds[1] = 0.5*integratedCharge[1499];
-			thresholds[2] = 0.9*integratedCharge[1499];
-
-			// Determine threshold crossing times
-			double _t1 = 0;
-			double _t2 = 0;
-			for (int i = 0; i < 1499; i++)
-			{
-				_t1 = integratedCharge[i];
-				_t2 = integratedCharge[i + 1];
-
-				for (int j = 0; j < 3; j++)
-				{
-					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+					if (cmf_peakBegin[i] >= beginROI)
 					{
-						(signalRegion ? cmf_sRiseTimes[j] : cmf_bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						arrivalIndex = cmf_peakBegin[i];
+						peakIndex = i;
+						break;
+					}
+				}
+				(signalRegion ? cmf_sArrivalIndex : cmf_bArrivalIndex) = arrivalIndex;
+
+				// Check that the full IW fits in ROI (i.e. onset happens in the first 6000 samples of ROI)
+				if (arrivalIndex < (endROI - 1500))
+				{
+					// Determine number of peaks in IW
+					for (int i = peakIndex; i < cmf_peakBegin.size(); i++)
+					{
+						// Add a shift of 3 to the integration window beginning to get proper peak onset
+						(signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2]) = (signalRegion ? cmf_sPeakCounts[2] : cmf_bPeakCounts[2]) + int(cmf_peakBegin[i] + 3 - arrivalIndex < 1500);
+					}
+
+					// Integrate over all peaks in IW
+					int _tPeakIndex = peakIndex;
+					double _tCharge = 0;
+					int wfIndex = 0;
+					for (int i = 0; i < 1500; i++)
+					{
+						// Get proper index in 'waveform space'
+						wfIndex = i + arrivalIndex;
+
+						// Add sample if it is within one of the PE regions identified previously
+						if (_tPeakIndex < cmf_peakBegin.size() && wfIndex >= cmf_peakBegin[_tPeakIndex] && wfIndex <= cmf_peakEnd[_tPeakIndex])
+						{
+							_tCharge += cmf_csi[wfIndex];
+
+							// If end of current peak integration window has been reached go to next peak
+							if (wfIndex == cmf_peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+						}
+						integratedCharge[i] = _tCharge;
+					}
+
+					// SAve total charge in IW
+					(signalRegion ? cmf_sChargeIW : cmf_bChargeIW) = integratedCharge[1499];
+
+					// Calculate charge thresholds for risetime analysis
+					double thresholds[3];
+					thresholds[0] = 0.1*integratedCharge[1499];
+					thresholds[1] = 0.5*integratedCharge[1499];
+					thresholds[2] = 0.9*integratedCharge[1499];
+
+					// Determine threshold crossing times
+					double _t1 = 0;
+					double _t2 = 0;
+					for (int i = 0; i < 1499; i++)
+					{
+						_t1 = integratedCharge[i];
+						_t2 = integratedCharge[i + 1];
+
+						for (int j = 0; j < 3; j++)
+						{
+							if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+							{
+								(signalRegion ? cmf_sRiseTimes[j] : cmf_bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+							}
+						}
 					}
 				}
 			}
 		}
-	}
-	void analyzeROIWindowLBLStyle(bool signalRegion)
-	{
-		// Set correct window parameters based on signal/background region
-		int peaksInROI = (signalRegion ? sPeakCounts[1] : bPeakCounts[1]);
-		int beginROI = (signalRegion ? sRegionLimits[2] : bRegionLimits[2]);
-		int endROI = (signalRegion ? sRegionLimits[3] : bRegionLimits[3]);
-
-		/*int peaksInROI = bPeakCounts[1];
-		int beginROI = bRegionLimits[2];
-		int endROI = bRegionLimits[3];
-		
-		// Set correct window parameters:
-		if (signalRegion)
+		void analyzeROIWindowLBLStyle(bool signalRegion)
 		{
-			peaksInROI = sPeakCounts[1];
-			beginROI = sRegionLimits[2];
-			endROI = sRegionLimits[3];
-		}*/
+			// Set correct window parameters based on signal/background region
+			int peaksInROI = (signalRegion ? sPeakCounts[1] : bPeakCounts[1]);
+			int beginROI = (signalRegion ? sRegionLimits[2] : bRegionLimits[2]);
+			int endROI = (signalRegion ? sRegionLimits[3] : bRegionLimits[3]);
 
-		// Only analyze data if there is at least one PE in the ROI
-		if (peaksInROI > 0)
-		{
-			int arrivalIndex = -1;
-			int peakIndex = -1;
-
-			// Find the first Peak in the ROI
-			for (int i = 0; i < peakBegin.size(); i++)
+			// Only analyze data if there is at least one PE in the ROI
+			if (peaksInROI > 0)
 			{
-				if (peakBegin[i] >= beginROI)
+				int arrivalIndex = -1;
+				int peakIndex = -1;
+
+				// Find the first Peak in the ROI
+				for (int i = 0; i < peakBegin.size(); i++)
 				{
-					arrivalIndex = peakBegin[i];
-					peakIndex = i;
-					break;
-				}
-			}
-
-			// Check that the full IW fits in ROI
-			//if (arrivalIndex < (endROI - 1500))
-
-			// Estimate local baseline based on wf 1 us before the arrival
-			double localBaseline = 0;
-			int numSamples = 0;
-			for (int i = arrivalIndex - 500; i < arrivalIndex; i++)
-			{
-				if (fabs(csi[i]) <= 3)
-				{
-					localBaseline += double(csi[i]);
-					numSamples++;
-				}
-			}
-			localBaseline /= double(numSamples);
-
-			// Integrate over all peaks in iw
-			int _tPeakIndex = peakIndex;
-			double _tCharge = 0;
-			int wfIndex = 0;
-			for (int i = 0; i < 1500; i++)
-			{
-				// Get proper 'real' index that includes the onset offset
-				wfIndex = i + arrivalIndex;
-
-				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-				if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
-				{
-					_tCharge += (csi[wfIndex] - localBaseline);
-					if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
-				}
-				integratedCharge[i] = _tCharge;
-			}
-			(signalRegion ? lbl_sChargeIW : lbl_bChargeIW) = integratedCharge[1499];
-
-			// Calculate charge thresholds
-			double thresholds[3];
-			thresholds[0] = 0.1*integratedCharge[1499];
-			thresholds[1] = 0.5*integratedCharge[1499];
-			thresholds[2] = 0.9*integratedCharge[1499];
-
-			// Determine threshold crossing times
-			double _t1 = 0;
-			double _t2 = 0;
-			for (int i = 0; i < 1499; i++)
-			{
-				_t1 = integratedCharge[i];
-				_t2 = integratedCharge[i + 1];
-
-				for (int j = 0; j < 3; j++)
-				{
-					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+					if (peakBegin[i] >= beginROI)
 					{
-						(signalRegion ? lbl_sRiseTimes[j] : lbl_bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						arrivalIndex = peakBegin[i];
+						peakIndex = i;
+						break;
+					}
+				}
+
+				// Check that the full IW fits in ROI (i.e. onset happens in the first 6000 samples of ROI)
+				if (arrivalIndex < (endROI - 1500))
+				{
+					// Estimate local baseline based on waveform 1 us before the arrival
+					double localBaseline = 0;
+					int numSamples = 0;
+					for (int i = arrivalIndex - 500; i < arrivalIndex; i++)
+					{
+						if (fabs(csi[i]) <= 3)
+						{
+							localBaseline += double(csi[i]);
+							numSamples++;
+						}
+					}
+					localBaseline /= double(numSamples);
+
+					// Integrate over all peaks in IW
+					int _tPeakIndex = peakIndex;
+					double _tCharge = 0;
+					int wfIndex = 0;
+					for (int i = 0; i < 1500; i++)
+					{
+						// Get proper index in 'waveform space'
+						wfIndex = i + arrivalIndex;
+
+						// Add sample if it is within one of the PE regions identified previously
+						if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
+						{
+							_tCharge += (csi[wfIndex] - localBaseline);
+
+							// If end of current peak integration window has been reached go to next peak
+							if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+						}
+						integratedCharge[i] = _tCharge;
+					}
+
+					// Save total charge in IW
+					(signalRegion ? lbl_sChargeIW : lbl_bChargeIW) = integratedCharge[1499];
+
+					// Calculate charge thresholds for risetime analysis
+					double thresholds[3];
+					thresholds[0] = 0.1*integratedCharge[1499];
+					thresholds[1] = 0.5*integratedCharge[1499];
+					thresholds[2] = 0.9*integratedCharge[1499];
+
+					// Determine threshold crossing times
+					double _t1 = 0;
+					double _t2 = 0;
+					for (int i = 0; i < 1499; i++)
+					{
+						_t1 = integratedCharge[i];
+						_t2 = integratedCharge[i + 1];
+
+						for (int j = 0; j < 3; j++)
+						{
+							if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+							{
+								(signalRegion ? lbl_sRiseTimes[j] : lbl_bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+							}
+						}
 					}
 				}
 			}
 		}
-	}
-	void updateInfoData(infoData &cInData)
-	{
-		// Update peaks in PT, ROI and IW histograms
-		cInData.bPeaksInPretrace[(bPeakCounts[0] < 50) ? bPeakCounts[0] : 50] += 1;
-		cInData.bPeaksInROI[(bPeakCounts[1] < 50) ? bPeakCounts[1] : 50] += 1;
-		cInData.bPeaksInIW[(bPeakCounts[2] < 50) ? bPeakCounts[2] : 50] += 1;
-		cInData.sPeaksInPretrace[(sPeakCounts[0] < 50) ? sPeakCounts[0] : 50] += 1;
-		cInData.sPeaksInROI[(sPeakCounts[1] < 50) ? sPeakCounts[1] : 50] += 1;
-		cInData.sPeaksInIW[(sPeakCounts[2] < 50) ? sPeakCounts[2] : 50] += 1;
 
-		cInData.cmf_bPeaksInPretrace[(cmf_bPeakCounts[0] < 50) ? cmf_bPeakCounts[0] : 50] += 1;
-		cInData.cmf_bPeaksInROI[(cmf_bPeakCounts[1] < 50) ? cmf_bPeakCounts[1] : 50] += 1;
-		cInData.cmf_bPeaksInIW[(cmf_bPeakCounts[2] < 50) ? cmf_bPeakCounts[2] : 50] += 1;
-		cInData.cmf_sPeaksInPretrace[(cmf_sPeakCounts[0] < 50) ? cmf_sPeakCounts[0] : 50] += 1;
-		cInData.cmf_sPeaksInROI[(cmf_sPeakCounts[1] < 50) ? cmf_sPeakCounts[1] : 50] += 1;
-		cInData.cmf_sPeaksInIW[(cmf_sPeakCounts[2] < 50) ? cmf_sPeakCounts[2] : 50] += 1;
-
-		// Update counters
-		cInData.linearGateCounter += (linearGateFlag) ? 1 : 0;
-		cInData.overflowCounter += (overflowFlag) ? 1 : 0;
-		cInData.muonCounter += (muonVetoFlag) ? 1 : 0;
-
-		// Update muon veto vector in infoData
-		if (muonEvents.size() > 0 && !linearGateFlag)
+		// Update info data with internal data
+		void updateInfoData(infoData &cInData)
 		{
-			for (std::vector<int>::size_type i = 0; i != muonEvents.size(); i++) { cInData.muonVetoEvents.push_back(muonEvents[i]); }
-		}
+			// Update peaks in PT, ROI and IW histograms
+			cInData.bPeaksInPretrace[((bPeakCounts[0] < 50) ? bPeakCounts[0] : 50)] += 1;
+			cInData.bPeaksInROI[((bPeakCounts[1] < 50) ? bPeakCounts[1] : 50)] += 1;
+			cInData.bPeaksInIW[((bPeakCounts[2] < 50) ? bPeakCounts[2] : 50)] += 1;
+			cInData.sPeaksInPretrace[((sPeakCounts[0] < 50) ? sPeakCounts[0] : 50)] += 1;
+			cInData.sPeaksInROI[((sPeakCounts[1] < 50) ? sPeakCounts[1] : 50)] += 1;
+			cInData.sPeaksInIW[((sPeakCounts[2] < 50) ? sPeakCounts[2] : 50)] += 1;
 
-		// Add global baseline
-		cInData.summedBaseline += globalBaselineCsI;
+			cInData.cmf_bPeaksInPretrace[((cmf_bPeakCounts[0] < 50) ? cmf_bPeakCounts[0] : 50)] += 1;
+			cInData.cmf_bPeaksInROI[((cmf_bPeakCounts[1] < 50) ? cmf_bPeakCounts[1] : 50)] += 1;
+			cInData.cmf_bPeaksInIW[((cmf_bPeakCounts[2] < 50) ? cmf_bPeakCounts[2] : 50)] += 1;
+			cInData.cmf_sPeaksInPretrace[((cmf_sPeakCounts[0] < 50) ? cmf_sPeakCounts[0] : 50)] += 1;
+			cInData.cmf_sPeaksInROI[((cmf_sPeakCounts[1] < 50) ? cmf_sPeakCounts[1] : 50)] += 1;
+			cInData.cmf_sPeaksInIW[((cmf_sPeakCounts[2] < 50) ? cmf_sPeakCounts[2] : 50)] += 1;
 
+			// Update counters
+			cInData.linearGateCounter += ((linearGateFlag) ? 1 : 0);
+			cInData.overflowCounter += ((overflowFlag) ? 1 : 0);
+			cInData.muonCounter += ((muonVetoFlag) ? 1 : 0);
 
-	}
-	void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
-	{
-		// Write background data
-		int muonLocation = (muonEvents.size() > 0) ? muonEvents[0] : -1;
-
-		bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
-		bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
-		bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
-		bOutput << lbl_bChargeIW << " " << lbl_bRiseTimes[0] << " " << lbl_bRiseTimes[1] << " " << lbl_bRiseTimes[2] << " ";
-		bOutput << muonLocation << std::endl;
-
-		// Write signal data
-		sOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
-		sOutput << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << " " << sArrivalIndex << " " << sChargeIW << " " << sRiseTimes[0] << " " << sRiseTimes[1] << " " << sRiseTimes[2] << " ";
-		sOutput << cmf_sPeakCounts[0] << " " << cmf_sPeakCounts[1] << " " << cmf_sPeakCounts[2] << " " << cmf_sArrivalIndex << " " << cmf_sChargeIW << " " << cmf_sRiseTimes[0] << " " << cmf_sRiseTimes[1] << " " << cmf_sRiseTimes[2] << " ";
-		sOutput << lbl_sChargeIW << " " << lbl_sRiseTimes[0] << " " << lbl_sRiseTimes[1] << " " << lbl_sRiseTimes[2] << " ";
-		sOutput << muonLocation << std::endl;
-	}
-	void writeWaveformToFile(std::ofstream &wOutput)
-	{
-		for (int i = 0; i < 35000; i++)
-		{
-			wOutput << csi[i] << " ";
-		}
-		wOutput << std::endl;
-
-		for (int i = 0; i < 35000; i++)
-		{
-			wOutput << cmf_csi[i] << " ";
-		}
-		wOutput << std::endl;
-		wOutput << globalBaselineCsI << std::endl;
-		if (peakBegin.size() > 0)
-		{
-			for (int i = 0; i < peakBegin.size(); i++)
+			// Update muon veto vector in infoData
+			if (muonEvents.size() > 0 && !linearGateFlag)
 			{
-				wOutput << peakBegin[i] << " ";
+				for (std::vector<int>::size_type i = 0; i != muonEvents.size(); i++) { cInData.muonVetoEvents.push_back(muonEvents[i]); }
 			}
-		}
-		else
-		{
-			wOutput << -1;
-		}
-		wOutput << std::endl;
 
-		if (cmf_peakBegin.size() > 0)
+			// Add global baseline
+			cInData.summedBaseline += globalBaselineCsI;
+		}
+
+		// Write internal data to file
+		void writeEventData(std::ofstream &bOutput, std::ofstream &sOutput)
 		{
-			for (int i = 0; i < cmf_peakBegin.size(); i++)
+			// Write background data
+			int muonLocation = ((muonEvents.size() > 0) ? muonEvents[0] : -1);
+
+			bOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
+			bOutput << bPeakCounts[0] << " " << bPeakCounts[1] << " " << bPeakCounts[2] << " " << bArrivalIndex << " " << bChargeIW << " " << bRiseTimes[0] << " " << bRiseTimes[1] << " " << bRiseTimes[2] << " ";
+			bOutput << cmf_bPeakCounts[0] << " " << cmf_bPeakCounts[1] << " " << cmf_bPeakCounts[2] << " " << cmf_bArrivalIndex << " " << cmf_bChargeIW << " " << cmf_bRiseTimes[0] << " " << cmf_bRiseTimes[1] << " " << cmf_bRiseTimes[2] << " ";
+			bOutput << lbl_bChargeIW << " " << lbl_bRiseTimes[0] << " " << lbl_bRiseTimes[1] << " " << lbl_bRiseTimes[2] << " ";
+			bOutput << muonLocation << std::endl;
+
+			// Write signal data
+			sOutput << timeStamp << " " << int(overflowFlag) << " " << int(muonVetoFlag) << " " << int(linearGateFlag) << " " << globalBaselineCsI << " ";
+			sOutput << sPeakCounts[0] << " " << sPeakCounts[1] << " " << sPeakCounts[2] << " " << sArrivalIndex << " " << sChargeIW << " " << sRiseTimes[0] << " " << sRiseTimes[1] << " " << sRiseTimes[2] << " ";
+			sOutput << cmf_sPeakCounts[0] << " " << cmf_sPeakCounts[1] << " " << cmf_sPeakCounts[2] << " " << cmf_sArrivalIndex << " " << cmf_sChargeIW << " " << cmf_sRiseTimes[0] << " " << cmf_sRiseTimes[1] << " " << cmf_sRiseTimes[2] << " ";
+			sOutput << lbl_sChargeIW << " " << lbl_sRiseTimes[0] << " " << lbl_sRiseTimes[1] << " " << lbl_sRiseTimes[2] << " ";
+			sOutput << muonLocation << std::endl;
+		}
+
+		// If needed write waveforms and peak locations to file
+		void writeWaveformToFile(std::ofstream &wOutput)
+		{
+			for (int i = 0; i < 35000; i++)
 			{
-				wOutput << cmf_peakBegin[i] << " ";
+				wOutput << csi[i] << " ";
 			}
+			wOutput << std::endl;
+
+			for (int i = 0; i < 35000; i++)
+			{
+				wOutput << cmf_csi[i] << " ";
+			}
+			wOutput << std::endl;
+			wOutput << globalBaselineCsI << std::endl;
+			if (peakBegin.size() > 0)
+			{
+				for (int i = 0; i < peakBegin.size(); i++)
+				{
+					wOutput << peakBegin[i] << " ";
+				}
+			}
+			else
+			{
+				wOutput << -1;
+			}
+			wOutput << std::endl;
+
+			if (cmf_peakBegin.size() > 0)
+			{
+				for (int i = 0; i < cmf_peakBegin.size(); i++)
+				{
+					wOutput << cmf_peakBegin[i] << " ";
+				}
+			}
+			else
+			{
+				wOutput << -1;
+			}
+			wOutput << std::endl;
 		}
-		else
+
+		// Constructor - Destructor
+		waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
 		{
-			wOutput << -1;
+			for (int i = 0; i < 4; i++)
+			{
+				bRegionLimits[i] = bRegions[i];
+				sRegionLimits[i] = sRegions[i];
+				cmf_bRegionLimits[i] = bRegions[i];
+				cmf_sRegionLimits[i] = sRegions[i];
+			}
+
+			globalBaselineCsI = 0;
+			globalBaselineMuonVeto = 0;
+
+			bChargeIW = 0;
+			sChargeIW = 0;
+			bArrivalIndex = -1;
+			sArrivalIndex = -1;
+
+			cmf_bChargeIW = 0.0;
+			cmf_sChargeIW = 0.0;
+			cmf_bArrivalIndex = -1;
+			cmf_sArrivalIndex = -1;
+
+			lbl_bChargeIW = 0.0;
+			lbl_sChargeIW = 0.0;
+
+			overflowFlag = false;
+			muonVetoFlag = false;
+			linearGateFlag = false;
+
+			csi = {};
+			muonVeto = {};
+			cmf_csi = {};
+			medianBaselineHistCsI = {};
+			medianBaselineHistMuonVeto = {};
+
+			peakBegin.clear();
+			peakEnd.clear();
+			cmf_peakBegin.clear();
+			cmf_peakEnd.clear();
+			muonEvents.clear();
+
+			bPeakCounts = {};
+			sPeakCounts = {};
+			bRiseTimes = {};
+			sRiseTimes = {};
+
+			lbl_bRiseTimes = {};
+			lbl_sRiseTimes = {};
+
+			cmf_bPeakCounts = {};
+			cmf_sPeakCounts = {};
+			cmf_bRiseTimes = {};
+			cmf_sRiseTimes = {};
+
+			integratedCharge = {};
 		}
-		wOutput << std::endl;
-	}
-	waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
-	{
-		for (int i = 0; i < 4; i++)
-		{
-			bRegionLimits[i] = bRegions[i];
-			sRegionLimits[i] = sRegions[i];
-			cmf_bRegionLimits[i] = bRegions[i];
-			cmf_sRegionLimits[i] = sRegions[i];
-		}
-
-		globalBaselineCsI = 0;
-		globalBaselineMuonVeto = 0;
-
-		bChargeIW = 0;
-		sChargeIW = 0;
-		bArrivalIndex = -1;
-		sArrivalIndex = -1;
-
-		cmf_bChargeIW = 0.0;
-		cmf_sChargeIW = 0.0;
-		cmf_bArrivalIndex = -1;
-		cmf_sArrivalIndex = -1;
-
-		lbl_bChargeIW = 0.0;
-		lbl_sChargeIW = 0.0;
-
-		overflowFlag = false;
-		muonVetoFlag = false;
-		linearGateFlag = false;
-
-		csi = {};
-		muonVeto = {};
-		cmf_csi = {};
-		medianBaselineHistCsI = {};
-		medianBaselineHistMuonVeto = {};
-
-		peakBegin.clear();
-		peakEnd.clear();
-		cmf_peakBegin.clear();
-		cmf_peakEnd.clear();
-		muonEvents.clear();
-
-		bPeakCounts = {};
-		sPeakCounts = {};
-		bRiseTimes = {};
-		sRiseTimes = {};
-
-		lbl_bRiseTimes = {};
-		lbl_sRiseTimes = {};
-
-		cmf_bPeakCounts = {};
-		cmf_sPeakCounts = {};
-		cmf_bRiseTimes = {};
-		cmf_sRiseTimes = {};
-
-		integratedCharge = {};
-	}
-	~waveform(){};
+		~waveform(){};
 
 	private:
 		std::string timeStamp;
@@ -987,7 +1032,7 @@ int main(int argc, char* argv[])
 	// Create signal, background and info output files
 	bg_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "B-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 	s_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "S-")).c_str(), std::ofstream::out | std::ofstream::trunc);
-	w_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc);
+	if (saveWaveFormsToFile) { w_out_file.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "W-")).c_str(), std::ofstream::out | std::ofstream::trunc); }
 	infoOut.open((out_dir + "/" + fileName(atoi(time_name_in_zip.c_str()), "I-")).c_str(), std::ofstream::out | std::ofstream::trunc);
 
 	// Begin data processing if file has been properly opened
@@ -1013,6 +1058,7 @@ int main(int argc, char* argv[])
 				c = contents[zidx++];
 				no_channels = no_channels << 8 | (unsigned char) c;
 			}
+
 			// Takes care of LabViews closing bit...
 			if (no_samples > 350070)
 			{
@@ -1022,7 +1068,6 @@ int main(int argc, char* argv[])
 			//  Process consecutive waveforms without encountering another LabView header inbetween
 			for (int wf=0; wf < (int) (no_samples/35007); wf++)
 			{
-				
 				// A new waveform begins, update counter and create waveform object
 			 	cInfoData.waveformCounter += 1;
 				waveform currentWaveForm(bRegions, sRegions);
@@ -1051,6 +1096,7 @@ int main(int argc, char* argv[])
 				gate_down = 0;
 				gate_up = 0;
 
+				// Read CsI and MV data from binary stream
 				for(int i=0; i<35000; i++)
 				{
 					// Read CsI value and apply bit correction
@@ -1064,6 +1110,7 @@ int main(int argc, char* argv[])
 						cmfQ.push(_fTmpC);
 						cmfBL += _fTmpC;
 					}
+
 					// CMF filter ready
 					else
 					{
@@ -1149,10 +1196,8 @@ int main(int argc, char* argv[])
 				// Write analysis results to file
 				currentWaveForm.writeEventData(bg_out_file, s_out_file);
 
-				if (cInfoData.waveformCounter <= 10)
-				{
-					currentWaveForm.writeWaveformToFile(w_out_file);
-				}
+				// Write first 10 waveforms to file if desired
+				if (saveWaveFormsToFile &&	cInfoData.waveformCounter <= 10){ currentWaveForm.writeWaveformToFile(w_out_file); }
 			}
 		}
 	}
@@ -1160,7 +1205,7 @@ int main(int argc, char* argv[])
 	// Before exiting, make sure that both output files are properly closed to prevent data loss.
 	if (bg_out_file.is_open()) { bg_out_file.close(); }
 	if (s_out_file.is_open()) { s_out_file.close(); }
-	if (w_out_file.is_open()) { w_out_file.close(); }
+	if (saveWaveFormsToFile && w_out_file.is_open()) { w_out_file.close(); }
 
 	// Write run info
 	if (infoOut.is_open())
