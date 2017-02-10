@@ -21,7 +21,7 @@ const unsigned int cmfWidth = 250;
 const double cmfThreshold = 2.5;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
-const bool saveWaveFormsToFile = true;
+const bool saveWaveFormsToFile = false;
 
 // Assortment of all distributions that are being tracked throughout the analysis
 struct infoData
