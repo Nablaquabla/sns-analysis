@@ -321,17 +321,16 @@ class waveform
 	}
 	void analyzeROIWindowVanillaStyle(bool signalRegion)
 	{
-		int peaksInROI = bPeakCounts[1];
-		int beginROI = bRegionLimits[2];
-		int endROI = bRegionLimits[3];
-
-		// Set correct window parameters:
-		if (signalRegion)
+		// Set correct window parameters based on signal/background region
+		int peaksInROI = (signalRegion ? sPeakCounts[1] : bPeakCounts[1]);
+		int beginROI = (signalRegion ? sRegionLimits[2] : bRegionLimits[2]);
+		int endROI = (signalRegion ? sRegionLimits[3] : bRegionLimits[3]);
+		/*if (signalRegion)
 		{
 			peaksInROI = sPeakCounts[1];
 			beginROI = sRegionLimits[2];
 			endROI = sRegionLimits[3];
-		}
+		}*/
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -358,46 +357,46 @@ class waveform
 				{
 					(signalRegion ? sPeakCounts[2] : bPeakCounts[2]) = (signalRegion ? sPeakCounts[2] : bPeakCounts[2]) + int((peakBegin[i] - arrivalIndex) < 1500);
 				}
-			}
 
-			// Integrate over all peaks in iw
-			int _tPeakIndex = peakIndex;
-			double _tCharge = 0;
-			int wfIndex = 0;
-			for (int i = 0; i < 1500; i++)
-			{
-				// Get proper 'real' index that includes the onset offset
-				wfIndex = i + arrivalIndex;
-
-				// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
-				if (_tPeakIndex < peakBegin.size() && wfIndex >=peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
+				// Integrate over all peaks in iw
+				int _tPeakIndex = peakIndex;
+				double _tCharge = 0;
+				int wfIndex = 0;
+				for (int i = 0; i < 1500; i++)
 				{
-					_tCharge += csi[wfIndex];
-					if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
-				}
-				integratedCharge[i] = _tCharge;
-			}
-			(signalRegion ? sChargeIW : bChargeIW) = int(round(integratedCharge[1499]));
+					// Get proper 'real' index that includes the onset offset
+					wfIndex = i + arrivalIndex;
 
-			// Calculate charge thresholds
-			double thresholds[3];
-			thresholds[0] = 0.1*integratedCharge[1499];
-			thresholds[1] = 0.5*integratedCharge[1499];
-			thresholds[2] = 0.9*integratedCharge[1499];
-
-			// Determine threshold crossing times
-			double _t1 = 0;
-			double _t2 = 0;
-			for (int i = 0; i < 1499; i++)
-			{
-				_t1 = integratedCharge[i];
-				_t2 = integratedCharge[i + 1];
-
-				for (int j = 0; j < 3; j++)
-				{
-					if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+					// Add sample if it is within one of the PE regions identified previously as well as update loglikelihood estimators
+					if (_tPeakIndex < peakBegin.size() && wfIndex >= peakBegin[_tPeakIndex] && wfIndex <= peakEnd[_tPeakIndex])
 					{
-						(signalRegion ? sRiseTimes[j] : bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						_tCharge += csi[wfIndex];
+						if (wfIndex == peakEnd[_tPeakIndex]) { _tPeakIndex++; }
+					}
+					integratedCharge[i] = _tCharge;
+				}
+				(signalRegion ? sChargeIW : bChargeIW) = int(round(integratedCharge[1499]));
+
+				// Calculate charge thresholds
+				double thresholds[3];
+				thresholds[0] = 0.1*integratedCharge[1499];
+				thresholds[1] = 0.5*integratedCharge[1499];
+				thresholds[2] = 0.9*integratedCharge[1499];
+
+				// Determine threshold crossing times
+				double _t1 = 0;
+				double _t2 = 0;
+				for (int i = 0; i < 1499; i++)
+				{
+					_t1 = integratedCharge[i];
+					_t2 = integratedCharge[i + 1];
+
+					for (int j = 0; j < 3; j++)
+					{
+						if (_t1 < thresholds[j] && _t2 >= thresholds[j])
+						{
+							(signalRegion ? sRiseTimes[j] : bRiseTimes[j]) = i + (thresholds[j] - _t1) / (_t2 - _t1);
+						}
 					}
 				}
 			}
@@ -405,6 +404,11 @@ class waveform
 	}
 	void analyzeROIWindowCMFStyle(bool signalRegion)
 	{
+		// Set correct window parameters based on signal/background region
+		int peaksInROI = (signalRegion ? cmf_sPeakCounts[1] : cmf_bPeakCounts[1]);
+		int beginROI = (signalRegion ? cmf_sRegionLimits[2] : cmf_bRegionLimits[2]);
+		int endROI = (signalRegion ? cmf_sRegionLimits[3] : cmf_bRegionLimits[3]);
+		/*
 		int peaksInROI = cmf_bPeakCounts[1];
 		int beginROI = cmf_bRegionLimits[2];
 		int endROI = cmf_bRegionLimits[3];
@@ -415,7 +419,7 @@ class waveform
 			peaksInROI = cmf_sPeakCounts[1];
 			beginROI = cmf_sRegionLimits[2];
 			endROI = cmf_sRegionLimits[3];
-		}
+		}*/
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
 		{
@@ -489,7 +493,12 @@ class waveform
 	}
 	void analyzeROIWindowLBLStyle(bool signalRegion)
 	{
-		int peaksInROI = bPeakCounts[1];
+		// Set correct window parameters based on signal/background region
+		int peaksInROI = (signalRegion ? sPeakCounts[1] : bPeakCounts[1]);
+		int beginROI = (signalRegion ? sRegionLimits[2] : bRegionLimits[2]);
+		int endROI = (signalRegion ? sRegionLimits[3] : bRegionLimits[3]);
+
+		/*int peaksInROI = bPeakCounts[1];
 		int beginROI = bRegionLimits[2];
 		int endROI = bRegionLimits[3];
 		
@@ -499,7 +508,7 @@ class waveform
 			peaksInROI = sPeakCounts[1];
 			beginROI = sRegionLimits[2];
 			endROI = sRegionLimits[3];
-		}
+		}*/
 
 		// Only analyze data if there is at least one PE in the ROI
 		if (peaksInROI > 0)
