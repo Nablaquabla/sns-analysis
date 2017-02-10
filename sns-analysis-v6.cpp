@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <vector>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <dirent.h>
 #include <algorithm>
 #include <limits>
@@ -18,7 +18,7 @@
 
 // Global constants
 const unsigned int cmfWidth = 250;
-const double cmfThreshold = 2.5;
+const double cmfThreshold = 3.0;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
 const bool saveWaveFormsToFile = false;
@@ -1157,7 +1157,7 @@ int main(int argc, char* argv[])
 
 					// Read muon veto data and apply correction
 					c = contents[zidx++];
-					_tmpC = (int) c + (int) ((signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
+					_tmpC = (int) c + (int) ((std::signbit((int) c) ? -1 : 1 ) * floor((4.0 - abs((double) c))/11.0));
 					currentWaveForm.setMuonVetoValue(i, _tmpC);
 				}
 
@@ -1168,7 +1168,7 @@ int main(int argc, char* argv[])
 				currentWaveForm.applyBaselineCorrection();
 
 				
-				// Find all peaks in CsI and Muon Veto data
+				// Find all peaks in CsI and Muon Veto data (peak width and threshold for CsI trace is defined at the beginning of this file; the ones for the muon veto are fixed)
 				currentWaveForm.findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
 				currentWaveForm.cmf_findCsIPeaks(peakFinderAmplitudeThreshold, peakFinderWidthThreshold);
 				currentWaveForm.findMuonVetoPeaks(10, 3);
