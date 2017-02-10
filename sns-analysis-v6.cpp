@@ -21,7 +21,7 @@ const unsigned int cmfWidth = 250;
 const double cmfThreshold = 2.5;
 const int peakFinderAmplitudeThreshold = 4;
 const int peakFinderWidthThreshold = 3;
-const bool saveWaveFormsToFile = false;
+const bool saveWaveFormsToFile = true;
 
 // Assortment of all distributions that are being tracked throughout the analysis
 struct infoData
@@ -721,6 +721,10 @@ class waveform
 			wOutput << std::endl;
 		}
 
+		bool getLinearGateFlag()
+		{
+			return linearGateFlag;
+		}
 		// Constructor - Destructor
 		waveform(std::array<unsigned int, 4> bRegions, std::array<unsigned int, 4> sRegions)
 		{
@@ -1197,7 +1201,8 @@ int main(int argc, char* argv[])
 				currentWaveForm.writeEventData(bg_out_file, s_out_file);
 
 				// Write first 10 waveforms to file if desired
-				if (saveWaveFormsToFile &&	cInfoData.waveformCounter <= 10){ currentWaveForm.writeWaveformToFile(w_out_file); }
+				// if (saveWaveFormsToFile && cInfoData.waveformCounter <= 10){ currentWaveForm.writeWaveformToFile(w_out_file); }
+				if (saveWaveFormsToFile && currentWaveForm.getLinearGateFlag()){ currentWaveForm.writeWaveformToFile(w_out_file); }
 			}
 		}
 	}
